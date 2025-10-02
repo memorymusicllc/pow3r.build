@@ -1,0 +1,21 @@
+# Local Repository Analysis & Generation Tool
+# Requirements for Phase 0: Repository Selection
+
+# Standard library only - no external dependencies required for Phase 0
+
+# Future phases may require:
+# Phase 1 (Analysis):
+# - gitpython>=3.1.0  # Advanced Git operations
+# - pyyaml>=6.0       # YAML configuration parsing
+# - toml>=0.10.2      # TOML parsing for pyproject.toml
+# - chardet>=5.0.0    # Character encoding detection
+
+# Phase 2 (Visualization):
+# - networkx>=3.0     # Graph generation
+# - matplotlib>=3.7.0 # Visualization
+# - graphviz>=0.20    # Graph rendering
+
+# Phase 3 (Reporting):
+# - jinja2>=3.1.0     # Template rendering
+# - markdown>=3.4.0   # Markdown processing
+

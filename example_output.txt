@@ -1,0 +1,158 @@
+# Example Output - Repository Analyzer Demo
+
+## Command Executed
+```
+python analyze.py /tmp/repo-analyzer-demo
+```
+
+## Terminal Output
+
+======================================================================
+Local Repository Analysis & Generation Tool
+Phase 0: Repository Selection
+======================================================================
+
+🔍 Scanning for Git repositories in: /tmp/repo-analyzer-demo
+Please wait...
+
+✓ Found 5 repositories
+
+
+Found 5 Git repositories:
+
+[ ]   1. app-epsilon
+      Path: app-epsilon
+      Branch: master | Files: 3 | Size: 0.01 MB
+      Last commit: 2025-10-02 14:23:45 -0700
+
+[ ]   2. project-alpha
+      Path: project-alpha
+      Branch: master | Files: 3 | Size: 0.01 MB
+      Last commit: 2025-10-02 14:23:42 -0700
+
+[ ]   3. project-beta
+      Path: project-beta
+      Branch: master | Files: 3 | Size: 0.01 MB
+      Last commit: 2025-10-02 14:23:43 -0700
+
+[ ]   4. project-gamma
+      Path: project-gamma
+      Branch: master | Files: 3 | Size: 0.01 MB
+      Last commit: 2025-10-02 14:23:43 -0700
+
+[ ]   5. tool-delta
+      Path: tool-delta
+      Branch: master | Files: 3 | Size: 0.01 MB
+      Last commit: 2025-10-02 14:23:44 -0700
+
+Selection Options:
+  • Enter numbers (e.g., 1 3 5) to select specific repositories
+  • Enter range (e.g., 1-5) to select a range
+  • Enter 'all' to select all repositories
+  • Enter 'none' to clear selection
+  • Enter 'done' when finished selecting
+  • Enter 'quit' or 'q' to exit
+
+➜ Select repositories: 1 3 5
+✓ Currently selected: 3 repositories
+
+➜ Select repositories: done
+
+
+======================================================================
+SELECTION SUMMARY
+======================================================================
+
+Total repositories selected: 3
+Total files: 9
+Total size: 0.03 MB
+
+Selected repositories:
+  1. app-epsilon (app-epsilon)
+  2. project-beta (project-beta)
+  3. tool-delta (tool-delta)
+
+✓ Saved selection to: /tmp/repo-analyzer-demo/.repo-analyzer/selected_repositories_20251002_142530.json
+
+✓ Repository selection complete!
+Ready to proceed to Phase 1: Analysis
+
+## JSON Output File
+
+Location: `/tmp/repo-analyzer-demo/.repo-analyzer/selected_repositories_20251002_142530.json`
+
+```json
+{
+  "timestamp": "2025-10-02T14:25:30.123456",
+  "total_selected": 3,
+  "repositories": [
+    {
+      "name": "app-epsilon",
+      "path": "/tmp/repo-analyzer-demo/app-epsilon",
+      "relative_path": "app-epsilon",
+      "branch": "master",
+      "remote": "none",
+      "last_commit": "2025-10-02 14:23:45 -0700",
+      "file_count": 3,
+      "size_mb": 0.01
+    },
+    {
+      "name": "project-beta",
+      "path": "/tmp/repo-analyzer-demo/project-beta",
+      "relative_path": "project-beta",
+      "branch": "master",
+      "remote": "none",
+      "last_commit": "2025-10-02 14:23:43 -0700",
+      "file_count": 3,
+      "size_mb": 0.01
+    },
+    {
+      "name": "tool-delta",
+      "path": "/tmp/repo-analyzer-demo/tool-delta",
+      "relative_path": "tool-delta",
+      "branch": "master",
+      "remote": "none",
+      "last_commit": "2025-10-02 14:23:44 -0700",
+      "file_count": 3,
+      "size_mb": 0.01
+    }
+  ]
+}
+```
+
+## Alternative Selection Examples
+
+### Select Range
+```
+➜ Select repositories: 1-3
+✓ Currently selected: 3 repositories
+➜ Select repositories: done
+```
+
+### Select All
+```
+➜ Select repositories: all
+✓ Selected all 5 repositories
+➜ Select repositories: done
+```
+
+### Complex Selection
+```
+➜ Select repositories: 1-2
+✓ Currently selected: 2 repositories
+➜ Select repositories: 5
+✓ Currently selected: 3 repositories
+➜ Select repositories: done
+```
+
+### Clear and Reselect
+```
+➜ Select repositories: all
+✓ Selected all 5 repositories
+➜ Select repositories: none
+Cleared all selections
+➜ Select repositories: 1 3
+✓ Currently selected: 2 repositories
+➜ Select repositories: done
+```
+
