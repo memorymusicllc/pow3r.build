@@ -128,15 +128,46 @@ class RepositoryVisualization {
 
     async loadRepositories() {
         try {
-            const response = await fetch('/api/projects');
-            const data = await response.json();
+            // Try to fetch from API first, then fallback to embedded data
+            let data;
             
-            if (data.success) {
-                this.repositories = data.projects;
+            try {
+                const response = await fetch('/api/projects');
+                data = await response.json();
+            } catch (apiError) {
+                console.log('API not available, trying embedded data...');
+                // Fallback to embedded data.json
+                const response = await fetch('/data.json');
+                data = await response.json();
+            }
+            
+            if (data.success && data.projects) {
+                // Normalize data - support both v1 and v2 schemas
+                this.repositories = data.projects.map(project => {
+                    // If it's v2 format (with assets), normalize to expected format
+                    if (project.assets) {
+                        return {
+                            projectName: project.assets[0]?.metadata?.title || 'Unknown',
+                            status: project.assets[0]?.status?.phase || 'gray',
+                            stats: {
+                                fileCount: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
+                                totalCommitsLast30Days: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
+                                primaryLanguage: 'unknown',
+                                sizeMB: 0
+                            },
+                            nodes: project.assets,
+                            edges: project.edges,
+                            lastUpdate: project.lastScan,
+                            ...project
+                        };
+                    }
+                    return project;
+                });
+                
                 console.log(`Loaded ${this.repositories.length} repositories`);
                 
                 // Update stats
-                this.updateStats(data.projects);
+                this.updateStats(this.repositories);
             } else {
                 throw new Error(data.error || 'Failed to load repositories');
             }
@@ -144,7 +175,8 @@ class RepositoryVisualization {
             console.error('Error loading repositories:', error);
             document.getElementById('loading').innerHTML = 
                 '<p style="color: #f87171;">Error loading repositories</p>' +
-                '<p style="font-size: 14px; margin-top: 10px;">' + error.message + '</p>';
+                '<p style="font-size: 14px; margin-top: 10px; color: #888;">Run locally for full features: ./start-visualization.sh</p>' +
+                '<p style="font-size: 12px; margin-top: 5px; color: #666;">' + error.message + '</p>';
         }
     }
 

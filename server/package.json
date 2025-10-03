@@ -1,13 +1,15 @@
 {
   "name": "repo-3d-visualization",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "3D visualization server for local Git repositories",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "node ../scripts/generate-data.js",
+    "deploy": "npm run build && wrangler pages deploy ../public --project-name=thewatchmen"
   },
-  "keywords": ["visualization", "3d", "git", "repositories"],
+  "keywords": ["visualization", "3d", "git", "repositories", "cloudflare"],
   "author": "",
   "license": "MIT",
   "dependencies": {
