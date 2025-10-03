@@ -24,6 +24,9 @@ wheels/
 venv/
 ENV/
 env/
+all_api_keys.env
+secrets/
+secrets
 
 # IDEs
 .vscode/
