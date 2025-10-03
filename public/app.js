@@ -1,13 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 /**
  * Repository 3D Visualization
- * Main application logic - Enhanced with node-based architecture visualization
+ * Fixed version with proper error handling and beautiful loader
  */
 
 class RepositoryVisualization {
@@ -15,28 +11,20 @@ class RepositoryVisualization {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.labelRenderer = null;
-        this.composer = null;
         this.controls = null;
         this.repositories = [];
-        this.nodeMeshes = new Map(); // Changed from repoMeshes to nodeMeshes
-        this.edgeLines = [];
+        this.repoMeshes = new Map();
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-        this.selectedNode = null;
+        this.selectedRepo = null;
+        this.isLoading = true;
         
-        // Colors for different statuses (TRON-style neon glow)
+        // Colors for different statuses
         this.statusColors = {
-            green: 0x00FF00,   // Pure green for stable
-            orange: 0xFF7F00,  // Bright orange for active
-            red: 0xFF0000,     // Pure red for blocked
-            gray: 0x808080     // Gray for archived
-        };
-        
-        // GitHub and local badges
-        this.badges = {
-            github: null,
-            local: null
+            green: 0x4ade80,
+            orange: 0xfb923c,
+            red: 0xf87171,
+            gray: 0x6b7280
         };
     }
 
@@ -45,21 +33,22 @@ class RepositoryVisualization {
         this.setupScene();
         this.setupLights();
         this.setupControls();
+        this.setupLoader();
+        
+        // Start animation loop (safe even without data)
+        this.animate();
         
         // Load data
         await this.loadRepositories();
         
-        // Create visualization
-        this.createVisualization();
-        
-        // Setup interactions
-        this.setupEventListeners();
-        
-        // Start rendering
-        this.animate();
-        
-        // Hide loading
-        document.getElementById('loading').style.display = 'none';
+        // Create visualization if we have data
+        if (this.repositories.length > 0) {
+            this.createVisualization();
+            this.setupEventListeners();
+            this.hideLoader();
+        } else {
+            this.showError('No repositories found. Run locally for full features: ./start-visualization.sh');
+        }
     }
 
     setupScene() {
@@ -126,68 +115,180 @@ class RepositoryVisualization {
         this.controls.maxPolarAngle = Math.PI / 2;
     }
 
+    setupLoader() {
+        // Create a glowing 3D loader in the scene
+        const loaderGeometry = new THREE.TorusGeometry(10, 0.5, 16, 100);
+        const loaderMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        this.loaderMesh = new THREE.Mesh(loaderGeometry, loaderMaterial);
+        this.loaderMesh.rotation.x = Math.PI / 2;
+        this.scene.add(this.loaderMesh);
+        
+        // Add glow rings
+        for (let i = 1; i <= 3; i++) {
+            const ringGeometry = new THREE.TorusGeometry(10 + i * 2, 0.2, 16, 100);
+            const ringMaterial = new THREE.MeshBasicMaterial({
+                color: i === 1 ? 0x00ffff : i === 2 ? 0xff00ff : 0xffff00,
+                transparent: true,
+                opacity: 0.3
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.rotation.x = Math.PI / 2;
+            ring.userData.speed = 0.5 + i * 0.2;
+            this.scene.add(ring);
+            
+            if (!this.loaderRings) this.loaderRings = [];
+            this.loaderRings.push(ring);
+        }
+        
+        // Update loading text
+        this.updateLoadingText('Initializing 3D space...');
+    }
+
+    updateLoadingText(text) {
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            const textEl = loadingEl.querySelector('p');
+            if (textEl) textEl.textContent = text;
+        }
+    }
+
+    hideLoader() {
+        // Remove 3D loader
+        if (this.loaderMesh) {
+            this.scene.remove(this.loaderMesh);
+            this.loaderMesh = null;
+        }
+        
+        if (this.loaderRings) {
+            this.loaderRings.forEach(ring => this.scene.remove(ring));
+            this.loaderRings = null;
+        }
+        
+        // Hide HTML loader
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            loadingEl.style.display = 'none';
+        }
+        
+        this.isLoading = false;
+    }
+
+    showError(message) {
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            loadingEl.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p style="color: #f87171; font-size: 18px; margin-bottom: 10px;">⚠️ ${message}</p>
+                    <p style="color: #888; font-size: 14px; margin-bottom: 20px;">For full features, run locally:</p>
+                    <code style="background: #1a1f2e; padding: 10px 20px; border-radius: 8px; color: #4ade80;">./start-visualization.sh</code>
+                </div>
+            `;
+        }
+        this.isLoading = false;
+    }
+
     async loadRepositories() {
         try {
-            // Try to fetch from API first, then fallback to embedded data
+            this.updateLoadingText('Loading repository data...');
+            
+            // Try multiple sources
             let data;
+            let source = 'unknown';
             
+            // Try data.json first (for static deployment)
             try {
-                const response = await fetch('/api/projects');
-                data = await response.json();
-            } catch (apiError) {
-                console.log('API not available, trying embedded data...');
-                // Fallback to embedded data.json
+                console.log('Trying data.json...');
                 const response = await fetch('/data.json');
-                data = await response.json();
+                if (response.ok) {
+                    data = await response.json();
+                    source = 'data.json';
+                    console.log('✓ Loaded from data.json');
+                }
+            } catch (e) {
+                console.log('data.json not available:', e.message);
             }
             
-            if (data.success && data.projects) {
-                // Normalize data - support both v1 and v2 schemas
-                this.repositories = data.projects.map(project => {
-                    // If it's v2 format (with assets), normalize to expected format
-                    if (project.assets) {
-                        return {
-                            projectName: project.assets[0]?.metadata?.title || 'Unknown',
-                            status: project.assets[0]?.status?.phase || 'gray',
-                            stats: {
-                                fileCount: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
-                                totalCommitsLast30Days: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
-                                primaryLanguage: 'unknown',
-                                sizeMB: 0
-                            },
-                            nodes: project.assets,
-                            edges: project.edges,
-                            lastUpdate: project.lastScan,
-                            ...project
-                        };
+            // Try API if data.json failed
+            if (!data) {
+                try {
+                    console.log('Trying /api/projects...');
+                    const response = await fetch('/api/projects');
+                    if (response.ok) {
+                        data = await response.json();
+                        source = 'api';
+                        console.log('✓ Loaded from API');
                     }
-                    return project;
-                });
-                
-                console.log(`Loaded ${this.repositories.length} repositories`);
-                
-                // Update stats
-                this.updateStats(this.repositories);
-            } else {
-                throw new Error(data.error || 'Failed to load repositories');
+                } catch (e) {
+                    console.log('API not available:', e.message);
+                }
             }
+            
+            if (!data || !data.projects || data.projects.length === 0) {
+                throw new Error('No repository data available');
+            }
+            
+            this.updateLoadingText(`Processing ${data.projects.length} repositories...`);
+            
+            // Normalize data - support both v1 and v2 schemas
+            this.repositories = data.projects.map((project, index) => {
+                // v2 format (with assets)
+                if (project.assets && Array.isArray(project.assets)) {
+                    const primaryAsset = project.assets[0] || {};
+                    return {
+                        projectName: primaryAsset.metadata?.title || project.projectName || `Project ${index + 1}`,
+                        status: primaryAsset.status?.phase || 'gray',
+                        stats: {
+                            fileCount: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
+                            totalCommitsLast30Days: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
+                            primaryLanguage: primaryAsset.metadata?.tags?.[0] || 'unknown',
+                            sizeMB: 0
+                        },
+                        nodes: project.assets,
+                        edges: project.edges || [],
+                        lastUpdate: project.lastScan || primaryAsset.metadata?.lastUpdate,
+                        metadata: primaryAsset.metadata || {},
+                        ...project
+                    };
+                }
+                
+                // v1 format (original)
+                return {
+                    projectName: project.projectName || `Project ${index + 1}`,
+                    status: project.status || 'gray',
+                    stats: project.stats || {},
+                    nodes: project.nodes || [],
+                    edges: project.edges || [],
+                    ...project
+                };
+            });
+            
+            console.log(`✓ Loaded ${this.repositories.length} repositories from ${source}`);
+            
+            // Update stats
+            this.updateStats(this.repositories);
+            
         } catch (error) {
             console.error('Error loading repositories:', error);
-            document.getElementById('loading').innerHTML = 
-                '<p style="color: #f87171;">Error loading repositories</p>' +
-                '<p style="font-size: 14px; margin-top: 10px; color: #888;">Run locally for full features: ./start-visualization.sh</p>' +
-                '<p style="font-size: 12px; margin-top: 5px; color: #666;">' + error.message + '</p>';
+            this.showError(error.message);
+            this.repositories = []; // Ensure it's an empty array, not undefined
         }
     }
 
     updateStats(projects) {
+        if (!projects || projects.length === 0) return;
+        
         const stats = {
             total: projects.length,
             green: projects.filter(p => p.status === 'green').length,
             orange: projects.filter(p => p.status === 'orange').length,
             red: projects.filter(p => p.status === 'red').length,
             gray: projects.filter(p => p.status === 'gray').length,
-            nodes: projects.reduce((sum, p) => sum + (p.nodes?.length || 0), 0),
+            nodes: projects.reduce((sum, p) => sum + ((p.nodes || p.assets || []).length), 0),
             commits: projects.reduce((sum, p) => sum + (p.stats?.totalCommitsLast30Days || 0), 0)
         };
         
@@ -200,9 +301,12 @@ class RepositoryVisualization {
     }
 
     createVisualization() {
-        const numRepos = this.repositories.length;
+        this.updateLoadingText('Creating 3D visualization...');
         
-        // Calculate layout (circular for now, can be enhanced)
+        const numRepos = this.repositories.length;
+        if (numRepos === 0) return;
+        
+        // Calculate layout (circular)
         const radius = Math.max(50, numRepos * 2);
         
         this.repositories.forEach((repo, index) => {
@@ -222,8 +326,10 @@ class RepositoryVisualization {
             this.scene.add(label);
         });
         
-        // Create edges between repositories (if they share components)
+        // Create edges between repositories
         this.createEdges();
+        
+        console.log(`✓ Created ${this.repoMeshes.size} repository nodes`);
     }
 
     createRepoNode(repo, x, y, z) {
@@ -235,7 +341,7 @@ class RepositoryVisualization {
         // Color based on status
         const color = this.statusColors[repo.status] || this.statusColors.gray;
         
-        // Create geometry - box for now, could be more interesting
+        // Create geometry
         const geometry = new THREE.BoxGeometry(size, size, size);
         
         // Material with glow effect
@@ -274,7 +380,7 @@ class RepositoryVisualization {
         context.font = 'bold 48px Arial';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText(text, 256, 64);
+        context.fillText(text.substring(0, 20), 256, 64);
         
         // Create texture
         const texture = new THREE.CanvasTexture(canvas);
@@ -294,10 +400,8 @@ class RepositoryVisualization {
     }
 
     createEdges() {
-        // Simple edge creation based on proximity or shared characteristics
-        // This is a placeholder - in a real implementation, you'd parse actual dependencies
+        if (!this.repositories || this.repositories.length < 2) return;
         
-        const lineGeometry = new THREE.BufferGeometry();
         const lineMaterial = new THREE.LineBasicMaterial({
             color: 0x4a5568,
             transparent: true,
@@ -317,7 +421,7 @@ class RepositoryVisualization {
         // Draw connections within language groups
         byLanguage.forEach((repos, lang) => {
             if (repos.length > 1) {
-                for (let i = 0; i < repos.length - 1; i++) {
+                for (let i = 0; i < Math.min(repos.length - 1, 5); i++) {
                     const mesh1 = this.repoMeshes.get(repos[i].projectName);
                     const mesh2 = this.repoMeshes.get(repos[i + 1].projectName);
                     
@@ -343,10 +447,13 @@ class RepositoryVisualization {
         this.renderer.domElement.addEventListener('mousemove', (event) => this.onMouseMove(event), false);
         
         // Close panel button
-        document.getElementById('close-panel').addEventListener('click', () => {
-            document.getElementById('info-panel').classList.remove('visible');
-            this.selectedRepo = null;
-        });
+        const closeBtn = document.getElementById('close-panel');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                document.getElementById('info-panel').classList.remove('visible');
+                this.selectedRepo = null;
+            });
+        }
     }
 
     onWindowResize() {
@@ -356,6 +463,8 @@ class RepositoryVisualization {
     }
 
     onClick(event) {
+        if (!this.repoMeshes || this.repoMeshes.size === 0) return;
+        
         // Calculate mouse position
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -374,6 +483,8 @@ class RepositoryVisualization {
     }
 
     onMouseMove(event) {
+        if (!this.repoMeshes || this.repoMeshes.size === 0) return;
+        
         // Calculate mouse position
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -385,19 +496,23 @@ class RepositoryVisualization {
         const meshes = Array.from(this.repoMeshes.values());
         const intersects = this.raycaster.intersectObjects(meshes);
         
-        // Change cursor
+        // Change cursor and highlight
         if (intersects.length > 0) {
             document.body.style.cursor = 'pointer';
             
             // Highlight
             const mesh = intersects[0].object;
-            mesh.material.emissiveIntensity = 0.6;
+            if (mesh.material) {
+                mesh.material.emissiveIntensity = 0.6;
+            }
         } else {
             document.body.style.cursor = 'default';
             
             // Reset all highlights
             meshes.forEach(mesh => {
-                mesh.material.emissiveIntensity = 0.3;
+                if (mesh.material) {
+                    mesh.material.emissiveIntensity = 0.3;
+                }
             });
         }
     }
@@ -406,36 +521,38 @@ class RepositoryVisualization {
         this.selectedRepo = repo;
         
         // Update info panel
-        document.getElementById('info-name').textContent = repo.projectName;
-        document.getElementById('info-branch').textContent = `Branch: ${repo.branch}`;
+        document.getElementById('info-name').textContent = repo.projectName || 'Unknown';
+        document.getElementById('info-branch').textContent = `Branch: ${repo.branch || 'unknown'}`;
         
         // Status with color
-        const statusText = repo.status.charAt(0).toUpperCase() + repo.status.slice(1);
-        const statusClass = `status-${repo.status}`;
+        const statusText = (repo.status || 'gray').charAt(0).toUpperCase() + (repo.status || 'gray').slice(1);
+        const statusClass = `status-${repo.status || 'gray'}`;
         document.getElementById('info-status').innerHTML = 
             `<span class="status-indicator ${statusClass}"></span>${statusText}`;
         
         // Stats
         document.getElementById('info-language').textContent = 
-            repo.stats?.primaryLanguage || 'Unknown';
+            repo.stats?.primaryLanguage || repo.metadata?.tags?.[0] || 'Unknown';
         document.getElementById('info-files').textContent = 
             (repo.stats?.fileCount || 0).toLocaleString();
         document.getElementById('info-size').textContent = 
             `${(repo.stats?.sizeMB || 0).toFixed(2)} MB`;
         document.getElementById('info-commits').textContent = 
-            repo.stats?.totalCommitsLast30Days || 0;
+            repo.stats?.totalCommitsLast30Days || repo.analytics?.activityLast30Days || 0;
         
         // Last commit
         const lastCommit = repo.metadata?.lastCommitMessage || 'No commit data';
         const lastDate = repo.lastUpdate ? new Date(repo.lastUpdate).toLocaleDateString() : 'Unknown';
         document.getElementById('info-last-commit').textContent = 
-            `${lastDate}: ${lastCommit}`;
+            `${lastDate}: ${lastCommit.substring(0, 100)}`;
         
         // Nodes
-        const nodeCount = repo.nodes?.length || 0;
-        const nodeList = repo.nodes?.map(n => n.title).join(', ') || 'No architecture data';
+        const nodes = repo.nodes || repo.assets || [];
+        const nodeCount = nodes.length;
+        const nodeList = nodes.map(n => n.title || n.metadata?.title || 'Untitled').slice(0, 5).join(', ');
+        const moreText = nodes.length > 5 ? ` and ${nodes.length - 5} more` : '';
         document.getElementById('info-nodes').textContent = 
-            `${nodeCount} components: ${nodeList}`;
+            `${nodeCount} components: ${nodeList}${moreText}`;
         
         // Show panel
         document.getElementById('info-panel').classList.add('visible');
@@ -445,24 +562,50 @@ class RepositoryVisualization {
         requestAnimationFrame(() => this.animate());
         
         // Update controls
-        this.controls.update();
+        if (this.controls) {
+            this.controls.update();
+        }
         
-        // Animate repository nodes
-        this.repoMeshes.forEach(mesh => {
-            if (mesh.userData.rotationSpeed) {
-                mesh.rotation.x += mesh.userData.rotationSpeed.x;
-                mesh.rotation.y += mesh.userData.rotationSpeed.y;
+        // Animate loader
+        if (this.isLoading && this.loaderMesh) {
+            this.loaderMesh.rotation.z += 0.02;
+            
+            if (this.loaderRings) {
+                this.loaderRings.forEach((ring, i) => {
+                    ring.rotation.z += ring.userData.speed * 0.01;
+                    ring.material.opacity = 0.3 + Math.sin(Date.now() * 0.001 + i) * 0.2;
+                });
             }
-        });
+        }
+        
+        // Animate repository nodes (only if they exist)
+        if (this.repoMeshes && this.repoMeshes.size > 0) {
+            this.repoMeshes.forEach(mesh => {
+                if (mesh.userData && mesh.userData.rotationSpeed) {
+                    mesh.rotation.x += mesh.userData.rotationSpeed.x;
+                    mesh.rotation.y += mesh.userData.rotationSpeed.y;
+                }
+            });
+        }
         
         // Render
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     const app = new RepositoryVisualization();
-    app.init();
+    app.init().catch(error => {
+        console.error('Initialization error:', error);
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) {
+            loadingEl.innerHTML = `
+                <p style="color: #f87171;">Error initializing visualization</p>
+                <p style="font-size: 14px; margin-top: 10px; color: #888;">${error.message}</p>
+            `;
+        }
+    });
 });
-
