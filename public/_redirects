@@ -1,0 +1,8 @@
+# Cloudflare Pages redirects and rewrites
+
+# SPA fallback - all routes go to index.html
+/*    /index.html   200
+
+# API proxy (if needed)
+/api/*  https://your-api-backend.com/:splat  200
+

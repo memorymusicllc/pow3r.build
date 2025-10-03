@@ -1,8 +1,15 @@
 # Repository to 3D Visualization Tool
 
+[![Deploy to Cloudflare Pages](https://github.com/memorymusicllc/pow3r.build/workflows/Deploy%20to%20Cloudflare%20Pages/badge.svg)](https://github.com/memorymusicllc/pow3r.build/actions)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/memorymusicllc/pow3r.build)
+[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
+[![Node](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
+[![Three.js](https://img.shields.io/badge/three.js-0.160-orange.svg)](https://threejs.org/)
+
 A comprehensive system for discovering, analyzing, and visualizing local Git repositories in interactive 3D.
 
-**Status**: ✅ **ALL PHASES COMPLETE**
+**Status**: ✅ **ALL PHASES COMPLETE**  
+**Live Demo**: 🌐 [thewatchmen.pages.dev](https://thewatchmen.pages.dev)
 
 ## Overview
 
