@@ -58,17 +58,24 @@ async function findConfigFiles(dir, depth = 0) {
         // Recurse into subdirectories
         const subConfigs = await findConfigFiles(fullPath, depth + 1);
         configs.push(...subConfigs);
-      } else if (entry.name === 'dev-status.config.json') {
+      } else if (entry.name === 'pow3r.status.json' || entry.name === 'dev-status.config.json') {
         // Found a config file!
         try {
           const content = await fs.readFile(fullPath, 'utf8');
           const config = JSON.parse(content);
+          
+          // Support both old and new formats
+          const projectName = config.projectName || 
+                             (config.assets && config.assets[0] && config.assets[0].metadata && config.assets[0].metadata.title) || 
+                             'Unknown Project';
+          
           configs.push({
             path: fullPath,
             relativePath: path.relative(BASE_PATH, fullPath),
+            configType: entry.name === 'pow3r.status.json' ? 'v2' : 'v1',
             ...config
           });
-          console.log(`✓ Loaded: ${config.projectName}`);
+          console.log(`✓ Loaded: ${projectName} (${entry.name})`);
         } catch (error) {
           console.error(`✗ Error reading ${fullPath}:`, error.message);
         }

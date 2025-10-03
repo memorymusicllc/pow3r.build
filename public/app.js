@@ -1,9 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 /**
  * Repository 3D Visualization
- * Main application logic
+ * Main application logic - Enhanced with node-based architecture visualization
  */
 
 class RepositoryVisualization {
@@ -11,19 +15,28 @@ class RepositoryVisualization {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
+        this.labelRenderer = null;
+        this.composer = null;
         this.controls = null;
         this.repositories = [];
-        this.repoMeshes = new Map();
+        this.nodeMeshes = new Map(); // Changed from repoMeshes to nodeMeshes
+        this.edgeLines = [];
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-        this.selectedRepo = null;
+        this.selectedNode = null;
         
-        // Colors for different statuses
+        // Colors for different statuses (TRON-style neon glow)
         this.statusColors = {
-            green: 0x4ade80,
-            orange: 0xfb923c,
-            red: 0xf87171,
-            gray: 0x6b7280
+            green: 0x00FF00,   // Pure green for stable
+            orange: 0xFF7F00,  // Bright orange for active
+            red: 0xFF0000,     // Pure red for blocked
+            gray: 0x808080     // Gray for archived
+        };
+        
+        // GitHub and local badges
+        this.badges = {
+            github: null,
+            local: null
         };
     }
 
