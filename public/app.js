@@ -12,11 +12,13 @@ class RepositoryVisualization {
         this.camera = null;
         this.renderer = null;
         this.controls = null;
-        this.repositories = [];
-        this.repoMeshes = new Map();
+        this.projects = [];          // All projects
+        this.allNodes = [];           // ALL nodes from all projects
+        this.allEdges = [];           // ALL edges from all projects
+        this.repoMeshes = new Map();  // Meshes by node ID
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-        this.selectedRepo = null;
+        this.selectedNode = null;
         this.isLoading = true;
         
         // Colors for different statuses
@@ -26,6 +28,8 @@ class RepositoryVisualization {
             red: 0xf87171,
             gray: 0x6b7280
         };
+        
+        console.log('✓ RepositoryVisualization initialized');
     }
 
     async init() {
