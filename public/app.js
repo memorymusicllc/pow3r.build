@@ -234,43 +234,69 @@ class RepositoryVisualization {
             
             this.updateLoadingText(`Processing ${data.projects.length} repositories...`);
             
-            // Normalize data - support both v1 and v2 schemas
-            this.repositories = data.projects.map((project, index) => {
-                // v2 format (with assets)
-                if (project.assets && Array.isArray(project.assets)) {
-                    const primaryAsset = project.assets[0] || {};
-                    return {
-                        projectName: primaryAsset.metadata?.title || project.projectName || `Project ${index + 1}`,
-                        status: primaryAsset.status?.phase || 'gray',
-                        stats: {
-                            fileCount: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
-                            totalCommitsLast30Days: project.assets.reduce((sum, a) => sum + (a.analytics?.activityLast30Days || 0), 0),
-                            primaryLanguage: primaryAsset.metadata?.tags?.[0] || 'unknown',
-                            sizeMB: 0
-                        },
-                        nodes: project.assets,
-                        edges: project.edges || [],
-                        lastUpdate: project.lastScan || primaryAsset.metadata?.lastUpdate,
-                        metadata: primaryAsset.metadata || {},
-                        ...project
-                    };
+            // Store raw projects
+            this.projects = data.projects;
+            
+            // Extract ALL nodes from ALL projects
+            this.allNodes = [];
+            this.allEdges = [];
+            
+            console.log(`📊 Processing ${data.projects.length} projects...`);
+            
+            data.projects.forEach((project, projectIndex) => {
+                const projectName = project.projectName || 
+                                   project.graphId || 
+                                   `Project ${projectIndex}`;
+                
+                // Get nodes from either 'nodes' (v1/v3) or 'assets' (v2)
+                const nodes = project.nodes || project.assets || [];
+                
+                console.log(`  ${projectName}: ${nodes.length} nodes (type: ${project.configType || 'unknown'})`);
+                
+                if (nodes.length === 0) {
+                    console.warn(`  ⚠️ ${projectName} has NO nodes!`);
                 }
                 
-                // v1 format (original)
-                return {
-                    projectName: project.projectName || `Project ${index + 1}`,
-                    status: project.status || 'gray',
-                    stats: project.stats || {},
-                    nodes: project.nodes || [],
-                    edges: project.edges || [],
-                    ...project
-                };
+                // Add each node with project context
+                nodes.forEach((node, nodeIndex) => {
+                    const extractedNode = {
+                        ...node,
+                        projectName: projectName,
+                        projectIndex: projectIndex,
+                        nodeIndex: nodeIndex,
+                        // Normalize status from different formats
+                        status: node.status?.phase || node.status || 'gray',
+                        name: node.name || node.title || node.metadata?.title || `Component ${nodeIndex}`,
+                        description: node.description || node.metadata?.description || '',
+                        tech_stack: node.tech_stack || node.metadata?.tags || [],
+                        completeness: node.status?.completeness || 0.5,
+                        quality: node.status?.qualityScore || 0.5
+                    };
+                    
+                    this.allNodes.push(extractedNode);
+                });
+                
+                // Add edges with project context
+                const edges = project.edges || [];
+                edges.forEach(edge => {
+                    this.allEdges.push({
+                        ...edge,
+                        projectName: projectName,
+                        projectIndex: projectIndex
+                    });
+                });
             });
             
-            console.log(`✓ Loaded ${this.repositories.length} repositories from ${source}`);
+            console.log(`✅ Extracted ${this.allNodes.length} nodes and ${this.allEdges.length} edges from ${data.projects.length} projects`);
             
-            // Update stats
-            this.updateStats(this.repositories);
+            if (this.allNodes.length === 0) {
+                console.error('❌ CRITICAL: No nodes extracted! Check data structure.');
+                console.log('First project sample:', JSON.stringify(data.projects[0], null, 2).substring(0, 500));
+                throw new Error(`No nodes found in ${data.projects.length} projects. Data may be incorrect.`);
+            }
+            
+            // Update stats based on all nodes
+            this.updateStats(this.allNodes);
             
         } catch (error) {
             console.error('Error loading repositories:', error);
