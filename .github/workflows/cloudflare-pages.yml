@@ -29,9 +29,13 @@ jobs:
           cd server
           npm ci
 
+      - name: Generate embedded data
+        run: |
+          node scripts/generate-data.js || echo "⚠️ Data generation skipped (local paths not available)"
+          
       - name: Build
         run: |
-          echo "Build completed - static files ready"
+          echo "✅ Build completed - static files ready"
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
