@@ -1,113 +1,160 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 /**
- * Repository 3D Visualization
- * Fixed version with proper error handling and beautiful loader
+ * Enhanced Repository 3D Visualization
+ * Beautiful TRON-style aesthetic with light particles, energy waves, and glowing cards
  */
 
 class RepositoryVisualization {
     constructor() {
+        // Core Three.js objects
         this.scene = null;
         this.camera = null;
         this.renderer = null;
+        this.labelRenderer = null;
+        this.composer = null;
         this.controls = null;
-        this.projects = [];          // All projects
-        this.allNodes = [];           // ALL nodes from all projects
-        this.allEdges = [];           // ALL edges from all projects
-        this.repoMeshes = new Map();  // Meshes by node ID
+        
+        // Data structures
+        this.projects = [];
+        this.allNodes = [];
+        this.allEdges = [];
+        this.nodeMeshes = new Map();
+        this.edgeParticles = [];
+        this.waveforms = [];
+        
+        // Interaction
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.selectedNode = null;
         this.isLoading = true;
+        this.loaderMesh = null;
+        this.loaderRings = null;
         
-        // Colors for different statuses
+        // Colors (TRON neon palette)
         this.statusColors = {
-            green: 0x4ade80,
-            orange: 0xfb923c,
-            red: 0xf87171,
-            gray: 0x6b7280
+            green: 0x00FF00,
+            orange: 0xFF7F00,
+            red: 0xFF0000,
+            gray: 0x808080
         };
         
-        console.log('✓ RepositoryVisualization initialized');
+        // Edge type colors
+        this.edgeColors = {
+            'dependsOn': 0x00FFFF,
+            'uses': 0x00FF00,
+            'implements': 0xFF7F00,
+            'references': 0x8B00FF,
+            'queries': 0xFF0000,
+            'executes': 0xFFFF00
+        };
+        
+        console.log('✓ Enhanced visualization initialized');
     }
 
     async init() {
-        // Setup Three.js scene
+        // Setup scene
         this.setupScene();
         this.setupLights();
+        this.setupPostProcessing();
         this.setupControls();
+        this.setupLabelRenderer();
         this.setupLoader();
         
-        // Start animation loop (safe even without data)
+        // Start animation
         this.animate();
         
         // Load data
         await this.loadRepositories();
         
-        // Create visualization if we have data
-        if (this.repositories.length > 0) {
+        // Create visualization
+        if (this.allNodes.length > 0) {
             this.createVisualization();
             this.setupEventListeners();
             this.hideLoader();
         } else {
-            this.showError('No repositories found. Run locally for full features: ./start-visualization.sh');
+            this.showError('No nodes found');
         }
     }
 
     setupScene() {
         const container = document.getElementById('canvas-container');
         
-        // Scene
+        // Scene with deep black background
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0e1a);
-        this.scene.fog = new THREE.FogExp2(0x0a0e1a, 0.002);
+        this.scene.background = new THREE.Color(0x000000);
+        this.scene.fog = new THREE.FogExp2(0x000000, 0.0015);
         
         // Camera
         this.camera = new THREE.PerspectiveCamera(
             60,
             window.innerWidth / window.innerHeight,
             0.1,
-            2000
+            3000
         );
-        this.camera.position.set(100, 100, 100);
-        this.camera.lookAt(0, 0, 0);
+        this.camera.position.set(150, 150, 150);
         
         // Renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true
+        });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.toneMapping = THREE.ReinhardToneMapping;
         container.appendChild(this.renderer.domElement);
         
-        // Grid
-        const gridHelper = new THREE.GridHelper(200, 20, 0x1a1f2e, 0x1a1f2e);
-        this.scene.add(gridHelper);
-        
-        // Axes helper (subtle)
-        const axesHelper = new THREE.AxesHelper(50);
-        axesHelper.material.opacity = 0.3;
-        axesHelper.material.transparent = true;
-        this.scene.add(axesHelper);
+        // Subtle grid (very dark)
+        const grid = new THREE.GridHelper(400, 40, 0x111111, 0x0a0a0a);
+        this.scene.add(grid);
     }
 
     setupLights() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        this.scene.add(ambientLight);
+        // Minimal ambient
+        const ambient = new THREE.AmbientLight(0xffffff, 0.1);
+        this.scene.add(ambient);
         
-        // Directional lights
-        const light1 = new THREE.DirectionalLight(0xffffff, 0.8);
-        light1.position.set(50, 100, 50);
+        // Key lights for glow
+        const light1 = new THREE.PointLight(0x00ffff, 1, 500);
+        light1.position.set(100, 100, 100);
         this.scene.add(light1);
         
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.4);
-        light2.position.set(-50, 50, -50);
+        const light2 = new THREE.PointLight(0xff00ff, 0.8, 500);
+        light2.position.set(-100, 100, -100);
         this.scene.add(light2);
+    }
+
+    setupPostProcessing() {
+        // Bloom for neon glow
+        this.composer = new EffectComposer(this.renderer);
         
-        // Point light for dramatic effect
-        const pointLight = new THREE.PointLight(0x4ade80, 0.5, 300);
-        pointLight.position.set(0, 50, 0);
-        this.scene.add(pointLight);
+        const renderPass = new RenderPass(this.scene, this.camera);
+        this.composer.addPass(renderPass);
+        
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5,  // strength
+            0.4,  // radius
+            0.85  // threshold
+        );
+        this.composer.addPass(bloomPass);
+        
+        console.log('✓ Bloom effect enabled');
+    }
+
+    setupLabelRenderer() {
+        // CSS2D renderer for HTML labels
+        this.labelRenderer = new CSS2DRenderer();
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.domElement.style.position = 'absolute';
+        this.labelRenderer.domElement.style.top = '0px';
+        this.labelRenderer.domElement.style.pointerEvents = 'none';
+        document.getElementById('canvas-container').appendChild(this.labelRenderer.domElement);
     }
 
     setupControls() {
@@ -115,205 +162,149 @@ class RepositoryVisualization {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.minDistance = 20;
-        this.controls.maxDistance = 500;
-        this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.maxDistance = 800;
     }
 
     setupLoader() {
-        // Create a glowing 3D loader in the scene
-        const loaderGeometry = new THREE.TorusGeometry(10, 0.5, 16, 100);
-        const loaderMaterial = new THREE.MeshBasicMaterial({
+        // Glowing 3D loader
+        const loaderGeo = new THREE.TorusGeometry(15, 0.8, 16, 100);
+        const loaderMat = new THREE.MeshBasicMaterial({
             color: 0x00ffff,
             transparent: true,
-            opacity: 0.8
+            opacity: 1
         });
         
-        this.loaderMesh = new THREE.Mesh(loaderGeometry, loaderMaterial);
+        this.loaderMesh = new THREE.Mesh(loaderGeo, loaderMat);
         this.loaderMesh.rotation.x = Math.PI / 2;
         this.scene.add(this.loaderMesh);
         
-        // Add glow rings
-        for (let i = 1; i <= 3; i++) {
-            const ringGeometry = new THREE.TorusGeometry(10 + i * 2, 0.2, 16, 100);
-            const ringMaterial = new THREE.MeshBasicMaterial({
-                color: i === 1 ? 0x00ffff : i === 2 ? 0xff00ff : 0xffff00,
+        // Orbiting rings
+        this.loaderRings = [];
+        const colors = [0x00ffff, 0xff00ff, 0xffff00];
+        
+        for (let i = 0; i < 3; i++) {
+            const ringGeo = new THREE.TorusGeometry(15 + (i + 1) * 3, 0.3, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: colors[i],
                 transparent: true,
-                opacity: 0.3
+                opacity: 0.4
             });
-            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2;
-            ring.userData.speed = 0.5 + i * 0.2;
+            ring.userData.speed = 0.5 + i * 0.3;
+            ring.userData.baseOpacity = 0.4;
             this.scene.add(ring);
-            
-            if (!this.loaderRings) this.loaderRings = [];
             this.loaderRings.push(ring);
         }
-        
-        // Update loading text
-        this.updateLoadingText('Initializing 3D space...');
     }
 
     updateLoadingText(text) {
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) {
-            const textEl = loadingEl.querySelector('p');
-            if (textEl) textEl.textContent = text;
+        const el = document.getElementById('loading');
+        if (el) {
+            const p = el.querySelector('p');
+            if (p) p.textContent = text;
         }
     }
 
     hideLoader() {
-        // Remove 3D loader
         if (this.loaderMesh) {
             this.scene.remove(this.loaderMesh);
             this.loaderMesh = null;
         }
-        
         if (this.loaderRings) {
-            this.loaderRings.forEach(ring => this.scene.remove(ring));
+            this.loaderRings.forEach(r => this.scene.remove(r));
             this.loaderRings = null;
         }
-        
-        // Hide HTML loader
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) {
-            loadingEl.style.display = 'none';
-        }
-        
+        document.getElementById('loading').style.display = 'none';
         this.isLoading = false;
     }
 
     showError(message) {
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) {
-            loadingEl.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <p style="color: #f87171; font-size: 18px; margin-bottom: 10px;">⚠️ ${message}</p>
-                    <p style="color: #888; font-size: 14px; margin-bottom: 20px;">For full features, run locally:</p>
-                    <code style="background: #1a1f2e; padding: 10px 20px; border-radius: 8px; color: #4ade80;">./start-visualization.sh</code>
-                </div>
-            `;
-        }
+        document.getElementById('loading').innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <p style="color: #ff0000; font-size: 18px;">⚠️ ${message}</p>
+                <p style="color: #888; font-size: 14px; margin-top: 10px;">
+                    Run locally: <code>./start-visualization.sh</code>
+                </p>
+            </div>
+        `;
         this.isLoading = false;
     }
 
     async loadRepositories() {
         try {
-            this.updateLoadingText('Loading repository data...');
+            this.updateLoadingText('Loading data...');
             
-            // Try multiple sources
             let data;
-            let source = 'unknown';
             
-            // Try data.json first (for static deployment)
             try {
                 console.log('Trying data.json...');
                 const response = await fetch('/data.json');
-                if (response.ok) {
-                    data = await response.json();
-                    source = 'data.json';
-                    console.log('✓ Loaded from data.json');
-                }
-            } catch (e) {
-                console.log('data.json not available:', e.message);
+                data = await response.json();
+                console.log('✓ Loaded from data.json');
+            } catch {
+                const response = await fetch('/api/projects');
+                data = await response.json();
+                console.log('✓ Loaded from API');
             }
             
-            // Try API if data.json failed
-            if (!data) {
-                try {
-                    console.log('Trying /api/projects...');
-                    const response = await fetch('/api/projects');
-                    if (response.ok) {
-                        data = await response.json();
-                        source = 'api';
-                        console.log('✓ Loaded from API');
-                    }
-                } catch (e) {
-                    console.log('API not available:', e.message);
-                }
+            if (!data?.projects?.length) {
+                throw new Error('No data available');
             }
             
-            if (!data || !data.projects || data.projects.length === 0) {
-                throw new Error('No repository data available');
-            }
-            
-            this.updateLoadingText(`Processing ${data.projects.length} repositories...`);
-            
-            // Store raw projects
             this.projects = data.projects;
-            
-            // Extract ALL nodes from ALL projects
-            this.allNodes = [];
-            this.allEdges = [];
             
             console.log(`📊 Processing ${data.projects.length} projects...`);
             
-            data.projects.forEach((project, projectIndex) => {
-                const projectName = project.projectName || 
-                                   project.graphId || 
-                                   `Project ${projectIndex}`;
-                
-                // Get nodes from either 'nodes' (v1/v3) or 'assets' (v2)
+            // Extract all nodes
+            data.projects.forEach((project, idx) => {
+                const projectName = project.projectName || `Project ${idx}`;
                 const nodes = project.nodes || project.assets || [];
                 
-                console.log(`  ${projectName}: ${nodes.length} nodes (type: ${project.configType || 'unknown'})`);
+                console.log(`  ${projectName}: ${nodes.length} nodes (${project.configType})`);
                 
-                if (nodes.length === 0) {
-                    console.warn(`  ⚠️ ${projectName} has NO nodes!`);
-                }
-                
-                // Add each node with project context
-                nodes.forEach((node, nodeIndex) => {
-                    const extractedNode = {
+                nodes.forEach((node, nidx) => {
+                    this.allNodes.push({
                         ...node,
-                        projectName: projectName,
-                        projectIndex: projectIndex,
-                        nodeIndex: nodeIndex,
-                        // Normalize status from different formats
+                        projectName,
+                        projectIndex: idx,
                         status: node.status?.phase || node.status || 'gray',
-                        name: node.name || node.title || node.metadata?.title || `Component ${nodeIndex}`,
+                        name: node.name || node.title || node.metadata?.title || `Node ${nidx}`,
                         description: node.description || node.metadata?.description || '',
-                        tech_stack: node.tech_stack || node.metadata?.tags || [],
+                        tech_stack: node.tech_stack || [],
+                        features: node.features || [],
                         completeness: node.status?.completeness || 0.5,
                         quality: node.status?.qualityScore || 0.5
-                    };
-                    
-                    this.allNodes.push(extractedNode);
+                    });
                 });
                 
-                // Add edges with project context
-                const edges = project.edges || [];
-                edges.forEach(edge => {
+                (project.edges || []).forEach(edge => {
                     this.allEdges.push({
                         ...edge,
-                        projectName: projectName,
-                        projectIndex: projectIndex
+                        projectName,
+                        projectIndex: idx
                     });
                 });
             });
             
-            console.log(`✅ Extracted ${this.allNodes.length} nodes and ${this.allEdges.length} edges from ${data.projects.length} projects`);
+            console.log(`✅ Extracted ${this.allNodes.length} nodes and ${this.allEdges.length} edges`);
             
             if (this.allNodes.length === 0) {
-                console.error('❌ CRITICAL: No nodes extracted! Check data structure.');
-                console.log('First project sample:', JSON.stringify(data.projects[0], null, 2).substring(0, 500));
-                throw new Error(`No nodes found in ${data.projects.length} projects. Data may be incorrect.`);
+                throw new Error('No nodes extracted');
             }
             
-            // Update stats based on all nodes
             this.updateStats(this.allNodes);
             
-            console.log(`🎨 Ready to create visualization with ${this.allNodes.length} nodes`);
-            
         } catch (error) {
-            console.error('Error loading repositories:', error);
+            console.error('Load error:', error);
             this.showError(error.message);
-            this.allNodes = []; // Ensure it's an empty array
+            this.allNodes = [];
             this.allEdges = [];
         }
     }
 
     updateStats(nodes) {
-        if (!nodes || nodes.length === 0) return;
+        if (!nodes?.length) return;
         
         const stats = {
             total: nodes.length,
@@ -321,7 +312,7 @@ class RepositoryVisualization {
             orange: nodes.filter(n => n.status === 'orange').length,
             red: nodes.filter(n => n.status === 'red').length,
             gray: nodes.filter(n => n.status === 'gray').length,
-            projects: this.projects ? this.projects.length : 0,
+            projects: this.projects.length,
             avgQuality: nodes.reduce((sum, n) => sum + (n.quality || 0), 0) / nodes.length
         };
         
@@ -330,433 +321,487 @@ class RepositoryVisualization {
         document.getElementById('stat-red').textContent = stats.red;
         document.getElementById('stat-gray').textContent = stats.gray;
         
-        // Update nodes stat to show projects
         const nodesEl = document.getElementById('stat-nodes');
         if (nodesEl) nodesEl.textContent = stats.projects + ' projects';
         
         const commitsEl = document.getElementById('stat-commits');
-        if (commitsEl) commitsEl.textContent = (stats.avgQuality * 100).toFixed(0) + '% avg quality';
+        if (commitsEl) commitsEl.textContent = Math.round(stats.avgQuality * 100) + '% quality';
     }
 
     createVisualization() {
-        this.updateLoadingText('Creating 3D visualization...');
+        console.log(`🎨 Creating visualization: ${this.allNodes.length} nodes`);
         
-        console.log(`🎨 createVisualization called. allNodes:`, this.allNodes ? this.allNodes.length : 'undefined');
-        
-        if (!this.allNodes || this.allNodes.length === 0) {
-            console.error('❌ No nodes to visualize!');
-            console.error('  this.allNodes:', this.allNodes);
-            console.error('  Is array?', Array.isArray(this.allNodes));
-            this.showError('No architecture nodes found. Data may not have loaded correctly.');
+        if (!this.allNodes?.length) {
+            this.showError('No nodes to visualize');
             return;
         }
         
-        this.updateLoadingText(`Creating ${this.allNodes.length} nodes...`);
-        console.log(`✓ Starting visualization of ${this.allNodes.length} nodes`);
-        
-        // Group nodes by project for layout
-        const nodesByProject = new Map();
+        // Group by project
+        const byProject = new Map();
         this.allNodes.forEach(node => {
-            if (!nodesByProject.has(node.projectName)) {
-                nodesByProject.set(node.projectName, []);
+            if (!byProject.has(node.projectName)) {
+                byProject.set(node.projectName, []);
             }
-            nodesByProject.get(node.projectName).push(node);
+            byProject.get(node.projectName).push(node);
         });
         
-        // Layout: Arrange projects in a circle, nodes within each project in a cluster
-        const numProjects = nodesByProject.size;
-        const projectRadius = Math.max(80, numProjects * 10);
-        let projectIndex = 0;
+        // Layout projects in circle, nodes clustered
+        const numProjects = byProject.size;
+        const projectRadius = 120;
+        let projectIdx = 0;
         
-        nodesByProject.forEach((projectNodes, projectName) => {
-            // Position this project in the circle
-            const projectAngle = (projectIndex / numProjects) * Math.PI * 2;
-            const projectX = Math.cos(projectAngle) * projectRadius;
-            const projectZ = Math.sin(projectAngle) * projectRadius;
+        byProject.forEach((projectNodes, projectName) => {
+            const angle = (projectIdx / numProjects) * Math.PI * 2;
+            const px = Math.cos(angle) * projectRadius;
+            const pz = Math.sin(angle) * projectRadius;
             
-            // Arrange nodes within this project
             const numNodes = projectNodes.length;
-            const nodeRadius = Math.min(20, Math.max(10, numNodes * 2));
+            const nodeRadius = 15 + numNodes * 0.5;
             
-            projectNodes.forEach((node, nodeIdx) => {
-                // Position node in cluster around project center
-                const nodeAngle = (nodeIdx / numNodes) * Math.PI * 2;
-                const x = projectX + Math.cos(nodeAngle) * nodeRadius;
-                const z = projectZ + Math.sin(nodeAngle) * nodeRadius;
-                const y = Math.sin(nodeAngle) * 5; // Add some vertical variation
+            projectNodes.forEach((node, nidx) => {
+                const nAngle = (nidx / numNodes) * Math.PI * 2;
+                const x = px + Math.cos(nAngle) * nodeRadius;
+                const z = pz + Math.sin(nAngle) * nodeRadius;
+                const y = Math.sin(nAngle * 2) * 8;
                 
-                // Create node mesh
-                const nodeMesh = this.createNodeMesh(node, x, y, z);
-                this.scene.add(nodeMesh);
-                this.repoMeshes.set(node.id, nodeMesh);
+                // Create glowing card
+                const card = this.createGlowingCard(node, x, y, z);
+                this.scene.add(card);
+                this.nodeMeshes.set(node.id, card);
                 
-                // Add label
-                const label = this.createLabel(node.name, x, y + 5, z);
-                this.scene.add(label);
+                // Add CSS2D label
+                const label = this.createCSS2DLabel(node.name, card);
+                card.add(label);
+                
+                // Add energy waveform
+                const wave = this.createEnergyWave(node, card);
+                card.add(wave);
+                this.waveforms.push(wave);
             });
             
-            // Add project label (larger, higher up)
-            const projectLabel = this.createLabel(projectName, projectX, 25, projectZ);
-            projectLabel.scale.set(30, 7.5, 1);
+            // Project label (floating)
+            const projectLabel = this.createProjectLabel(projectName, px, 30, pz);
             this.scene.add(projectLabel);
             
-            projectIndex++;
+            projectIdx++;
         });
         
-        // Create edges between nodes
-        this.createEdges();
+        // Create light particle edges
+        this.createLightParticleEdges();
         
-        console.log(`✓ Created ${this.repoMeshes.size} nodes from ${numProjects} projects`);
+        console.log(`✓ Created ${this.nodeMeshes.size} glowing cards with energy waves`);
     }
 
-    createNodeMesh(node, x, y, z) {
-        // Size based on completeness and quality
-        const completeness = node.completeness || 0.5;
-        const quality = node.quality || 0.5;
-        const avgScore = (completeness + quality) / 2;
-        const size = 2 + avgScore * 3; // 2-5 range
+    createGlowingCard(node, x, y, z) {
+        const group = new THREE.Group();
+        group.position.set(x, y, z);
         
-        // Color based on status
-        const status = node.status || 'gray';
-        const color = this.statusColors[status] || this.statusColors.gray;
+        // Size based on quality
+        const score = (node.completeness + node.quality) / 2;
+        const width = 6 + score * 4;
+        const height = 4 + score * 3;
+        const depth = 0.2;
         
-        // Create card-like geometry (flatter box for card appearance)
-        const geometry = new THREE.BoxGeometry(size * 1.5, size, size * 0.3);
+        // Card body (dark, translucent)
+        const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+        const bodyMat = new THREE.MeshStandardMaterial({
+            color: 0x0a0a0a,
+            metalness: 0.9,
+            roughness: 0.1,
+            transparent: true,
+            opacity: 0.6,
+            emissive: 0x1a1a1a,
+            emissiveIntensity: 0.2
+        });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        group.add(body);
         
-        // Material with glow effect
-        const material = new THREE.MeshStandardMaterial({
+        // Glowing wireframe (TRON style)
+        const color = this.statusColors[node.status] || this.statusColors.gray;
+        const wireGeo = new THREE.EdgesGeometry(bodyGeo);
+        const wireMat = new THREE.LineBasicMaterial({
             color: color,
-            emissive: color,
-            emissiveIntensity: 0.4,
-            metalness: 0.7,
-            roughness: 0.2
+            linewidth: 3
+        });
+        const wire = new THREE.LineSegments(wireGeo, wireMat);
+        group.add(wire);
+        
+        // Corner glow spheres
+        const corners = [
+            [-width/2, -height/2, depth/2],
+            [width/2, -height/2, depth/2],
+            [-width/2, height/2, depth/2],
+            [width/2, height/2, depth/2]
+        ];
+        
+        corners.forEach(([cx, cy, cz]) => {
+            const sphere = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 8, 8),
+                new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8 })
+            );
+            sphere.position.set(cx, cy, cz);
+            group.add(sphere);
         });
         
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(x, y, z);
+        // Store data
+        group.userData = {
+            node,
+            rotationSpeed: {
+                x: (Math.random() - 0.5) * 0.0003,
+                y: (Math.random() - 0.5) * 0.0006
+            }
+        };
         
-        // Add glowing edges for card effect
-        const edgesGeometry = new THREE.EdgesGeometry(geometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({
-            color: color,
+        return group;
+    }
+
+    createEnergyWave(node, parent) {
+        // Activity-based waveform
+        const activity = node.completeness * 30;
+        const points = [];
+        const segments = Math.max(20, Math.floor(activity));
+        
+        for (let i = 0; i < segments; i++) {
+            const t = i / segments;
+            const x = (t - 0.5) * 5;
+            const y = Math.sin(t * Math.PI * 4 + node.quality * 10) * (activity / 30);
+            const z = 0.15;
+            points.push(new THREE.Vector3(x, y, z));
+        }
+        
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const mat = new THREE.LineBasicMaterial({
+            color: this.statusColors[node.status] || 0x00ffff,
+            transparent: true,
+            opacity: 0.8,
             linewidth: 2
         });
-        const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-        mesh.add(edges);
         
-        // Add user data for interaction
-        mesh.userData = { 
-            node: node,
-            projectName: node.projectName
-        };
+        const wave = new THREE.Line(geo, mat);
+        wave.userData.phase = Math.random() * Math.PI * 2;
         
-        // Add subtle rotation animation
-        mesh.userData.rotationSpeed = {
-            x: (Math.random() - 0.5) * 0.0005,
-            y: (Math.random() - 0.5) * 0.001
-        };
-        
-        return mesh;
+        return wave;
     }
 
-    createLabel(text, x, y, z) {
-        // Create canvas for text
+    createCSS2DLabel(text, parent) {
+        const div = document.createElement('div');
+        div.className = 'node-label-3d';
+        div.textContent = text.substring(0, 20);
+        div.style.cssText = `
+            color: #00ffff;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            white-space: nowrap;
+        `;
+        
+        const label = new CSS2DObject(div);
+        label.position.set(0, 3, 0);
+        
+        return label;
+    }
+
+    createProjectLabel(text, x, y, z) {
+        // Larger glowing label for projects
         const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         canvas.width = 512;
         canvas.height = 128;
         
-        // Draw text
-        context.fillStyle = '#ffffff';
-        context.font = 'bold 48px Arial';
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(text.substring(0, 20), 256, 64);
+        // Glow effect
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#00ffff';
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(text.substring(0, 15), 256, 64);
         
-        // Create texture
         const texture = new THREE.CanvasTexture(canvas);
-        
-        // Create sprite
-        const spriteMaterial = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.8
-        });
-        
-        const sprite = new THREE.Sprite(spriteMaterial);
+        const sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: texture, transparent: true })
+        );
         sprite.position.set(x, y, z);
-        sprite.scale.set(20, 5, 1);
+        sprite.scale.set(40, 10, 1);
         
         return sprite;
     }
 
-    createEdges() {
-        if (!this.allEdges || this.allEdges.length === 0) return;
+    createLightParticleEdges() {
+        if (!this.allEdges?.length) return;
         
-        console.log(`Creating ${this.allEdges.length} edges...`);
+        console.log(`Creating ${this.allEdges.length} light particle edges...`);
         
-        // Create edges from the data
         this.allEdges.forEach(edge => {
             const fromId = edge.from || edge.source;
             const toId = edge.to || edge.target;
             
-            const fromMesh = this.repoMeshes.get(fromId);
-            const toMesh = this.repoMeshes.get(toId);
+            const fromMesh = this.nodeMeshes.get(fromId);
+            const toMesh = this.nodeMeshes.get(toId);
             
             if (fromMesh && toMesh) {
-                // Get edge label
-                const label = edge.label || edge.type || '';
+                const edgeColor = this.edgeColors[edge.type] || 0x4a5568;
                 
-                // Color based on edge type
-                const edgeColors = {
-                    'dependsOn': 0x00ffff,
-                    'uses': 0x4ade80,
-                    'implements': 0xfb923c,
-                    'references': 0x8b5cf6,
-                    'queries': 0xf87171
-                };
-                const edgeColor = edgeColors[edge.type] || 0x4a5568;
-                
-                // Create curved line
-                const start = fromMesh.position;
-                const end = toMesh.position;
-                
-                // Bezier curve for nice arc
+                // Curved path
+                const start = fromMesh.position.clone();
+                const end = toMesh.position.clone();
                 const mid = new THREE.Vector3(
                     (start.x + end.x) / 2,
-                    Math.max(start.y, end.y) + 10,
+                    Math.max(start.y, end.y) + 15,
                     (start.z + end.z) / 2
                 );
                 
                 const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-                const points = curve.getPoints(50);
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const points = curve.getPoints(100);
                 
-                const material = new THREE.LineBasicMaterial({
+                // Glowing line
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const lineMat = new THREE.LineBasicMaterial({
                     color: edgeColor,
                     transparent: true,
-                    opacity: 0.5,
-                    linewidth: 2
+                    opacity: 0.3,
+                    linewidth: 1
                 });
-                
-                const line = new THREE.Line(geometry, material);
-                line.userData = { edge: edge, label: label };
+                const line = new THREE.Line(lineGeo, lineMat);
                 this.scene.add(line);
                 
-                // Add label sprite at midpoint if label exists
-                if (label) {
-                    const labelSprite = this.createSmallLabel(label, mid.x, mid.y, mid.z);
+                // Light particles along edge
+                const particles = this.createEdgeParticles(points, edgeColor, edge.label || edge.type);
+                this.scene.add(particles);
+                this.edgeParticles.push({
+                    points,
+                    particles,
+                    progress: 0,
+                    speed: 0.005 + Math.random() * 0.005
+                });
+                
+                // Edge label
+                if (edge.label) {
+                    const labelSprite = this.createEdgeLabel(edge.label, mid.x, mid.y + 2, mid.z);
                     this.scene.add(labelSprite);
                 }
             }
         });
-        
-        console.log(`✓ Created edges with labels`);
     }
-    
-    createSmallLabel(text, x, y, z) {
-        // Create small label for edges
+
+    createEdgeParticles(points, color, label) {
+        const particleCount = 10;
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+            const idx = Math.floor((i / particleCount) * points.length);
+            const point = points[idx];
+            positions[i * 3] = point.x;
+            positions[i * 3 + 1] = point.y;
+            positions[i * 3 + 2] = point.z;
+        }
+        
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const mat = new THREE.PointsMaterial({
+            color,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true
+        });
+        
+        return new THREE.Points(geo, mat);
+    }
+
+    createEdgeLabel(text, x, y, z) {
         const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         canvas.width = 256;
         canvas.height = 64;
         
-        context.fillStyle = '#888888';
-        context.font = '24px Arial';
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(text.substring(0, 15), 128, 32);
+        ctx.fillStyle = '#888888';
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(text.substring(0, 20), 128, 32);
         
         const texture = new THREE.CanvasTexture(canvas);
-        const spriteMaterial = new THREE.SpriteMaterial({
-            map: texture,
-            transparent: true,
-            opacity: 0.6
-        });
-        
-        const sprite = new THREE.Sprite(spriteMaterial);
+        const sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.7 })
+        );
         sprite.position.set(x, y, z);
-        sprite.scale.set(10, 2.5, 1);
+        sprite.scale.set(12, 3, 1);
         
         return sprite;
     }
 
     setupEventListeners() {
-        // Window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
+        this.renderer.domElement.addEventListener('click', (e) => this.onClick(e), false);
+        this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e), false);
         
-        // Mouse click
-        this.renderer.domElement.addEventListener('click', (event) => this.onClick(event), false);
-        
-        // Mouse move for hover effects
-        this.renderer.domElement.addEventListener('mousemove', (event) => this.onMouseMove(event), false);
-        
-        // Close panel button
-        const closeBtn = document.getElementById('close-panel');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                document.getElementById('info-panel').classList.remove('visible');
-                this.selectedRepo = null;
-            });
-        }
+        document.getElementById('close-panel')?.addEventListener('click', () => {
+            document.getElementById('info-panel').classList.remove('visible');
+        });
     }
 
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.composer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     onClick(event) {
-        if (!this.repoMeshes || this.repoMeshes.size === 0) return;
+        if (!this.nodeMeshes.size) return;
         
-        // Calculate mouse position
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         
-        // Raycast
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        
-        // Get intersections
-        const meshes = Array.from(this.repoMeshes.values());
-        const intersects = this.raycaster.intersectObjects(meshes);
+        const meshes = Array.from(this.nodeMeshes.values());
+        const intersects = this.raycaster.intersectObjects(meshes, true);
         
         if (intersects.length > 0) {
-            const nodeData = intersects[0].object.userData.node;
-            if (nodeData) {
-                this.showNodeInfo(nodeData);
+            let obj = intersects[0].object;
+            while (obj.parent && !obj.userData.node) {
+                obj = obj.parent;
+            }
+            if (obj.userData?.node) {
+                this.showNodeInfo(obj.userData.node);
             }
         }
     }
 
     onMouseMove(event) {
-        if (!this.repoMeshes || this.repoMeshes.size === 0) return;
+        if (!this.nodeMeshes.size) return;
         
-        // Calculate mouse position
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         
-        // Raycast
         this.raycaster.setFromCamera(this.mouse, this.camera);
+        const meshes = Array.from(this.nodeMeshes.values());
+        const intersects = this.raycaster.intersectObjects(meshes, true);
         
-        // Get intersections
-        const meshes = Array.from(this.repoMeshes.values());
-        const intersects = this.raycaster.intersectObjects(meshes);
-        
-        // Change cursor and highlight
         if (intersects.length > 0) {
             document.body.style.cursor = 'pointer';
             
-            // Highlight
-            const mesh = intersects[0].object;
-            if (mesh.material) {
-                mesh.material.emissiveIntensity = 0.6;
+            let obj = intersects[0].object;
+            while (obj.parent && !obj.userData.node) {
+                obj = obj.parent;
+            }
+            
+            if (obj.children[1]) { // Wireframe
+                obj.children[1].material.opacity = 1;
             }
         } else {
             document.body.style.cursor = 'default';
             
-            // Reset all highlights
             meshes.forEach(mesh => {
-                if (mesh.material) {
-                    mesh.material.emissiveIntensity = 0.3;
+                if (mesh.children[1]) {
+                    mesh.children[1].material.opacity = 0.8;
                 }
             });
         }
     }
 
     showNodeInfo(node) {
-        this.selectedNode = node;
-        
-        // Update info panel with node/component details
-        document.getElementById('info-name').textContent = node.name || 'Unknown Component';
+        document.getElementById('info-name').textContent = node.name;
         document.getElementById('info-branch').textContent = `Project: ${node.projectName}`;
         
-        // Status with color
-        const statusText = (node.status || 'gray').charAt(0).toUpperCase() + (node.status || 'gray').slice(1);
-        const statusClass = `status-${node.status || 'gray'}`;
+        const status = node.status || 'gray';
+        const statusText = status.charAt(0).toUpperCase() + status.slice(1);
         document.getElementById('info-status').innerHTML = 
-            `<span class="status-indicator ${statusClass}"></span>${statusText}`;
+            `<span class="status-indicator status-${status}"></span>${statusText}`;
         
-        // Component details
         document.getElementById('info-language').textContent = 
-            (node.tech_stack && node.tech_stack.length > 0) ? node.tech_stack[0] : 'Unknown';
-        
-        document.getElementById('info-files').textContent = 
-            node.category || 'Component';
-        
-        document.getElementById('info-size').textContent = 
-            node.type || 'Unknown type';
-        
+            node.tech_stack?.[0] || 'Unknown';
+        document.getElementById('info-files').textContent = node.category || 'Component';
+        document.getElementById('info-size').textContent = node.type || 'Unknown';
         document.getElementById('info-commits').textContent = 
-            `${Math.round((node.completeness || 0.5) * 100)}% complete`;
+            `${Math.round(node.completeness * 100)}% complete`;
         
-        // Description
         document.getElementById('info-last-commit').textContent = 
-            node.description || node.purpose || 'No description available';
+            node.description || node.purpose || '';
         
-        // Tech stack and features
-        const techStack = (node.tech_stack || []).join(', ') || 'Unknown';
-        const features = (node.features || []).slice(0, 3).join(', ') || 'No features listed';
-        const tags = (node.tags || []).map(t => `#${t}`).join(' ') || '';
+        const tech = (node.tech_stack || []).join(', ') || 'Unknown';
+        const features = (node.features || []).join(', ') || 'None';
+        const tags = (node.tags || []).map(t => `#${t}`).join(' ');
         
         document.getElementById('info-nodes').innerHTML = 
-            `<strong>Tech:</strong> ${techStack}<br/>` +
+            `<strong>Tech:</strong> ${tech}<br/>` +
             `<strong>Features:</strong> ${features}<br/>` +
-            `<strong>Quality:</strong> ${Math.round((node.quality || 0.5) * 100)}%<br/>` +
+            `<strong>Quality:</strong> ${Math.round(node.quality * 100)}%<br/>` +
             `<strong>Tags:</strong> ${tags}`;
         
-        // Show panel
         document.getElementById('info-panel').classList.add('visible');
     }
 
     animate() {
         requestAnimationFrame(() => this.animate());
         
-        // Update controls
-        if (this.controls) {
-            this.controls.update();
-        }
+        this.controls?.update();
         
         // Animate loader
         if (this.isLoading && this.loaderMesh) {
             this.loaderMesh.rotation.z += 0.02;
             
-            if (this.loaderRings) {
-                this.loaderRings.forEach((ring, i) => {
-                    ring.rotation.z += ring.userData.speed * 0.01;
-                    ring.material.opacity = 0.3 + Math.sin(Date.now() * 0.001 + i) * 0.2;
-                });
-            }
-        }
-        
-        // Animate repository nodes (only if they exist)
-        if (this.repoMeshes && this.repoMeshes.size > 0) {
-            this.repoMeshes.forEach(mesh => {
-                if (mesh.userData && mesh.userData.rotationSpeed) {
-                    mesh.rotation.x += mesh.userData.rotationSpeed.x;
-                    mesh.rotation.y += mesh.userData.rotationSpeed.y;
-                }
+            this.loaderRings?.forEach((ring, i) => {
+                ring.rotation.z += ring.userData.speed * 0.01;
+                ring.material.opacity = ring.userData.baseOpacity + 
+                    Math.sin(Date.now() * 0.001 + i) * 0.2;
             });
         }
         
-        // Render
-        if (this.renderer && this.scene && this.camera) {
-            this.renderer.render(this.scene, this.camera);
+        // Animate cards
+        this.nodeMeshes?.forEach(mesh => {
+            if (mesh.userData?.rotationSpeed) {
+                mesh.rotation.x += mesh.userData.rotationSpeed.x;
+                mesh.rotation.y += mesh.userData.rotationSpeed.y;
+            }
+        });
+        
+        // Animate waveforms
+        this.waveforms?.forEach(wave => {
+            wave.userData.phase += 0.02;
+            const positions = wave.geometry.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const y = positions.getY(i);
+                positions.setY(i, Math.sin(i * 0.3 + wave.userData.phase) * 0.5);
+            }
+            positions.needsUpdate = true;
+        });
+        
+        // Animate edge particles
+        this.edgeParticles?.forEach(ep => {
+            ep.progress += ep.speed;
+            if (ep.progress > 1) ep.progress = 0;
+            
+            const positions = ep.particles.geometry.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const idx = Math.floor(((i / positions.count + ep.progress) % 1) * ep.points.length);
+                const point = ep.points[idx];
+                positions.setXYZ(i, point.x, point.y, point.z);
+            }
+            positions.needsUpdate = true;
+        });
+        
+        // Render with bloom
+        if (this.composer && this.scene && this.camera) {
+            this.composer.render();
+        }
+        
+        // Render labels
+        if (this.labelRenderer) {
+            this.labelRenderer.render(this.scene, this.camera);
         }
     }
 }
 
-// Initialize when DOM is ready
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     const app = new RepositoryVisualization();
-    app.init().catch(error => {
-        console.error('Initialization error:', error);
-        const loadingEl = document.getElementById('loading');
-        if (loadingEl) {
-            loadingEl.innerHTML = `
-                <p style="color: #f87171;">Error initializing visualization</p>
-                <p style="font-size: 14px; margin-top: 10px; color: #888;">${error.message}</p>
-            `;
-        }
-    });
+    app.init().catch(err => console.error('Init error:', err));
 });
+
