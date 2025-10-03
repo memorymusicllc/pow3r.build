@@ -298,10 +298,13 @@ class RepositoryVisualization {
             // Update stats based on all nodes
             this.updateStats(this.allNodes);
             
+            console.log(`🎨 Ready to create visualization with ${this.allNodes.length} nodes`);
+            
         } catch (error) {
             console.error('Error loading repositories:', error);
             this.showError(error.message);
-            this.repositories = []; // Ensure it's an empty array, not undefined
+            this.allNodes = []; // Ensure it's an empty array
+            this.allEdges = [];
         }
     }
 
@@ -334,12 +337,18 @@ class RepositoryVisualization {
     createVisualization() {
         this.updateLoadingText('Creating 3D visualization...');
         
+        console.log(`🎨 createVisualization called. allNodes:`, this.allNodes ? this.allNodes.length : 'undefined');
+        
         if (!this.allNodes || this.allNodes.length === 0) {
-            console.warn('No nodes to visualize');
+            console.error('❌ No nodes to visualize!');
+            console.error('  this.allNodes:', this.allNodes);
+            console.error('  Is array?', Array.isArray(this.allNodes));
+            this.showError('No architecture nodes found. Data may not have loaded correctly.');
             return;
         }
         
         this.updateLoadingText(`Creating ${this.allNodes.length} nodes...`);
+        console.log(`✓ Starting visualization of ${this.allNodes.length} nodes`);
         
         // Group nodes by project for layout
         const nodesByProject = new Map();
