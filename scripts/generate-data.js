@@ -33,24 +33,40 @@ async function findConfigFiles(dir, depth = 0) {
       if (entry.isDirectory()) {
         const subConfigs = await findConfigFiles(fullPath, depth + 1);
         configs.push(...subConfigs);
-      } else if (entry.name === 'pow3r.status.json' || entry.name === 'dev-status.config.json') {
+      } else if (entry.name === 'pow3r.config.json' || entry.name === 'pow3r.status.json' || entry.name === 'dev-status.config.json') {
         try {
           const content = await fs.readFile(fullPath, 'utf8');
           const config = JSON.parse(content);
           
-          const projectName = config.projectName || 
-                             (config.assets && config.assets[0] && config.assets[0].metadata && config.assets[0].metadata.title) || 
-                             'Unknown Project';
+          // Determine config type and extract project name
+          let configType = 'v1';
+          let projectName = 'Unknown Project';
+          
+          if (entry.name === 'pow3r.config.json') {
+            configType = 'v3-comprehensive';
+            projectName = config.projectName || config.graphId || 'Unknown';
+          } else if (entry.name === 'pow3r.status.json') {
+            configType = 'v2';
+            projectName = (config.assets && config.assets[0] && config.assets[0].metadata && config.assets[0].metadata.title) || 
+                         config.projectName || 'Unknown';
+          } else {
+            configType = 'v1';
+            projectName = config.projectName || 'Unknown';
+          }
+          
+          // Get nodes/assets
+          const nodes = config.nodes || config.assets || [];
           
           configs.push({
             path: fullPath,
             relativePath: path.relative(BASE_PATH, fullPath),
-            configType: entry.name === 'pow3r.status.json' ? 'v2' : 'v1',
+            configType: configType,
             projectName: projectName,
+            nodeCount: nodes.length,
             ...config
           });
           
-          console.log(`✓ Loaded: ${projectName}`);
+          console.log(`✓ Loaded: ${projectName} (${entry.name}, ${nodes.length} nodes)`);
         } catch (error) {
           console.error(`✗ Error reading ${fullPath}:`, error.message);
         }
