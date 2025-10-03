@@ -1,0 +1,13 @@
+{
+  "project_name": "thewatchmen",
+  "pages_domain": "thewatchmen.pages.dev",
+  "production_branch": "main",
+  "build_output": "public",
+  "auto_deploy": true,
+  "notifications": {
+    "telegram": {
+      "enabled": false,
+      "setup_guide": "See CLOUDFLARE_SETUP.md"
+    }
+  }
+}
