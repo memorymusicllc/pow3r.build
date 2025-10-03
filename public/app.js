@@ -279,89 +279,141 @@ class RepositoryVisualization {
         }
     }
 
-    updateStats(projects) {
-        if (!projects || projects.length === 0) return;
+    updateStats(nodes) {
+        if (!nodes || nodes.length === 0) return;
         
         const stats = {
-            total: projects.length,
-            green: projects.filter(p => p.status === 'green').length,
-            orange: projects.filter(p => p.status === 'orange').length,
-            red: projects.filter(p => p.status === 'red').length,
-            gray: projects.filter(p => p.status === 'gray').length,
-            nodes: projects.reduce((sum, p) => sum + ((p.nodes || p.assets || []).length), 0),
-            commits: projects.reduce((sum, p) => sum + (p.stats?.totalCommitsLast30Days || 0), 0)
+            total: nodes.length,
+            green: nodes.filter(n => n.status === 'green').length,
+            orange: nodes.filter(n => n.status === 'orange').length,
+            red: nodes.filter(n => n.status === 'red').length,
+            gray: nodes.filter(n => n.status === 'gray').length,
+            projects: this.projects ? this.projects.length : 0,
+            avgQuality: nodes.reduce((sum, n) => sum + (n.quality || 0), 0) / nodes.length
         };
         
-        document.getElementById('stat-total').textContent = stats.total;
+        document.getElementById('stat-total').textContent = stats.total + ' nodes';
         document.getElementById('stat-orange').textContent = stats.orange;
         document.getElementById('stat-red').textContent = stats.red;
         document.getElementById('stat-gray').textContent = stats.gray;
-        document.getElementById('stat-nodes').textContent = stats.nodes;
-        document.getElementById('stat-commits').textContent = stats.commits;
+        
+        // Update nodes stat to show projects
+        const nodesEl = document.getElementById('stat-nodes');
+        if (nodesEl) nodesEl.textContent = stats.projects + ' projects';
+        
+        const commitsEl = document.getElementById('stat-commits');
+        if (commitsEl) commitsEl.textContent = (stats.avgQuality * 100).toFixed(0) + '% avg quality';
     }
 
     createVisualization() {
         this.updateLoadingText('Creating 3D visualization...');
         
-        const numRepos = this.repositories.length;
-        if (numRepos === 0) return;
+        if (!this.allNodes || this.allNodes.length === 0) {
+            console.warn('No nodes to visualize');
+            return;
+        }
         
-        // Calculate layout (circular)
-        const radius = Math.max(50, numRepos * 2);
+        this.updateLoadingText(`Creating ${this.allNodes.length} nodes...`);
         
-        this.repositories.forEach((repo, index) => {
-            // Position in circle
-            const angle = (index / numRepos) * Math.PI * 2;
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            const y = 0;
-            
-            // Create repository node
-            const node = this.createRepoNode(repo, x, y, z);
-            this.scene.add(node);
-            this.repoMeshes.set(repo.projectName, node);
-            
-            // Add label
-            const label = this.createLabel(repo.projectName, x, y + 8, z);
-            this.scene.add(label);
+        // Group nodes by project for layout
+        const nodesByProject = new Map();
+        this.allNodes.forEach(node => {
+            if (!nodesByProject.has(node.projectName)) {
+                nodesByProject.set(node.projectName, []);
+            }
+            nodesByProject.get(node.projectName).push(node);
         });
         
-        // Create edges between repositories
+        // Layout: Arrange projects in a circle, nodes within each project in a cluster
+        const numProjects = nodesByProject.size;
+        const projectRadius = Math.max(80, numProjects * 10);
+        let projectIndex = 0;
+        
+        nodesByProject.forEach((projectNodes, projectName) => {
+            // Position this project in the circle
+            const projectAngle = (projectIndex / numProjects) * Math.PI * 2;
+            const projectX = Math.cos(projectAngle) * projectRadius;
+            const projectZ = Math.sin(projectAngle) * projectRadius;
+            
+            // Arrange nodes within this project
+            const numNodes = projectNodes.length;
+            const nodeRadius = Math.min(20, Math.max(10, numNodes * 2));
+            
+            projectNodes.forEach((node, nodeIdx) => {
+                // Position node in cluster around project center
+                const nodeAngle = (nodeIdx / numNodes) * Math.PI * 2;
+                const x = projectX + Math.cos(nodeAngle) * nodeRadius;
+                const z = projectZ + Math.sin(nodeAngle) * nodeRadius;
+                const y = Math.sin(nodeAngle) * 5; // Add some vertical variation
+                
+                // Create node mesh
+                const nodeMesh = this.createNodeMesh(node, x, y, z);
+                this.scene.add(nodeMesh);
+                this.repoMeshes.set(node.id, nodeMesh);
+                
+                // Add label
+                const label = this.createLabel(node.name, x, y + 5, z);
+                this.scene.add(label);
+            });
+            
+            // Add project label (larger, higher up)
+            const projectLabel = this.createLabel(projectName, projectX, 25, projectZ);
+            projectLabel.scale.set(30, 7.5, 1);
+            this.scene.add(projectLabel);
+            
+            projectIndex++;
+        });
+        
+        // Create edges between nodes
         this.createEdges();
         
-        console.log(`✓ Created ${this.repoMeshes.size} repository nodes`);
+        console.log(`✓ Created ${this.repoMeshes.size} nodes from ${numProjects} projects`);
     }
 
-    createRepoNode(repo, x, y, z) {
-        // Size based on file count (normalized)
-        const baseSize = 3;
-        const fileCount = repo.stats?.fileCount || 0;
-        const size = baseSize + Math.min(3, Math.log10(fileCount + 1));
+    createNodeMesh(node, x, y, z) {
+        // Size based on completeness and quality
+        const completeness = node.completeness || 0.5;
+        const quality = node.quality || 0.5;
+        const avgScore = (completeness + quality) / 2;
+        const size = 2 + avgScore * 3; // 2-5 range
         
         // Color based on status
-        const color = this.statusColors[repo.status] || this.statusColors.gray;
+        const status = node.status || 'gray';
+        const color = this.statusColors[status] || this.statusColors.gray;
         
-        // Create geometry
-        const geometry = new THREE.BoxGeometry(size, size, size);
+        // Create card-like geometry (flatter box for card appearance)
+        const geometry = new THREE.BoxGeometry(size * 1.5, size, size * 0.3);
         
         // Material with glow effect
         const material = new THREE.MeshStandardMaterial({
             color: color,
             emissive: color,
-            emissiveIntensity: 0.3,
-            metalness: 0.5,
-            roughness: 0.3
+            emissiveIntensity: 0.4,
+            metalness: 0.7,
+            roughness: 0.2
         });
         
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(x, y, z);
         
+        // Add glowing edges for card effect
+        const edgesGeometry = new THREE.EdgesGeometry(geometry);
+        const edgesMaterial = new THREE.LineBasicMaterial({
+            color: color,
+            linewidth: 2
+        });
+        const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+        mesh.add(edges);
+        
         // Add user data for interaction
-        mesh.userData = { repository: repo };
+        mesh.userData = { 
+            node: node,
+            projectName: node.projectName
+        };
         
         // Add subtle rotation animation
         mesh.userData.rotationSpeed = {
-            x: (Math.random() - 0.5) * 0.001,
+            x: (Math.random() - 0.5) * 0.0005,
             y: (Math.random() - 0.5) * 0.001
         };
         
@@ -400,40 +452,94 @@ class RepositoryVisualization {
     }
 
     createEdges() {
-        if (!this.repositories || this.repositories.length < 2) return;
+        if (!this.allEdges || this.allEdges.length === 0) return;
         
-        const lineMaterial = new THREE.LineBasicMaterial({
-            color: 0x4a5568,
-            transparent: true,
-            opacity: 0.2
-        });
+        console.log(`Creating ${this.allEdges.length} edges...`);
         
-        // Example: connect repositories with same language
-        const byLanguage = new Map();
-        this.repositories.forEach(repo => {
-            const lang = repo.stats?.primaryLanguage || 'unknown';
-            if (!byLanguage.has(lang)) {
-                byLanguage.set(lang, []);
-            }
-            byLanguage.get(lang).push(repo);
-        });
-        
-        // Draw connections within language groups
-        byLanguage.forEach((repos, lang) => {
-            if (repos.length > 1) {
-                for (let i = 0; i < Math.min(repos.length - 1, 5); i++) {
-                    const mesh1 = this.repoMeshes.get(repos[i].projectName);
-                    const mesh2 = this.repoMeshes.get(repos[i + 1].projectName);
-                    
-                    if (mesh1 && mesh2) {
-                        const points = [mesh1.position, mesh2.position];
-                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                        const line = new THREE.Line(geometry, lineMaterial);
-                        this.scene.add(line);
-                    }
+        // Create edges from the data
+        this.allEdges.forEach(edge => {
+            const fromId = edge.from || edge.source;
+            const toId = edge.to || edge.target;
+            
+            const fromMesh = this.repoMeshes.get(fromId);
+            const toMesh = this.repoMeshes.get(toId);
+            
+            if (fromMesh && toMesh) {
+                // Get edge label
+                const label = edge.label || edge.type || '';
+                
+                // Color based on edge type
+                const edgeColors = {
+                    'dependsOn': 0x00ffff,
+                    'uses': 0x4ade80,
+                    'implements': 0xfb923c,
+                    'references': 0x8b5cf6,
+                    'queries': 0xf87171
+                };
+                const edgeColor = edgeColors[edge.type] || 0x4a5568;
+                
+                // Create curved line
+                const start = fromMesh.position;
+                const end = toMesh.position;
+                
+                // Bezier curve for nice arc
+                const mid = new THREE.Vector3(
+                    (start.x + end.x) / 2,
+                    Math.max(start.y, end.y) + 10,
+                    (start.z + end.z) / 2
+                );
+                
+                const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+                const points = curve.getPoints(50);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                
+                const material = new THREE.LineBasicMaterial({
+                    color: edgeColor,
+                    transparent: true,
+                    opacity: 0.5,
+                    linewidth: 2
+                });
+                
+                const line = new THREE.Line(geometry, material);
+                line.userData = { edge: edge, label: label };
+                this.scene.add(line);
+                
+                // Add label sprite at midpoint if label exists
+                if (label) {
+                    const labelSprite = this.createSmallLabel(label, mid.x, mid.y, mid.z);
+                    this.scene.add(labelSprite);
                 }
             }
         });
+        
+        console.log(`✓ Created edges with labels`);
+    }
+    
+    createSmallLabel(text, x, y, z) {
+        // Create small label for edges
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 256;
+        canvas.height = 64;
+        
+        context.fillStyle = '#888888';
+        context.font = '24px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(text.substring(0, 15), 128, 32);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.6
+        });
+        
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.position.set(x, y, z);
+        sprite.scale.set(10, 2.5, 1);
+        
+        return sprite;
     }
 
     setupEventListeners() {
@@ -477,8 +583,10 @@ class RepositoryVisualization {
         const intersects = this.raycaster.intersectObjects(meshes);
         
         if (intersects.length > 0) {
-            const repo = intersects[0].object.userData.repository;
-            this.showRepoInfo(repo);
+            const nodeData = intersects[0].object.userData.node;
+            if (nodeData) {
+                this.showNodeInfo(nodeData);
+            }
         }
     }
 
@@ -517,42 +625,46 @@ class RepositoryVisualization {
         }
     }
 
-    showRepoInfo(repo) {
-        this.selectedRepo = repo;
+    showNodeInfo(node) {
+        this.selectedNode = node;
         
-        // Update info panel
-        document.getElementById('info-name').textContent = repo.projectName || 'Unknown';
-        document.getElementById('info-branch').textContent = `Branch: ${repo.branch || 'unknown'}`;
+        // Update info panel with node/component details
+        document.getElementById('info-name').textContent = node.name || 'Unknown Component';
+        document.getElementById('info-branch').textContent = `Project: ${node.projectName}`;
         
         // Status with color
-        const statusText = (repo.status || 'gray').charAt(0).toUpperCase() + (repo.status || 'gray').slice(1);
-        const statusClass = `status-${repo.status || 'gray'}`;
+        const statusText = (node.status || 'gray').charAt(0).toUpperCase() + (node.status || 'gray').slice(1);
+        const statusClass = `status-${node.status || 'gray'}`;
         document.getElementById('info-status').innerHTML = 
             `<span class="status-indicator ${statusClass}"></span>${statusText}`;
         
-        // Stats
+        // Component details
         document.getElementById('info-language').textContent = 
-            repo.stats?.primaryLanguage || repo.metadata?.tags?.[0] || 'Unknown';
+            (node.tech_stack && node.tech_stack.length > 0) ? node.tech_stack[0] : 'Unknown';
+        
         document.getElementById('info-files').textContent = 
-            (repo.stats?.fileCount || 0).toLocaleString();
+            node.category || 'Component';
+        
         document.getElementById('info-size').textContent = 
-            `${(repo.stats?.sizeMB || 0).toFixed(2)} MB`;
+            node.type || 'Unknown type';
+        
         document.getElementById('info-commits').textContent = 
-            repo.stats?.totalCommitsLast30Days || repo.analytics?.activityLast30Days || 0;
+            `${Math.round((node.completeness || 0.5) * 100)}% complete`;
         
-        // Last commit
-        const lastCommit = repo.metadata?.lastCommitMessage || 'No commit data';
-        const lastDate = repo.lastUpdate ? new Date(repo.lastUpdate).toLocaleDateString() : 'Unknown';
+        // Description
         document.getElementById('info-last-commit').textContent = 
-            `${lastDate}: ${lastCommit.substring(0, 100)}`;
+            node.description || node.purpose || 'No description available';
         
-        // Nodes
-        const nodes = repo.nodes || repo.assets || [];
-        const nodeCount = nodes.length;
-        const nodeList = nodes.map(n => n.title || n.metadata?.title || 'Untitled').slice(0, 5).join(', ');
-        const moreText = nodes.length > 5 ? ` and ${nodes.length - 5} more` : '';
-        document.getElementById('info-nodes').textContent = 
-            `${nodeCount} components: ${nodeList}${moreText}`;
+        // Tech stack and features
+        const techStack = (node.tech_stack || []).join(', ') || 'Unknown';
+        const features = (node.features || []).slice(0, 3).join(', ') || 'No features listed';
+        const tags = (node.tags || []).map(t => `#${t}`).join(' ') || '';
+        
+        document.getElementById('info-nodes').innerHTML = 
+            `<strong>Tech:</strong> ${techStack}<br/>` +
+            `<strong>Features:</strong> ${features}<br/>` +
+            `<strong>Quality:</strong> ${Math.round((node.quality || 0.5) * 100)}%<br/>` +
+            `<strong>Tags:</strong> ${tags}`;
         
         // Show panel
         document.getElementById('info-panel').classList.add('visible');
