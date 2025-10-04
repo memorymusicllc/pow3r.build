@@ -28,6 +28,11 @@ class RepositoryVisualization {
         this.edgeParticles = [];
         this.waveforms = [];
         
+        // Collapsible state
+        this.collapsedProjects = new Set();
+        this.projectBoxes = new Map();
+        this.expandedNodes = new Map();
+        
         // Interaction
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
@@ -345,51 +350,68 @@ class RepositoryVisualization {
             byProject.get(node.projectName).push(node);
         });
         
-        // Layout projects in circle, nodes clustered
-        const numProjects = byProject.size;
-        const projectRadius = 120;
-        let projectIdx = 0;
+        // Layout projects vertically (y-axis flow) - Architecture diagram style
+        const projectSpacing = 80;
+        const projectArray = Array.from(byProject.entries());
+        const startY = (projectArray.length - 1) * projectSpacing / 2;
         
-        byProject.forEach((projectNodes, projectName) => {
-            const angle = (projectIdx / numProjects) * Math.PI * 2;
-            const px = Math.cos(angle) * projectRadius;
-            const pz = Math.sin(angle) * projectRadius;
+        projectArray.forEach(([projectName, projectNodes], projectIdx) => {
+            const py = startY - (projectIdx * projectSpacing);
+            const px = 0; // Center on x-axis
+            const pz = 0; // Center on z-axis
             
-            const numNodes = projectNodes.length;
-            const nodeRadius = 15 + numNodes * 0.5;
+            // Create collapsible project container
+            const isCollapsed = this.collapsedProjects.has(projectName);
             
-            projectNodes.forEach((node, nidx) => {
-                const nAngle = (nidx / numNodes) * Math.PI * 2;
-                const x = px + Math.cos(nAngle) * nodeRadius;
-                const z = pz + Math.sin(nAngle) * nodeRadius;
-                const y = Math.sin(nAngle * 2) * 8;
+            if (isCollapsed) {
+                // Show collapsed project box
+                const projectBox = this.createProjectBox(projectName, projectNodes, px, py, pz);
+                this.scene.add(projectBox);
+                this.projectBoxes.set(projectName, projectBox);
+            } else {
+                // Show expanded nodes in horizontal flow
+                const nodeSpacing = 25;
+                const startX = -(projectNodes.length - 1) * nodeSpacing / 2;
                 
-                // Create glowing card
-                const card = this.createGlowingCard(node, x, y, z);
-                this.scene.add(card);
-                this.nodeMeshes.set(node.id, card);
+                projectNodes.forEach((node, nidx) => {
+                    const x = startX + (nidx * nodeSpacing);
+                    const z = Math.sin(nidx * 0.5) * 5; // Slight wave for visual interest
+                    const y = py + Math.cos(nidx * 0.3) * 3; // Subtle height variation
+                    
+                    // Create glowing card
+                    const card = this.createGlowingCard(node, x, y, z);
+                    this.scene.add(card);
+                    this.nodeMeshes.set(node.id, card);
+                    
+                    // Add CSS2D label
+                    const label = this.createCSS2DLabel(node.name, card);
+                    card.add(label);
+                    
+                    // Add energy waveform
+                    const wave = this.createEnergyWave(node, card);
+                    card.add(wave);
+                    this.waveforms.push(wave);
+                    
+                    // Store for collapse/expand
+                    if (!this.expandedNodes.has(projectName)) {
+                        this.expandedNodes.set(projectName, []);
+                    }
+                    this.expandedNodes.get(projectName).push(card);
+                });
                 
-                // Add CSS2D label
-                const label = this.createCSS2DLabel(node.name, card);
-                card.add(label);
-                
-                // Add energy waveform
-                const wave = this.createEnergyWave(node, card);
-                card.add(wave);
-                this.waveforms.push(wave);
-            });
-            
-            // Project label (floating)
-            const projectLabel = this.createProjectLabel(projectName, px, 30, pz);
-            this.scene.add(projectLabel);
-            
-            projectIdx++;
+                // Project label with collapse button
+                const projectLabel = this.createExpandableProjectLabel(projectName, px - 60, py, pz);
+                this.scene.add(projectLabel);
+            }
         });
         
-        // Create light particle edges
+        // Create light particle edges with proper paths
         this.createLightParticleEdges();
         
-        console.log(`✓ Created ${this.nodeMeshes.size} glowing cards with energy waves`);
+        // Add collapse/expand controls
+        this.addCollapseExpandControls();
+        
+        console.log(`✓ Created ${this.nodeMeshes.size} glowing cards with vertical flow layout`);
     }
 
     createGlowingCard(node, x, y, z) {
@@ -531,6 +553,200 @@ class RepositoryVisualization {
         return sprite;
     }
 
+    createProjectBox(projectName, projectNodes, x, y, z) {
+        const group = new THREE.Group();
+        group.position.set(x, y, z);
+        
+        // Box size based on number of nodes
+        const nodeCount = projectNodes.length;
+        const width = Math.max(20, Math.min(50, nodeCount * 2));
+        const height = 8;
+        const depth = 6;
+        
+        // Main box (collapsed state)
+        const boxGeo = new THREE.BoxGeometry(width, height, depth);
+        const boxMat = new THREE.MeshStandardMaterial({
+            color: 0x1a1a2e,
+            metalness: 0.8,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.8,
+            emissive: 0x16213e,
+            emissiveIntensity: 0.3
+        });
+        const box = new THREE.Mesh(boxGeo, boxMat);
+        group.add(box);
+        
+        // Glowing wireframe
+        const wireGeo = new THREE.EdgesGeometry(boxGeo);
+        const wireMat = new THREE.LineBasicMaterial({
+            color: 0x00ffff,
+            linewidth: 2
+        });
+        const wire = new THREE.LineSegments(wireGeo, wireMat);
+        group.add(wire);
+        
+        // Node count indicator
+        const countCanvas = document.createElement('canvas');
+        const countCtx = countCanvas.getContext('2d');
+        countCanvas.width = 256;
+        countCanvas.height = 64;
+        countCtx.fillStyle = '#ffffff';
+        countCtx.font = 'bold 32px Arial';
+        countCtx.textAlign = 'center';
+        countCtx.fillText(`${nodeCount} nodes`, 128, 40);
+        
+        const countTexture = new THREE.CanvasTexture(countCanvas);
+        const countSprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: countTexture, transparent: true })
+        );
+        countSprite.position.set(0, 0, depth/2 + 0.1);
+        countSprite.scale.set(width * 0.8, height * 0.4, 1);
+        group.add(countSprite);
+        
+        // Project name label
+        const nameLabel = this.createProjectLabel(projectName, 0, height/2 + 8, 0);
+        group.add(nameLabel);
+        
+        // Expand button (+ icon)
+        const expandButton = this.createExpandButton(0, -height/2 - 5, 0);
+        group.add(expandButton);
+        
+        // Store project data
+        group.userData = {
+            projectName,
+            projectNodes,
+            isCollapsed: true,
+            type: 'projectBox'
+        };
+        
+        return group;
+    }
+
+    createExpandableProjectLabel(projectName, x, y, z) {
+        const group = new THREE.Group();
+        group.position.set(x, y, z);
+        
+        // Project label
+        const label = this.createProjectLabel(projectName, 0, 0, 0);
+        group.add(label);
+        
+        // Collapse button (- icon)
+        const collapseButton = this.createCollapseButton(40, 0, 0);
+        group.add(collapseButton);
+        
+        // Store project data
+        group.userData = {
+            projectName,
+            isCollapsed: false,
+            type: 'projectLabel'
+        };
+        
+        return group;
+    }
+
+    createExpandButton(x, y, z) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 64;
+        canvas.height = 64;
+        
+        // Draw + icon
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(32, 16);
+        ctx.lineTo(32, 48);
+        ctx.moveTo(16, 32);
+        ctx.lineTo(48, 32);
+        ctx.stroke();
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: texture, transparent: true })
+        );
+        sprite.position.set(x, y, z);
+        sprite.scale.set(6, 6, 1);
+        sprite.userData = { type: 'expandButton' };
+        
+        return sprite;
+    }
+
+    createCollapseButton(x, y, z) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 64;
+        canvas.height = 64;
+        
+        // Draw - icon
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(16, 32);
+        ctx.lineTo(48, 32);
+        ctx.stroke();
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: texture, transparent: true })
+        );
+        sprite.position.set(x, y, z);
+        sprite.scale.set(6, 6, 1);
+        sprite.userData = { type: 'collapseButton' };
+        
+        return sprite;
+    }
+
+    addCollapseExpandControls() {
+        // Add UI controls for collapse/expand all
+        const controlsDiv = document.createElement('div');
+        controlsDiv.id = 'collapse-controls';
+        controlsDiv.style.cssText = `
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 25, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 15px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        `;
+        
+        const collapseAllBtn = document.createElement('button');
+        collapseAllBtn.textContent = 'Collapse All';
+        collapseAllBtn.style.cssText = `
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        `;
+        collapseAllBtn.addEventListener('click', () => this.collapseAll());
+        
+        const expandAllBtn = document.createElement('button');
+        expandAllBtn.textContent = 'Expand All';
+        expandAllBtn.style.cssText = `
+            background: #00ff00;
+            color: black;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        `;
+        expandAllBtn.addEventListener('click', () => this.expandAll());
+        
+        controlsDiv.appendChild(collapseAllBtn);
+        controlsDiv.appendChild(expandAllBtn);
+        document.body.appendChild(controlsDiv);
+    }
+
     createLightParticleEdges() {
         if (!this.allEdges?.length) return;
         
@@ -546,46 +762,171 @@ class RepositoryVisualization {
             if (fromMesh && toMesh) {
                 const edgeColor = this.edgeColors[edge.type] || 0x4a5568;
                 
-                // Curved path
+                // Create architectural flow paths (vertical connections)
                 const start = fromMesh.position.clone();
                 const end = toMesh.position.clone();
-                const mid = new THREE.Vector3(
-                    (start.x + end.x) / 2,
-                    Math.max(start.y, end.y) + 15,
-                    (start.z + end.z) / 2
-                );
                 
-                const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-                const points = curve.getPoints(100);
+                // For vertical architecture diagram, create structured paths
+                let mid1, mid2;
+                const yDiff = Math.abs(start.y - end.y);
+                const xDiff = Math.abs(start.x - end.x);
                 
-                // Glowing line
+                if (yDiff > 20) {
+                    // Vertical connection between different layers
+                    mid1 = new THREE.Vector3(
+                        start.x,
+                        start.y - (start.y - end.y) * 0.3,
+                        (start.z + end.z) / 2
+                    );
+                    mid2 = new THREE.Vector3(
+                        end.x,
+                        start.y - (start.y - end.y) * 0.7,
+                        (start.z + end.z) / 2
+                    );
+                } else {
+                    // Horizontal connection within same layer
+                    const midY = (start.y + end.y) / 2 + Math.sin(xDiff * 0.1) * 5;
+                    mid1 = new THREE.Vector3(
+                        start.x + (end.x - start.x) * 0.3,
+                        midY,
+                        start.z + Math.sin(xDiff * 0.2) * 3
+                    );
+                    mid2 = new THREE.Vector3(
+                        start.x + (end.x - start.x) * 0.7,
+                        midY,
+                        end.z + Math.cos(xDiff * 0.2) * 3
+                    );
+                }
+                
+                // Create cubic bezier curve for smoother architectural flow
+                const curve = new THREE.CubicBezierCurve3(start, mid1, mid2, end);
+                const points = curve.getPoints(150);
+                
+                // Glowing line with gradient effect
                 const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
                 const lineMat = new THREE.LineBasicMaterial({
                     color: edgeColor,
                     transparent: true,
-                    opacity: 0.3,
-                    linewidth: 1
+                    opacity: 0.4,
+                    linewidth: 2
                 });
                 const line = new THREE.Line(lineGeo, lineMat);
                 this.scene.add(line);
                 
-                // Light particles along edge
+                // Light particles along edge with flow direction
                 const particles = this.createEdgeParticles(points, edgeColor, edge.label || edge.type);
                 this.scene.add(particles);
                 this.edgeParticles.push({
                     points,
                     particles,
                     progress: 0,
-                    speed: 0.005 + Math.random() * 0.005
+                    speed: 0.003 + Math.random() * 0.004,
+                    edgeType: edge.type
                 });
                 
-                // Edge label
-                if (edge.label) {
-                    const labelSprite = this.createEdgeLabel(edge.label, mid.x, mid.y + 2, mid.z);
+                // Edge label at midpoint
+                const midIndex = Math.floor(points.length / 2);
+                const midPoint = points[midIndex];
+                if (edge.label || edge.type) {
+                    const labelSprite = this.createEdgeLabel(
+                        edge.label || edge.type, 
+                        midPoint.x, 
+                        midPoint.y + 3, 
+                        midPoint.z
+                    );
                     this.scene.add(labelSprite);
                 }
+                
+                // Add flow direction indicator
+                this.createFlowIndicator(points, edgeColor);
             }
         });
+        
+        // Add missing architectural connections for better diagram flow
+        this.createArchitecturalConnections();
+    }
+
+    createFlowIndicator(points, color) {
+        // Create arrow indicators along the path to show data flow direction
+        const arrowCount = 3;
+        for (let i = 0; i < arrowCount; i++) {
+            const t = (i + 1) / (arrowCount + 1);
+            const pointIndex = Math.floor(t * (points.length - 1));
+            const point = points[pointIndex];
+            const nextPoint = points[Math.min(pointIndex + 5, points.length - 1)];
+            
+            // Create small arrow geometry
+            const arrowGeo = new THREE.ConeGeometry(0.3, 1, 4);
+            const arrowMat = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.6
+            });
+            const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+            
+            // Position and orient arrow
+            arrow.position.copy(point);
+            arrow.lookAt(nextPoint);
+            arrow.rotateX(Math.PI / 2);
+            
+            this.scene.add(arrow);
+        }
+    }
+
+    createArchitecturalConnections() {
+        // Create additional connections to show architectural relationships
+        // Group nodes by project and create inter-project connections
+        const projectGroups = new Map();
+        
+        this.allNodes.forEach(node => {
+            if (!projectGroups.has(node.projectName)) {
+                projectGroups.set(node.projectName, []);
+            }
+            projectGroups.get(node.projectName).push(node);
+        });
+        
+        // Create connections between related projects
+        const projectArray = Array.from(projectGroups.keys());
+        for (let i = 0; i < projectArray.length - 1; i++) {
+            const project1 = projectArray[i];
+            const project2 = projectArray[i + 1];
+            
+            const nodes1 = projectGroups.get(project1);
+            const nodes2 = projectGroups.get(project2);
+            
+            if (nodes1.length > 0 && nodes2.length > 0) {
+                // Connect representative nodes from adjacent projects
+                const node1 = nodes1[0];
+                const node2 = nodes2[0];
+                
+                const mesh1 = this.nodeMeshes.get(node1.id);
+                const mesh2 = this.nodeMeshes.get(node2.id);
+                
+                if (mesh1 && mesh2) {
+                    this.createArchitecturalConnection(mesh1, mesh2, 'architectural');
+                }
+            }
+        }
+    }
+
+    createArchitecturalConnection(fromMesh, toMesh, type) {
+        const start = fromMesh.position.clone();
+        const end = toMesh.position.clone();
+        
+        // Create subtle architectural connection
+        const points = [start, end];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+        const lineMat = new THREE.LineDashedMaterial({
+            color: 0x404040,
+            transparent: true,
+            opacity: 0.2,
+            dashSize: 2,
+            gapSize: 2
+        });
+        
+        const line = new THREE.Line(lineGeo, lineMat);
+        line.computeLineDistances();
+        this.scene.add(line);
     }
 
     createEdgeParticles(points, color, label) {
@@ -654,22 +995,70 @@ class RepositoryVisualization {
     }
 
     onClick(event) {
-        if (!this.nodeMeshes.size) return;
-        
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        const meshes = Array.from(this.nodeMeshes.values());
-        const intersects = this.raycaster.intersectObjects(meshes, true);
+        
+        // Check for project boxes and buttons first
+        const allObjects = [];
+        this.scene.traverse((obj) => {
+            if (obj.userData?.type) {
+                allObjects.push(obj);
+            }
+        });
+        
+        const intersects = this.raycaster.intersectObjects(allObjects, true);
         
         if (intersects.length > 0) {
             let obj = intersects[0].object;
-            while (obj.parent && !obj.userData.node) {
+            while (obj.parent && !obj.userData.type && !obj.userData.node) {
                 obj = obj.parent;
             }
+            
+            // Handle button clicks
+            if (obj.userData?.type === 'expandButton') {
+                const projectBox = obj.parent;
+                if (projectBox.userData?.projectName) {
+                    this.expandProject(projectBox.userData.projectName);
+                }
+                return;
+            }
+            
+            if (obj.userData?.type === 'collapseButton') {
+                const projectLabel = obj.parent;
+                if (projectLabel.userData?.projectName) {
+                    this.collapseProject(projectLabel.userData.projectName);
+                }
+                return;
+            }
+            
+            // Handle project box clicks
+            if (obj.userData?.type === 'projectBox') {
+                this.expandProject(obj.userData.projectName);
+                return;
+            }
+            
+            // Handle node clicks
             if (obj.userData?.node) {
                 this.showNodeInfo(obj.userData.node);
+                return;
+            }
+        }
+        
+        // Fallback to node mesh check
+        if (this.nodeMeshes.size > 0) {
+            const meshes = Array.from(this.nodeMeshes.values());
+            const nodeIntersects = this.raycaster.intersectObjects(meshes, true);
+            
+            if (nodeIntersects.length > 0) {
+                let obj = nodeIntersects[0].object;
+                while (obj.parent && !obj.userData.node) {
+                    obj = obj.parent;
+                }
+                if (obj.userData?.node) {
+                    this.showNodeInfo(obj.userData.node);
+                }
             }
         }
     }
@@ -736,6 +1125,105 @@ class RepositoryVisualization {
             `<strong>Tags:</strong> ${tags}`;
         
         document.getElementById('info-panel').classList.add('visible');
+    }
+
+    expandProject(projectName) {
+        console.log(`Expanding project: ${projectName}`);
+        
+        // Remove from collapsed set
+        this.collapsedProjects.delete(projectName);
+        
+        // Remove project box if it exists
+        const projectBox = this.projectBoxes.get(projectName);
+        if (projectBox) {
+            this.scene.remove(projectBox);
+            this.projectBoxes.delete(projectName);
+        }
+        
+        // Recreate the visualization to show expanded nodes
+        this.clearVisualization();
+        this.createVisualization();
+    }
+
+    collapseProject(projectName) {
+        console.log(`Collapsing project: ${projectName}`);
+        
+        // Add to collapsed set
+        this.collapsedProjects.add(projectName);
+        
+        // Remove expanded nodes for this project
+        const expandedNodes = this.expandedNodes.get(projectName);
+        if (expandedNodes) {
+            expandedNodes.forEach(node => {
+                this.scene.remove(node);
+                // Remove from nodeMeshes if it exists
+                for (const [id, mesh] of this.nodeMeshes.entries()) {
+                    if (mesh === node) {
+                        this.nodeMeshes.delete(id);
+                        break;
+                    }
+                }
+            });
+            this.expandedNodes.delete(projectName);
+        }
+        
+        // Recreate the visualization to show collapsed state
+        this.clearVisualization();
+        this.createVisualization();
+    }
+
+    collapseAll() {
+        console.log('Collapsing all projects');
+        
+        // Add all projects to collapsed set
+        this.projects.forEach(project => {
+            const projectName = project.projectName || 'Unknown Project';
+            this.collapsedProjects.add(projectName);
+        });
+        
+        // Recreate visualization
+        this.clearVisualization();
+        this.createVisualization();
+    }
+
+    expandAll() {
+        console.log('Expanding all projects');
+        
+        // Clear collapsed set
+        this.collapsedProjects.clear();
+        
+        // Recreate visualization
+        this.clearVisualization();
+        this.createVisualization();
+    }
+
+    clearVisualization() {
+        // Remove all nodes
+        this.nodeMeshes.forEach(mesh => this.scene.remove(mesh));
+        this.nodeMeshes.clear();
+        
+        // Remove all project boxes
+        this.projectBoxes.forEach(box => this.scene.remove(box));
+        this.projectBoxes.clear();
+        
+        // Clear expanded nodes
+        this.expandedNodes.clear();
+        
+        // Remove edge particles
+        this.edgeParticles.forEach(ep => this.scene.remove(ep.particles));
+        this.edgeParticles = [];
+        
+        // Clear waveforms
+        this.waveforms = [];
+        
+        // Remove all scene objects except lights, camera, and grid
+        const objectsToRemove = [];
+        this.scene.traverse((obj) => {
+            if (obj.userData?.projectName || obj.userData?.node || obj.userData?.type) {
+                objectsToRemove.push(obj);
+            }
+        });
+        objectsToRemove.forEach(obj => this.scene.remove(obj));
     }
 
     animate() {
