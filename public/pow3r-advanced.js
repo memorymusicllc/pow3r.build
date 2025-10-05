@@ -740,35 +740,41 @@ class Pow3rAdvanced {
     
     updateVisualization() {
         const filter = this.currentFilter;
-
-        const showRepos = (filter === 'all' || filter === 'repos');
-        const showNodes = (filter !== 'repos');
-
+        const visibleNodeIds = new Set(this.filteredNodes.map(node => node.id));
         const visibleProjects = new Set(this.filteredNodes.map(node => node.project));
 
+        // Toggle visibility of repo boxes based on whether any of their nodes are visible
         this.repoBoxes.forEach((box, projectName) => {
-            const query = this.searchQuery.toLowerCase().trim();
-            if (query.startsWith('repo:')) {
-                const repoName = query.substring(5);
-                box.visible = projectName.toLowerCase().includes(repoName);
+            if (filter === 'repos') {
+                 // In 'repos' view, only show repos that match the search query, if any
+                if (this.searchQuery.trim()) {
+                    box.visible = visibleProjects.has(projectName);
+                } else {
+                    box.visible = true;
+                }
             } else {
-                 box.visible = showRepos || (showNodes && visibleProjects.has(projectName));
+                 box.visible = visibleProjects.has(projectName);
             }
         });
 
+        // Toggle visibility of individual node meshes
         this.nodeMeshes.forEach((mesh, nodeId) => {
-            if (!showNodes) {
-                mesh.visible = false;
-                return;
+            if (filter === 'repos') {
+                mesh.visible = false; // Always hide individual nodes in 'repos' view
+            } else {
+                mesh.visible = visibleNodeIds.has(nodeId);
             }
-            const isVisible = this.filteredNodes.some(node => node.id === nodeId);
-            mesh.visible = isVisible;
         });
         
+        // Toggle visibility of edges
         this.edgeLines.forEach(edge => {
-            const fromVisible = this.nodeMeshes.get(edge.userData.from)?.visible;
-            const toVisible = this.nodeMeshes.get(edge.userData.to)?.visible;
-            edge.visible = fromVisible && toVisible;
+            const fromNodeId = edge.userData.from;
+            const toNodeId = edge.userData.to;
+
+            const fromNodeVisible = this.nodeMeshes.get(fromNodeId)?.visible;
+            const toNodeVisible = this.nodeMeshes.get(toNodeId)?.visible;
+
+            edge.visible = fromNodeVisible && toNodeVisible;
         });
     }
     
