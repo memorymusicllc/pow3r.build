@@ -1525,11 +1525,6 @@ class Pow3rAdvanced {
 
 // Initialize Pow3r Advanced when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const debugElement = document.getElementById('script-debug');
-    if (debugElement) {
-        debugElement.textContent = 'pow3r-advanced.js is EXECUTING!';
-        debugElement.style.background = 'green';
-    }
     new Pow3rAdvanced();
 });
 
