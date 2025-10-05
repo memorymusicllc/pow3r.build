@@ -94,6 +94,7 @@ class Pow3rAdvanced {
         this.hideLoading();
         
         console.log('✨ Pow3r.build Advanced System initialized successfully!');
+        debugger; // <-- Add debugger here
     }
     
     async init3DWorld() {
@@ -1517,6 +1518,7 @@ class Pow3rAdvanced {
         if (loading) {
             loading.style.display = 'none';
             console.log('Loading screen hidden.');
+            debugger; // <-- Add debugger here
             // Check visibility of UI elements right after hiding
             const searchPanel = document.querySelector('.pow3r-s3arch');
             if (searchPanel) {
