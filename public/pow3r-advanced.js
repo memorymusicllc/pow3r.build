@@ -890,24 +890,339 @@ class Pow3rAdvanced {
     }
     
     transformTo2D() {
+        // Disable rotation for camera and models
+        this.controls.enableRotate = false;
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
+        
+        // Set camera to 2D view
         this.camera.position.set(0, 0, 50);
         this.controls.target.set(0, 0, 0);
+        
+        // Organize all items on 2D canvas with anti-collision
+        this.organize2DCanvas();
+        
+        // Make all items face viewer
+        this.faceViewer();
+        
+        // Enable drag functionality
+        this.enableDragMode();
+        
         this.controls.update();
+    }
+    
+    organize2DCanvas() {
+        const nodes = Array.from(this.nodeMeshes.values());
+        const repos = Array.from(this.repoBoxes.values());
+        const allItems = [...nodes, ...repos];
+        
+        // Calculate grid layout to prevent overlapping
+        const cols = Math.ceil(Math.sqrt(allItems.length));
+        const spacing = 8;
+        
+        allItems.forEach((item, index) => {
+            const row = Math.floor(index / cols);
+            const col = index % cols;
+            
+            const x = (col - (cols - 1) / 2) * spacing;
+            const y = (row - (Math.ceil(allItems.length / cols) - 1) / 2) * spacing;
+            
+            // Smooth transition to new position
+            this.animateToPosition(item, { x, y, z: 0 });
+        });
+    }
+    
+    faceViewer() {
+        // Make all items face the camera
+        this.nodeMeshes.forEach(mesh => {
+            mesh.lookAt(this.camera.position);
+        });
+        
+        this.repoBoxes.forEach(box => {
+            box.lookAt(this.camera.position);
+        });
+    }
+    
+    enableDragMode() {
+        // Remove existing drag listeners
+        this.renderer.domElement.removeEventListener('mousedown', this.handleDragStart);
+        this.renderer.domElement.removeEventListener('mousemove', this.handleDragMove);
+        this.renderer.domElement.removeEventListener('mouseup', this.handleDragEnd);
+        
+        // Add new drag listeners
+        this.handleDragStart = this.handleDragStart.bind(this);
+        this.handleDragMove = this.handleDragMove.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this);
+        
+        this.renderer.domElement.addEventListener('mousedown', this.handleDragStart);
+        this.renderer.domElement.addEventListener('mousemove', this.handleDragMove);
+        this.renderer.domElement.addEventListener('mouseup', this.handleDragEnd);
+        
+        this.dragging = false;
+        this.dragObject = null;
+        this.dragOffset = new THREE.Vector3();
+    }
+    
+    handleDragStart(event) {
+        if (event.button !== 0) return; // Only left mouse button
+        
+        const mouse = new THREE.Vector2();
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, this.camera);
+        
+        // Check for intersections with nodes and repo boxes
+        const allObjects = [...Array.from(this.nodeMeshes.values()), ...Array.from(this.repoBoxes.values())];
+        const intersects = raycaster.intersectObjects(allObjects, true);
+        
+        if (intersects.length > 0) {
+            this.dragging = true;
+            this.dragObject = intersects[0].object.parent || intersects[0].object;
+            
+            // Calculate drag offset
+            const worldPosition = new THREE.Vector3();
+            this.dragObject.getWorldPosition(worldPosition);
+            const projected = worldPosition.project(this.camera);
+            this.dragOffset.set(
+                mouse.x - projected.x,
+                mouse.y - projected.y,
+                0
+            );
+            
+            event.preventDefault();
+        }
+    }
+    
+    handleDragMove(event) {
+        if (!this.dragging || !this.dragObject) return;
+        
+        const mouse = new THREE.Vector2();
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        // Calculate new position
+        const newX = (mouse.x - this.dragOffset.x) * 25; // Scale factor for 2D movement
+        const newY = (mouse.y - this.dragOffset.y) * 25;
+        
+        // Update position
+        this.dragObject.position.x = newX;
+        this.dragObject.position.y = newY;
+        
+        event.preventDefault();
+    }
+    
+    handleDragEnd(event) {
+        this.dragging = false;
+        this.dragObject = null;
     }
     
     transformTo3D() {
+        // Re-enable all 3D controls
+        this.controls.enableRotate = true;
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
+        
         this.camera.position.set(30, 30, 30);
         this.controls.target.set(0, 0, 0);
         this.controls.update();
+        
+        // Disable drag mode
+        this.disableDragMode();
+    }
+    
+    disableDragMode() {
+        this.renderer.domElement.removeEventListener('mousedown', this.handleDragStart);
+        this.renderer.domElement.removeEventListener('mousemove', this.handleDragMove);
+        this.renderer.domElement.removeEventListener('mouseup', this.handleDragEnd);
     }
     
     transformToTimeline() {
-        this.allNodes.forEach((node, index) => {
-            const mesh = this.nodeMeshes.get(node.id);
-            if (mesh) {
-                mesh.position.set(index * 3 - (this.allNodes.length * 1.5), 0, 0);
+        // Create spiral timeline with dates
+        this.createSpiralTimeline();
+        
+        // Organize nodes along timeline
+        this.organizeTimelineNodes();
+    }
+    
+    createSpiralTimeline() {
+        // Clear existing timeline elements
+        this.clearTimelineElements();
+        
+        // Create spiral path
+        const spiralPoints = [];
+        const spiralRadius = 20;
+        const spiralHeight = 30;
+        const spiralTurns = 3;
+        const pointsCount = 100;
+        
+        for (let i = 0; i < pointsCount; i++) {
+            const t = i / (pointsCount - 1);
+            const angle = t * spiralTurns * Math.PI * 2;
+            const radius = spiralRadius * (1 - t * 0.5); // Spiral gets smaller
+            const height = t * spiralHeight;
+            
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            const z = height;
+            
+            spiralPoints.push(new THREE.Vector3(x, y, z));
+        }
+        
+        // Create spiral line
+        const spiralGeometry = new THREE.BufferGeometry().setFromPoints(spiralPoints);
+        const spiralMaterial = new THREE.LineBasicMaterial({
+            color: 0x00ff88,
+            transparent: true,
+            opacity: 0.6
+        });
+        
+        this.spiralLine = new THREE.Line(spiralGeometry, spiralMaterial);
+        this.scene.add(this.spiralLine);
+        
+        // Add date markers along spiral
+        this.addDateMarkers(spiralPoints);
+    }
+    
+    addDateMarkers(spiralPoints) {
+        const dateCount = 12; // 12 months
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 11);
+        
+        for (let i = 0; i < dateCount; i++) {
+            const pointIndex = Math.floor((i / (dateCount - 1)) * (spiralPoints.length - 1));
+            const position = spiralPoints[pointIndex];
+            
+            // Create date marker
+            const markerGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+            const markerMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff0088,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            marker.position.copy(position);
+            this.scene.add(marker);
+            
+            // Create date label
+            const date = new Date(startDate);
+            date.setMonth(date.getMonth() + i);
+            const dateString = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'timeline-date';
+            labelDiv.textContent = dateString;
+            labelDiv.style.color = '#00ff88';
+            labelDiv.style.fontSize = '10px';
+            labelDiv.style.fontFamily = 'Google Prime Courier, monospace';
+            labelDiv.style.pointerEvents = 'none';
+            labelDiv.style.textAlign = 'center';
+            labelDiv.style.background = 'rgba(0, 17, 34, 0.8)';
+            labelDiv.style.padding = '2px 6px';
+            labelDiv.style.borderRadius = '3px';
+            labelDiv.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+            
+            const label = new CSS2DObject(labelDiv);
+            label.position.set(0, 1, 0);
+            marker.add(label);
+            
+            // Connect to repo boxes
+            this.connectTimelineToRepos(marker, position);
+        }
+    }
+    
+    connectTimelineToRepos(timelineMarker, position) {
+        // Connect timeline markers to nearby repo boxes
+        this.repoBoxes.forEach((repoBox, projectName) => {
+            const distance = position.distanceTo(repoBox.position);
+            if (distance < 15) { // Within connection range
+                const connectionGeometry = new THREE.BufferGeometry().setFromPoints([
+                    position,
+                    repoBox.position
+                ]);
+                
+                const connectionMaterial = new THREE.LineBasicMaterial({
+                    color: 0x88aaff,
+                    transparent: true,
+                    opacity: 0.4,
+                    dashSize: 1,
+                    gapSize: 0.5
+                });
+                
+                const connection = new THREE.Line(connectionGeometry, connectionMaterial);
+                this.scene.add(connection);
             }
         });
+    }
+    
+    organizeTimelineNodes() {
+        // Organize nodes along timeline without cluttering
+        const timelineNodes = this.allNodes.slice(); // Copy array
+        const timelineLength = 100; // Timeline length in units
+        
+        timelineNodes.forEach((node, index) => {
+            const mesh = this.nodeMeshes.get(node.id);
+            if (!mesh) return;
+            
+            // Calculate position along timeline
+            const t = index / (timelineNodes.length - 1);
+            const spiralAngle = t * 3 * Math.PI * 2; // 3 turns
+            const spiralRadius = 20 * (1 - t * 0.5);
+            const spiralHeight = t * 30;
+            
+            // Add some randomness to prevent exact overlap
+            const randomOffset = (Math.random() - 0.5) * 2;
+            
+            const x = Math.cos(spiralAngle) * spiralRadius + randomOffset;
+            const y = Math.sin(spiralAngle) * spiralRadius + randomOffset;
+            const z = spiralHeight + (Math.random() - 0.5) * 2;
+            
+            // Smooth transition to timeline position
+            this.animateToPosition(mesh, { x, y, z });
+        });
+    }
+    
+    animateToPosition(object, targetPosition, duration = 1000) {
+        const startPosition = object.position.clone();
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            
+            object.position.lerpVectors(startPosition, targetPosition, easeProgress);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+    
+    clearTimelineElements() {
+        // Remove existing timeline elements
+        if (this.spiralLine) {
+            this.scene.remove(this.spiralLine);
+            this.spiralLine = null;
+        }
+        
+        // Remove timeline markers and connections
+        const objectsToRemove = [];
+        this.scene.traverse((child) => {
+            if (child.userData && child.userData.timelineElement) {
+                objectsToRemove.push(child);
+            }
+        });
+        
+        objectsToRemove.forEach(obj => this.scene.remove(obj));
     }
     
     transformToQuantum() {
