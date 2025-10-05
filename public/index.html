@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repository 3D Visualization</title>
+    <title>Pow3r.build - Quantum Repository Intelligence</title>
     <style>
         * {
             margin: 0;
@@ -12,185 +12,179 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #0a0e1a;
-            color: #e0e0e0;
+            font-family: 'Google Prime Courier', 'Courier New', monospace;
+            background: #001122;
+            color: #ffffff;
             overflow: hidden;
+            height: 100vh;
         }
 
-        #container {
+        #app {
             width: 100vw;
             height: 100vh;
             position: relative;
+            background: linear-gradient(135deg, #001122 0%, #000811 50%, #001122 100%);
         }
 
-        #canvas-container {
+        /* Particle Space Theme Styles */
+        .particle-space-container {
+            position: relative;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+        }
+
+        .particle-space-wireframe {
+            position: absolute;
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            background: rgba(0, 17, 34, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .particle-space-wireframe.pow3r-moment {
+            border-color: #ff0088;
+            box-shadow: 0 0 20px rgba(255, 0, 136, 0.3);
+            animation: pow3r-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pow3r-pulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 0, 136, 0.3);
+                border-color: #ff0088;
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 0, 136, 0.6);
+                border-color: #ff44aa;
+            }
         }
 
         /* Header */
-        #header {
+        .header {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             padding: 20px 30px;
-            background: linear-gradient(180deg, rgba(10, 14, 26, 0.95) 0%, rgba(10, 14, 26, 0) 100%);
+            background: linear-gradient(180deg, rgba(0, 17, 34, 0.95) 0%, rgba(0, 17, 34, 0) 100%);
             z-index: 100;
             pointer-events: none;
         }
 
-        #header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #fff;
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff88;
             margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
 
-        #header p {
+        .header p {
             font-size: 14px;
-            color: #888;
+            color: #88aaff;
+            opacity: 0.8;
         }
 
-        /* Stats Panel */
-        #stats-panel {
+        /* Pow3r S3arch Component */
+        .pow3r-s3arch {
+            position: absolute;
+            top: 100px;
+            left: 30px;
+            right: 30px;
+            z-index: 200;
+        }
+
+        .s3arch-container {
+            background: rgba(0, 17, 34, 0.8);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .s3arch-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            font-family: 'Google Prime Courier', monospace;
+            padding: 15px 20px;
+            outline: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .s3arch-input:focus {
+            border-bottom-color: #00ff88;
+            box-shadow: 0 2px 0 rgba(0, 255, 136, 0.5);
+        }
+
+        .s3arch-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Pow3r Graph Component */
+        .pow3r-graph {
+            position: absolute;
+            top: 200px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            z-index: 150;
+        }
+
+        .graph-container {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 17, 34, 0.6);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Transform3r Controls */
+        .transform3r-controls {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(20, 25, 40, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            min-width: 250px;
-            z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        #stats-panel h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #fff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-        }
-
-        .stat-row {
+            z-index: 300;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .stat-label {
-            color: #999;
-        }
-
-        .stat-value {
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-green { background: #4ade80; }
-        .status-orange { background: #fb923c; }
-        .status-red { background: #f87171; }
-        .status-gray { background: #6b7280; }
-
-        /* Info Panel */
-        #info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(20, 25, 40, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 400px;
-            z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            display: none;
-        }
-
-        #info-panel.visible {
-            display: block;
-        }
-
-        #info-panel h2 {
-            font-size: 20px;
-            margin-bottom: 5px;
-            color: #fff;
-        }
-
-        #info-panel .branch {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 15px;
-        }
-
-        #info-panel .info-section {
-            margin-bottom: 15px;
-        }
-
-        #info-panel .info-section h4 {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        #info-panel .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
-        #info-panel .info-item {
-            font-size: 14px;
-        }
-
-        #info-panel .info-item-label {
-            color: #888;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        #info-panel .info-item-value {
-            color: #fff;
-            font-weight: 500;
-            margin-top: 2px;
-        }
-
-        #close-panel {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 24px;
+        .transform3r-btn {
+            background: rgba(0, 17, 34, 0.8);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 15px;
             cursor: pointer;
-            padding: 5px;
-            line-height: 1;
+            font-family: 'Google Prime Courier', monospace;
+            font-size: 12px;
+            transition: all 0.3s ease;
         }
 
-        #close-panel:hover {
-            color: #fff;
+        .transform3r-btn:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
         }
 
-        /* Loading */
-        #loading {
+        .transform3r-btn.active {
+            border-color: #ff0088;
+            background: rgba(255, 0, 136, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 136, 0.4);
+        }
+
+        /* Loading State */
+        .loading {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -199,12 +193,12 @@
             z-index: 1000;
         }
 
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #fff;
-            border-radius: 50%;
+        .loading-spinner {
             width: 50px;
             height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid #00ff88;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -214,211 +208,125 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Legend */
-        #legend {
+        .loading-text {
+            color: #88aaff;
+            font-size: 14px;
+        }
+
+        /* Particle Effects */
+        .particle-system {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(20, 25, 40, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 15px 20px;
-            z-index: 100;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        #legend h4 {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .legend-item:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Controls hint */
-        #controls-hint {
+        .particle {
             position: absolute;
-            top: 120px;
-            left: 20px;
-            background: rgba(20, 25, 40, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 12px;
-            color: #888;
-            z-index: 100;
+            width: 2px;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: particle-float 4s linear infinite;
         }
 
-        #controls-hint div {
-            margin-bottom: 4px;
-        }
-
-        #controls-hint div:last-child {
-            margin-bottom: 0;
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(50px);
+                opacity: 0;
+            }
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            #stats-panel {
-                right: 10px;
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .pow3r-s3arch,
+            .pow3r-graph {
+                left: 15px;
+                right: 15px;
+            }
+            
+            .transform3r-controls {
                 top: 10px;
-                min-width: 200px;
-                padding: 15px;
-            }
-
-            #info-panel {
-                left: 10px;
-                bottom: 10px;
-                max-width: calc(100vw - 20px);
-            }
-
-            #legend {
-                bottom: 10px;
                 right: 10px;
-            }
-
-            #controls-hint {
-                display: none;
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="header">
-            <h1>Repository Architecture Diagram</h1>
-            <p>Interactive 3D architecture view with collapsible project layers</p>
+    <div id="app">
+        <!-- Particle System Background -->
+        <div class="particle-system" id="particle-system"></div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1>🌌 Pow3r.build</h1>
+            <p>Quantum Repository Intelligence • Particle Space Theme • Transform3r Ready</p>
         </div>
 
-        <div id="canvas-container"></div>
-
-        <div id="stats-panel">
-            <h3>Statistics</h3>
-            <div class="stat-row">
-                <span class="stat-label">Total Repositories</span>
-                <span class="stat-value" id="stat-total">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-green"></span>Active</span>
-                <span class="stat-value" id="stat-orange">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-red"></span>Blocked</span>
-                <span class="stat-value" id="stat-red">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-gray"></span>Archived</span>
-                <span class="stat-value" id="stat-gray">-</span>
-            </div>
-            <div class="stat-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <span class="stat-label">Total Nodes</span>
-                <span class="stat-value" id="stat-nodes">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Total Commits (30d)</span>
-                <span class="stat-value" id="stat-commits">-</span>
+        <!-- Pow3r S3arch Component -->
+        <div class="pow3r-s3arch">
+            <div class="s3arch-container particle-space-wireframe pow3r-moment">
+                <input 
+                    type="text" 
+                    class="s3arch-input" 
+                    placeholder="🔍 Pow3r S3arch: Search repositories, nodes, or use Transform3r syntax..."
+                    id="s3arch-input"
+                />
             </div>
         </div>
 
-        <div id="legend">
-            <h4>Status Legend</h4>
-            <div class="legend-item">
-                <span class="status-indicator status-green"></span>
-                <span>Stable</span>
-            </div>
-            <div class="legend-item">
-                <span class="status-indicator status-orange"></span>
-                <span>Active Development</span>
-            </div>
-            <div class="legend-item">
-                <span class="status-indicator status-red"></span>
-                <span>Blocked / Stale</span>
-            </div>
-            <div class="legend-item">
-                <span class="status-indicator status-gray"></span>
-                <span>Archived</span>
+        <!-- Transform3r Controls -->
+        <div class="transform3r-controls">
+            <button class="transform3r-btn" data-mode="2d">2D</button>
+            <button class="transform3r-btn" data-mode="3d">3D</button>
+            <button class="transform3r-btn" data-mode="timeline">Timeline</button>
+            <button class="transform3r-btn" data-mode="quantum">Quantum</button>
+        </div>
+
+        <!-- Pow3r Graph Component -->
+        <div class="pow3r-graph">
+            <div class="graph-container particle-space-wireframe">
+                <canvas class="graph-canvas" id="graph-canvas"></canvas>
             </div>
         </div>
 
-        <div id="controls-hint">
-            <div><strong>Controls:</strong></div>
-            <div>• Left Mouse: Rotate</div>
-            <div>• Right Mouse: Pan</div>
-            <div>• Scroll: Zoom</div>
-            <div>• Click Node: Details</div>
-            <div>• Click Box: Expand Project</div>
-            <div>• Click (-): Collapse Project</div>
-        </div>
-
-        <div id="info-panel">
-            <button id="close-panel">&times;</button>
-            <h2 id="info-name">-</h2>
-            <div class="branch" id="info-branch">-</div>
-            
-            <div class="info-section">
-                <h4>Status</h4>
-                <div id="info-status" style="font-size: 14px;">-</div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-item-label">Language</div>
-                        <div class="info-item-value" id="info-language">-</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-item-label">Files</div>
-                        <div class="info-item-value" id="info-files">-</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-item-label">Size</div>
-                        <div class="info-item-value" id="info-size">-</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-item-label">Commits (30d)</div>
-                        <div class="info-item-value" id="info-commits">-</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h4>Last Commit</h4>
-                <div id="info-last-commit" style="font-size: 13px; color: #ccc;">-</div>
-            </div>
-
-            <div class="info-section">
-                <h4>Architecture</h4>
-                <div id="info-nodes" style="font-size: 13px; color: #ccc;">-</div>
-            </div>
-        </div>
-
-        <div id="loading">
-            <div class="spinner"></div>
-            <p>Loading repositories...</p>
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Initializing Pow3r Graph...</div>
         </div>
     </div>
 
+    <!-- Three.js and Dependencies -->
     <script type="importmap">
     {
         "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js",
+            "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"
         }
     }
     </script>
-    <script type="module" src="app.js"></script>
+    
+    <script type="module" src="pow3r-app.js"></script>
 </body>
 </html>
-
