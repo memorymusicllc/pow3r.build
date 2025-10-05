@@ -102,7 +102,6 @@ class Pow3rAdvanced {
         
         // Scene setup
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x001122);
         this.scene.fog = new THREE.FogExp2(0x001122, 0.001);
         
         // Camera setup
@@ -643,6 +642,16 @@ class Pow3rAdvanced {
         
         // Load search history
         this.loadSearchHistory();
+        
+        // Repo collapse toggle
+        this.isCollapsed = false;
+        const collapseBtn = document.getElementById('repo-collapse-toggle');
+        collapseBtn.addEventListener('click', () => {
+            this.isCollapsed = !this.isCollapsed;
+            this.toggleRepoCollapse(this.isCollapsed);
+            collapseBtn.innerHTML = this.isCollapsed ? '<i class="fas fa-expand-alt"></i>' : '<i class="fas fa-compress-alt"></i>';
+            collapseBtn.title = this.isCollapsed ? 'Expand Nodes' : 'Collapse Nodes';
+        });
     }
     
     showSuggestions() {
@@ -704,59 +713,62 @@ class Pow3rAdvanced {
     }
     
     performSearch() {
-        if (!this.searchQuery.trim()) {
-            this.filteredNodes = this.allNodes;
-            this.updateVisualization();
-            return;
-        }
-        
-        let filtered = this.allNodes;
-        
-        // Apply text filter
-        if (this.searchQuery.trim()) {
-            const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter(node => 
-                node.name.toLowerCase().includes(query) ||
-                node.type.toLowerCase().includes(query) ||
-                node.project.toLowerCase().includes(query)
+        let visibleNodes = this.allNodes;
+        const query = this.searchQuery.toLowerCase().trim();
+
+        // Handle repo: prefix
+        if (query.startsWith('repo:')) {
+            const repoName = query.substring(5);
+            visibleNodes = visibleNodes.filter(node => node.project.toLowerCase().includes(repoName));
+            this.currentFilter = 'all'; // Ignore other filters when repo specific
+        } else if (query) {
+            visibleNodes = visibleNodes.filter(node =>
+                (node.name && node.name.toLowerCase().includes(query)) ||
+                (node.type && node.type.toLowerCase().includes(query))
             );
         }
-        
-        // Apply status filter
-        if (this.currentFilter !== 'all') {
-            if (this.currentFilter === 'repo') {
-                // Show only repo boxes
-                this.repoBoxes.forEach((box, projectName) => {
-                    box.visible = true;
-                });
-                this.nodeMeshes.forEach((mesh, nodeId) => {
-                    mesh.visible = false;
-                });
-                return;
-            } else if (this.currentFilter === 'node') {
-                // Show only nodes
-                this.repoBoxes.forEach((box, projectName) => {
-                    box.visible = false;
-                });
-                this.nodeMeshes.forEach((mesh, nodeId) => {
-                    mesh.visible = true;
-                });
-                return;
-            } else {
-                filtered = filtered.filter(node => node.status === this.currentFilter);
-            }
+
+        const filter = this.currentFilter;
+        if (filter !== 'all' && filter !== 'repos' && filter !== 'nodes') {
+            visibleNodes = visibleNodes.filter(node => node.status === filter);
         }
-        
-        this.filteredNodes = filtered;
+
+        this.filteredNodes = visibleNodes;
         this.updateVisualization();
         console.log(`🔍 Search results: ${this.filteredNodes.length} nodes found`);
     }
     
     updateVisualization() {
-        // Show/hide nodes based on search results
+        const filter = this.currentFilter;
+
+        const showRepos = (filter === 'all' || filter === 'repos');
+        const showNodes = (filter !== 'repos');
+
+        const visibleProjects = new Set(this.filteredNodes.map(node => node.project));
+
+        this.repoBoxes.forEach((box, projectName) => {
+            const query = this.searchQuery.toLowerCase().trim();
+            if (query.startsWith('repo:')) {
+                const repoName = query.substring(5);
+                box.visible = projectName.toLowerCase().includes(repoName);
+            } else {
+                 box.visible = showRepos || (showNodes && visibleProjects.has(projectName));
+            }
+        });
+
         this.nodeMeshes.forEach((mesh, nodeId) => {
+            if (!showNodes) {
+                mesh.visible = false;
+                return;
+            }
             const isVisible = this.filteredNodes.some(node => node.id === nodeId);
             mesh.visible = isVisible;
+        });
+        
+        this.edgeLines.forEach(edge => {
+            const fromVisible = this.nodeMeshes.get(edge.userData.from)?.visible;
+            const toVisible = this.nodeMeshes.get(edge.userData.to)?.visible;
+            edge.visible = fromVisible && toVisible;
         });
     }
     
@@ -1220,7 +1232,7 @@ class Pow3rAdvanced {
         });
     }
     
-    animateToPosition(object, targetPosition, duration = 1000) {
+    animateToPosition(object, targetPosition, duration = 1000, onComplete = null) {
         const startPosition = object.position.clone();
         const startTime = Date.now();
         
@@ -1228,13 +1240,14 @@ class Pow3rAdvanced {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Easing function
             const easeProgress = 1 - Math.pow(1 - progress, 3);
             
-            object.position.lerpVectors(startPosition, targetPosition, easeProgress);
+            object.position.lerpVectors(startPosition, new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z), easeProgress);
             
             if (progress < 1) {
                 requestAnimationFrame(animate);
+            } else {
+                if (onComplete) onComplete();
             }
         };
         
@@ -1442,6 +1455,42 @@ class Pow3rAdvanced {
         }
     }
     
+    toggleRepoCollapse(collapse) {
+        if (collapse) {
+            console.log('Collapsing nodes into repo boxes...');
+            if (!this.originalNodePositions) {
+                this.originalNodePositions = new Map();
+                this.nodeMeshes.forEach((mesh, id) => {
+                    this.originalNodePositions.set(id, mesh.position.clone());
+                });
+            }
+
+            this.nodeMeshes.forEach((mesh, nodeId) => {
+                const nodeData = this.allNodes.find(n => n.id === nodeId);
+                if (nodeData && this.repoBoxes.has(nodeData.project)) {
+                    const repoBox = this.repoBoxes.get(nodeData.project);
+                    this.animateToPosition(mesh, repoBox.position, 1000, () => {
+                        mesh.visible = false;
+                    });
+                }
+            });
+            this.edgeLines.forEach(edge => edge.visible = false);
+
+        } else {
+            console.log('Expanding nodes from repo boxes...');
+            if (!this.originalNodePositions) return;
+
+            this.nodeMeshes.forEach((mesh, nodeId) => {
+                const originalPos = this.originalNodePositions.get(nodeId);
+                if (originalPos) {
+                    mesh.visible = true;
+                    this.animateToPosition(mesh, originalPos);
+                }
+            });
+            this.updateVisualization(); // Restore edges and node visibility based on filters
+        }
+    }
+
     onWindowResize() {
         if (!this.camera || !this.renderer) return;
         

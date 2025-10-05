@@ -546,6 +546,29 @@
                 flex-direction: column;
             }
         }
+
+        .s3arch-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .repo-collapse-btn {
+            background: rgba(0, 17, 34, 0.7);
+            border: 1px solid rgba(136, 0, 255, 0.5); /* Purple */
+            color: #8800ff;
+            border-radius: 6px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .repo-collapse-btn:hover {
+            background: #8800ff;
+            color: #001122;
+            box-shadow: 0 0 10px rgba(136, 0, 255, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -593,12 +616,17 @@
                     <button class="s3arch-collapse" id="s3arch-collapse">▼</button>
                 </div>
                 <div class="s3arch-content" id="s3arch-content">
-                    <input 
-                        type="text" 
-                        class="s3arch-input" 
-                        placeholder="Search repositories, nodes, or use Transform3r syntax..."
-                        id="s3arch-input"
-                    />
+                    <div class="s3arch-input-wrapper">
+                        <input 
+                            type="text" 
+                            class="s3arch-input" 
+                            placeholder="Search repositories, nodes, or use Transform3r syntax..."
+                            id="s3arch-input"
+                        />
+                        <button class="repo-collapse-btn" id="repo-collapse-toggle" title="Collapse/Expand Nodes">
+                            <i class="fas fa-compress-alt"></i>
+                        </button>
+                    </div>
                     <div class="s3arch-suggestions" id="s3arch-suggestions"></div>
                     <div class="filter-chips" id="filter-chips">
                         <div class="filter-chip active" data-filter="all">All</div>
