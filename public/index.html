@@ -85,7 +85,7 @@
             opacity: 0.8;
         }
 
-        /* Pow3r S3arch Component */
+        /* Pow3r S3arch Component - Enhanced */
         .pow3r-s3arch {
             position: absolute;
             top: 100px;
@@ -101,6 +101,52 @@
             padding: 20px;
             backdrop-filter: blur(15px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .s3arch-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .s3arch-title {
+            color: #00ff88;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .s3arch-collapse {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .s3arch-collapse:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .s3arch-collapse.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .s3arch-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .s3arch-content.collapsed {
+            max-height: 0;
+            opacity: 0;
         }
 
         .s3arch-input {
@@ -122,6 +168,89 @@
 
         .s3arch-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Search Suggestions */
+        .s3arch-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 17, 34, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .suggestion-item.repo {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .suggestion-item.node {
+            color: #88aaff;
+            padding-left: 25px;
+        }
+
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .filter-chip {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            color: #00ff88;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-chip:hover {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .filter-chip.active {
+            background: rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Search History */
+        .search-history {
+            margin-top: 15px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            color: #88aaff;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-item:hover {
+            color: #00ff88;
         }
 
         /* Pow3r Graph Component */
@@ -234,6 +363,141 @@
         .status-red { background: #ff0000; }
         .status-gray { background: #808080; }
 
+        /* Lock Toggle Button */
+        .lock-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 17, 34, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            transition: all 0.3s ease;
+        }
+
+        .lock-toggle:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .lock-toggle.locked {
+            background: rgba(255, 0, 136, 0.1);
+            border-color: #ff0088;
+        }
+
+        /* Light Controller */
+        .light-controller {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 17, 34, 0.8);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 200px;
+            z-index: 300;
+            backdrop-filter: blur(10px);
+        }
+
+        .light-controller h4 {
+            color: #00ff88;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .light-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .light-control label {
+            font-size: 12px;
+            color: #88aaff;
+            min-width: 60px;
+        }
+
+        .light-control input {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .light-control button {
+            background: rgba(255, 0, 136, 0.1);
+            border: 1px solid #ff0088;
+            border-radius: 4px;
+            color: #ff0088;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* Details Card */
+        .details-card {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 17, 34, 0.95);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 400px;
+            z-index: 300;
+            backdrop-filter: blur(15px);
+            display: none;
+        }
+
+        .details-card.visible {
+            display: block;
+        }
+
+        .details-card h3 {
+            color: #00ff88;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .details-card .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #88aaff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .details-item {
+            font-size: 12px;
+        }
+
+        .details-label {
+            color: #88aaff;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .details-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
         /* Loading State */
         .loading {
             position: absolute;
@@ -264,43 +528,6 @@
             font-size: 14px;
         }
 
-        /* Particle Effects */
-        .particle-system {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #00ff88;
-            border-radius: 50%;
-            animation: particle-float 4s linear infinite;
-        }
-
-        @keyframes particle-float {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-10vh) translateX(50px);
-                opacity: 0;
-            }
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .header h1 {
@@ -323,9 +550,6 @@
 </head>
 <body>
     <div id="app">
-        <!-- Particle System Background -->
-        <div class="particle-system" id="particle-system"></div>
-        
         <!-- Header -->
         <div class="header">
             <h1>🌌 Pow3r.build</h1>
@@ -361,15 +585,30 @@
             </div>
         </div>
 
-        <!-- Pow3r S3arch Component -->
+        <!-- Pow3r S3arch Component - Enhanced -->
         <div class="pow3r-s3arch">
             <div class="s3arch-container particle-space-wireframe pow3r-moment">
-                <input 
-                    type="text" 
-                    class="s3arch-input" 
-                    placeholder="🔍 Pow3r S3arch: Search repositories, nodes, or use Transform3r syntax..."
-                    id="s3arch-input"
-                />
+                <div class="s3arch-header">
+                    <div class="s3arch-title">🔍 Pow3r S3arch</div>
+                    <button class="s3arch-collapse" id="s3arch-collapse">▼</button>
+                </div>
+                <div class="s3arch-content" id="s3arch-content">
+                    <input 
+                        type="text" 
+                        class="s3arch-input" 
+                        placeholder="Search repositories, nodes, or use Transform3r syntax..."
+                        id="s3arch-input"
+                    />
+                    <div class="s3arch-suggestions" id="s3arch-suggestions"></div>
+                    <div class="filter-chips" id="filter-chips">
+                        <div class="filter-chip active" data-filter="all">All</div>
+                        <div class="filter-chip" data-filter="repo">Repos</div>
+                        <div class="filter-chip" data-filter="node">Nodes</div>
+                        <div class="filter-chip" data-filter="green">Active</div>
+                        <div class="filter-chip" data-filter="red">Blocked</div>
+                    </div>
+                    <div class="search-history" id="search-history"></div>
+                </div>
             </div>
         </div>
 
@@ -386,6 +625,33 @@
             <div class="graph-container particle-space-wireframe">
                 <canvas class="graph-canvas" id="graph-canvas"></canvas>
             </div>
+        </div>
+
+        <!-- Lock Toggle Button -->
+        <button class="lock-toggle" id="lock-toggle" title="Lock/Unlock UI Position">
+            🔒
+        </button>
+
+        <!-- Light Controller -->
+        <div class="light-controller" id="light-controller">
+            <h4>💡 Light Controller</h4>
+            <div class="light-control">
+                <label>Intensity:</label>
+                <input type="range" id="light-intensity" min="0" max="2" step="0.1" value="1">
+                <button id="add-light">+</button>
+            </div>
+            <div class="light-control">
+                <label>Color:</label>
+                <input type="color" id="light-color" value="#00ff88">
+                <button id="remove-light">-</button>
+            </div>
+        </div>
+
+        <!-- Details Card -->
+        <div class="details-card" id="details-card">
+            <button class="close-btn" id="close-details">&times;</button>
+            <h3 id="details-title">Node Details</h3>
+            <div class="details-grid" id="details-grid"></div>
         </div>
 
         <!-- Loading State -->
@@ -405,6 +671,6 @@
     }
     </script>
     
-    <script type="module" src="pow3r-complete.js"></script>
+    <script type="module" src="pow3r-advanced.js"></script>
 </body>
 </html>
