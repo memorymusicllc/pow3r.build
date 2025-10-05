@@ -1506,15 +1506,30 @@ class Pow3rAdvanced {
     }
     
     hideLoading() {
+        console.log('Hiding loading screen...');
         const loading = document.getElementById('loading');
         if (loading) {
             loading.style.display = 'none';
+            console.log('Loading screen hidden.');
+            // Check visibility of UI elements right after hiding
+            const searchPanel = document.querySelector('.pow3r-s3arch');
+            if (searchPanel) {
+                const isVisible = window.getComputedStyle(searchPanel).display !== 'none';
+                console.log(`'.pow3r-s3arch' visibility after hideLoading: ${isVisible}`);
+            } else {
+                console.log('Could not find .pow3r-s3arch element');
+            }
         }
     }
 }
 
 // Initialize Pow3r Advanced when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    const debugElement = document.getElementById('script-debug');
+    if (debugElement) {
+        debugElement.textContent = 'pow3r-advanced.js is EXECUTING!';
+        debugElement.style.background = 'green';
+    }
     new Pow3rAdvanced();
 });
 
