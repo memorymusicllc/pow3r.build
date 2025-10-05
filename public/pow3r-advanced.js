@@ -23,6 +23,7 @@ class Pow3rAdvanced {
         this.projects = [];
         this.allNodes = [];
         this.allEdges = [];
+        this.filteredNodes = []; // Initialize filtered nodes
         this.nodeMeshes = new Map();
         this.edgeLines = [];
         this.projectClusters = new Map();
@@ -32,6 +33,7 @@ class Pow3rAdvanced {
         this.uiLocked = false;
         this.s3archCollapsed = false;
         this.searchHistory = [];
+        this.searchQuery = ''; // Initialize search query
         this.currentFilter = 'all';
         this.selectedNode = null;
         
@@ -157,51 +159,71 @@ class Pow3rAdvanced {
     }
     
     initParticleSystem() {
-        // Create particle geometry
-        const particleCount = 1000;
+        // Create enhanced particle system that integrates with repo explorer
+        const particleCount = 2000; // Increased for better visual impact
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
         const sizes = new Float32Array(particleCount);
+        const velocities = new Float32Array(particleCount * 3);
         
         for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
             
-            // Random positions in a large sphere
-            positions[i3] = (Math.random() - 0.5) * 200;
-            positions[i3 + 1] = (Math.random() - 0.5) * 200;
+            // Create shooting star effect - particles move in specific directions
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 0.5 + 0.1;
+            const distance = Math.random() * 300 + 100;
+            
+            positions[i3] = Math.cos(angle) * distance;
+            positions[i3 + 1] = Math.sin(angle) * distance;
             positions[i3 + 2] = (Math.random() - 0.5) * 200;
             
-            // Random colors from Pow3r palette
+            // Shooting star velocities
+            velocities[i3] = -Math.cos(angle) * speed;
+            velocities[i3 + 1] = -Math.sin(angle) * speed;
+            velocities[i3 + 2] = (Math.random() - 0.5) * 0.2;
+            
+            // Enhanced color palette with more variety
             const colorValues = [
                 [0, 1, 0.533], // techGreen
                 [1, 0, 0.533], // pink
                 [0.533, 0, 1], // purple
                 [1, 0.867, 0], // goldGlitter
-                [0, 0.533, 1]  // skyBlue
+                [0, 0.533, 1], // skyBlue
+                [1, 0.2, 0.2], // red
+                [0.2, 1, 0.2], // bright green
+                [1, 1, 0.2]    // yellow
             ];
             const color = colorValues[Math.floor(Math.random() * colorValues.length)];
             colors[i3] = color[0];
             colors[i3 + 1] = color[1];
             colors[i3 + 2] = color[2];
             
-            sizes[i] = Math.random() * 2 + 1;
+            sizes[i] = Math.random() * 3 + 1;
         }
         
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
         
         const material = new THREE.PointsMaterial({
             size: 2,
             vertexColors: true,
             transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
         });
         
         this.particleSystem = new THREE.Points(geometry, material);
         this.scene.add(this.particleSystem);
+        
+        // Store particle data for animation
+        this.particlePositions = positions;
+        this.particleVelocities = velocities;
+        this.particleCount = particleCount;
     }
     
     initLightSystem() {
@@ -307,6 +329,9 @@ class Pow3rAdvanced {
                 }
             }
         });
+        
+        // Initialize filtered nodes to show all nodes initially
+        this.filteredNodes = [...this.allNodes];
         
         console.log(`📊 Processed ${this.allNodes.length} nodes and ${this.allEdges.length} edges`);
     }
@@ -777,12 +802,21 @@ class Pow3rAdvanced {
     }
     
     initUIControls() {
-        // Lock toggle
+        // Enhanced Lock toggle
         const lockToggle = document.getElementById('lock-toggle');
         lockToggle.addEventListener('click', () => {
             this.uiLocked = !this.uiLocked;
             lockToggle.classList.toggle('locked', this.uiLocked);
-            lockToggle.textContent = this.uiLocked ? '🔓' : '🔒';
+            
+            if (this.uiLocked) {
+                lockToggle.innerHTML = '<i class="fas fa-lock icon"></i>';
+                this.lockUIComponents();
+                console.log('🔒 UI components locked in place');
+            } else {
+                lockToggle.innerHTML = '<i class="fas fa-unlock icon"></i>';
+                this.unlockUIComponents();
+                console.log('🔓 UI components unlocked - free positioning');
+            }
         });
         
         // S3arch collapse
@@ -1236,6 +1270,51 @@ class Pow3rAdvanced {
         });
     }
     
+    lockUIComponents() {
+        // Store current positions of UI components
+        this.lockedUIPositions = {};
+        
+        const uiPanels = document.querySelectorAll('.ui-panel');
+        uiPanels.forEach((panel, index) => {
+            const rect = panel.getBoundingClientRect();
+            this.lockedUIPositions[panel.id] = {
+                x: rect.left,
+                y: rect.top,
+                width: rect.width,
+                height: rect.height
+            };
+            
+            // Add locked styling
+            panel.style.position = 'fixed';
+            panel.style.pointerEvents = 'all';
+            panel.style.transition = 'none';
+        });
+        
+        // Disable drag functionality when locked
+        this.disableDragMode();
+    }
+    
+    unlockUIComponents() {
+        // Restore UI components to their original positioning
+        const uiPanels = document.querySelectorAll('.ui-panel');
+        uiPanels.forEach((panel) => {
+            if (this.lockedUIPositions && this.lockedUIPositions[panel.id]) {
+                const pos = this.lockedUIPositions[panel.id];
+                panel.style.left = pos.x + 'px';
+                panel.style.top = pos.y + 'px';
+            }
+            
+            // Remove locked styling
+            panel.style.position = 'absolute';
+            panel.style.transition = 'all 0.3s ease-in-out';
+        });
+        
+        // Re-enable drag functionality when unlocked
+        if (this.currentMode === '2d') {
+            this.enableDragMode();
+        }
+    }
+    
     showDetailsCard(node) {
         const detailsCard = document.getElementById('details-card');
         const detailsTitle = document.getElementById('details-title');
@@ -1302,17 +1381,52 @@ class Pow3rAdvanced {
             this.controls.update();
         }
         
-        // Animate particles
-        if (this.particleSystem) {
-            this.particleSystem.rotation.y += 0.001;
+        // Enhanced particle animation - shooting stars effect
+        if (this.particleSystem && this.particlePositions && this.particleVelocities) {
+            const positions = this.particleSystem.geometry.attributes.position.array;
+            
+            for (let i = 0; i < this.particleCount; i++) {
+                const i3 = i * 3;
+                
+                // Update positions based on velocities
+                positions[i3] += this.particleVelocities[i3];
+                positions[i3 + 1] += this.particleVelocities[i3 + 1];
+                positions[i3 + 2] += this.particleVelocities[i3 + 2];
+                
+                // Reset particles that have moved too far
+                const distance = Math.sqrt(
+                    positions[i3] * positions[i3] + 
+                    positions[i3 + 1] * positions[i3 + 1] + 
+                    positions[i3 + 2] * positions[i3 + 2]
+                );
+                
+                if (distance > 400) {
+                    // Respawn particle at edge
+                    const angle = Math.random() * Math.PI * 2;
+                    const respawnDistance = 350;
+                    positions[i3] = Math.cos(angle) * respawnDistance;
+                    positions[i3 + 1] = Math.sin(angle) * respawnDistance;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 200;
+                }
+            }
+            
+            this.particleSystem.geometry.attributes.position.needsUpdate = true;
         }
         
-        // Animate nodes
+        // Animate nodes with enhanced movement
         this.nodeMeshes.forEach((mesh, nodeId) => {
             if (mesh.userData && mesh.userData.originalY !== undefined) {
                 const time = Date.now() * 0.001;
                 mesh.position.y = mesh.userData.originalY + Math.sin(time + mesh.userData.animationOffset) * 0.5;
             }
+            // Add subtle rotation
+            mesh.rotation.y += 0.005;
+            mesh.rotation.x += 0.002;
+        });
+        
+        // Animate repo boxes
+        this.repoBoxes.forEach(box => {
+            box.rotation.y += 0.002;
         });
         
         // Render
