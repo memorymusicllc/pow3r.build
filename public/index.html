@@ -183,6 +183,57 @@
             box-shadow: 0 0 15px rgba(255, 0, 136, 0.4);
         }
 
+        /* Stats Panel */
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            right: 200px;
+            background: rgba(0, 17, 34, 0.8);
+            border: 0.8px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 250px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-panel h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #00ff88;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: #88aaff;
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-green { background: #00ff88; }
+        .status-orange { background: #ff7f00; }
+        .status-red { background: #ff0000; }
+        .status-gray { background: #808080; }
+
         /* Loading State */
         .loading {
             position: absolute;
@@ -281,6 +332,35 @@
             <p>Quantum Repository Intelligence • Particle Space Theme • Transform3r Ready</p>
         </div>
 
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <h3>Repository Stats</h3>
+            <div class="stat-row">
+                <span class="stat-label">Total Projects</span>
+                <span class="stat-value" id="stat-projects">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="status-indicator status-green"></span>Active</span>
+                <span class="stat-value" id="stat-active">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="status-indicator status-orange"></span>Development</span>
+                <span class="stat-value" id="stat-development">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="status-indicator status-red"></span>Blocked</span>
+                <span class="stat-value" id="stat-blocked">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="status-indicator status-gray"></span>Archived</span>
+                <span class="stat-value" id="stat-archived">-</span>
+            </div>
+            <div class="stat-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(0,255,136,0.3);">
+                <span class="stat-label">Total Nodes</span>
+                <span class="stat-value" id="stat-nodes">-</span>
+            </div>
+        </div>
+
         <!-- Pow3r S3arch Component -->
         <div class="pow3r-s3arch">
             <div class="s3arch-container particle-space-wireframe pow3r-moment">
@@ -311,7 +391,7 @@
         <!-- Loading State -->
         <div class="loading" id="loading">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Initializing Pow3r Graph...</div>
+            <div class="loading-text">Loading Quantum Repository Intelligence...</div>
         </div>
     </div>
 
@@ -320,13 +400,11 @@
     {
         "imports": {
             "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-            "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js",
-            "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
         }
     }
     </script>
     
-    <script type="module" src="pow3r-app.js"></script>
+    <script type="module" src="pow3r-complete.js"></script>
 </body>
 </html>
