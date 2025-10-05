@@ -1,0 +1,77 @@
+{
+  "name": "@pow3r/graph",
+  "version": "1.0.0",
+  "description": "Pow3r Graph - 2D/3D graph transformations with Timeline 3D and Transform3r syntax",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "graph",
+    "3d",
+    "timeline",
+    "transform",
+    "pow3r",
+    "particle-space",
+    "quantum",
+    "visualization"
+  ],
+  "author": "pow3r.build",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "@pow3r/search-ui": "^1.0.0"
+  },
+  "dependencies": {
+    "zustand": "^4.4.7",
+    "framer-motion": "^10.16.16"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "rollup": "^4.6.1",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vitest": "^1.0.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./pow3r-build": {
+      "import": "./dist/integrations/pow3rBuild.esm.js",
+      "require": "./dist/integrations/pow3rBuild.js",
+      "types": "./dist/integrations/pow3rBuild.d.ts"
+    },
+    "./schemas": {
+      "import": "./dist/schemas/pow3rStatusSchema.esm.js",
+      "require": "./dist/schemas/pow3rStatusSchema.js",
+      "types": "./dist/schemas/pow3rStatusSchema.d.ts"
+    }
+  }
+}
