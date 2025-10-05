@@ -1,0 +1,96 @@
+{
+  "name": "@pow3r/search-ui",
+  "version": "1.0.0",
+  "description": "TRON-style Advanced Search UI - First pow3r component with wireframe aesthetics, particle effects, and smart search",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "search",
+    "ui",
+    "tron",
+    "wireframe",
+    "particles",
+    "react",
+    "three-fiber",
+    "react-flow",
+    "zustand",
+    "redux",
+    "pow3r"
+  ],
+  "author": "pow3r.build",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "zustand": "^4.4.7",
+    "framer-motion": "^10.16.16"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "rollup": "^4.6.1",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vitest": "^1.0.4"
+  },
+  "optionalDependencies": {
+    "@react-three/fiber": "^8.15.11",
+    "@react-three/drei": "^9.88.13",
+    "reactflow": "^11.10.4",
+    "react-redux": "^9.0.4",
+    "@reduxjs/toolkit": "^2.0.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react-three-fiber": {
+      "import": "./dist/integrations/ReactThreeFiber.esm.js",
+      "require": "./dist/integrations/ReactThreeFiber.js",
+      "types": "./dist/integrations/ReactThreeFiber.d.ts"
+    },
+    "./react-flow": {
+      "import": "./dist/integrations/ReactFlow.esm.js",
+      "require": "./dist/integrations/ReactFlow.js",
+      "types": "./dist/integrations/ReactFlow.d.ts"
+    },
+    "./store": {
+      "import": "./dist/store/searchStore.esm.js",
+      "require": "./dist/store/searchStore.js",
+      "types": "./dist/store/searchStore.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/useTronSearch.esm.js",
+      "require": "./dist/hooks/useTronSearch.js",
+      "types": "./dist/hooks/useTronSearch.d.ts"
+    }
+  }
+}
