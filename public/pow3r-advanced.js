@@ -86,6 +86,9 @@ class Pow3rAdvanced {
             // Load real data
             await this.loadRealData();
             
+            // Create 3D UI components FIRST
+            this.create3DUIElements();
+            
             // Initialize enhanced S3arch
             this.initEnhancedS3arch();
             
