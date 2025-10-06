@@ -29,8 +29,8 @@ class ComprehensiveAnalyzer:
         self.api_keys = api_keys
         
         # Output paths
-        self.output_json = self.repo_path / 'pow3r.config.json'
-        self.output_canvas = self.repo_path / 'pow3r.config.canvas'
+        self.output_json = self.repo_path / 'pow3r.status.json'
+        self.output_canvas = self.repo_path / 'pow3r.canvas.json'
         self.output_mermaid = self.repo_path / 'pow3r.config.md'
     
     def analyze(self):

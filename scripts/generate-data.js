@@ -29,44 +29,25 @@ async function findConfigFiles(dir, depth = 0) {
       }
       
       const fullPath = path.join(dir, entry.name);
+      const relativePath = path.relative(BASE_PATH, fullPath);
       
       if (entry.isDirectory()) {
         const subConfigs = await findConfigFiles(fullPath, depth + 1);
         configs.push(...subConfigs);
-      } else if (entry.name === 'pow3r.config.json' || entry.name === 'pow3r.status.json' || entry.name === 'dev-status.config.json') {
+      } else if (entry.name === 'pow3r.status.json') {
         try {
           const content = await fs.readFile(fullPath, 'utf8');
           const config = JSON.parse(content);
           
-          // Determine config type and extract project name
-          let configType = 'v1';
-          let projectName = 'Unknown Project';
-          
-          if (entry.name === 'pow3r.config.json') {
-            configType = 'v3-comprehensive';
-            projectName = config.projectName || config.graphId || 'Unknown';
-          } else if (entry.name === 'pow3r.status.json') {
-            configType = 'v2';
-            projectName = (config.assets && config.assets[0] && config.assets[0].metadata && config.assets[0].metadata.title) || 
-                         config.projectName || 'Unknown';
-          } else {
-            configType = 'v1';
-            projectName = config.projectName || 'Unknown';
-          }
-          
-          // Get nodes/assets
-          const nodes = config.nodes || config.assets || [];
-          
-          configs.push({
+          // Add metadata for the frontend to use
+          config.metadata = {
             path: fullPath,
-            relativePath: path.relative(BASE_PATH, fullPath),
-            configType: configType,
-            projectName: projectName,
-            nodeCount: nodes.length,
-            ...config
-          });
-          
-          console.log(`✓ Loaded: ${projectName} (${entry.name}, ${nodes.length} nodes)`);
+            relativePath: relativePath,
+            configType: 'v2', // Standardize to v2
+          };
+
+          configs.push(config);
+          console.log(`✓ Loaded: ${config.projectName || 'Unknown Project'} (${entry.name})`);
         } catch (error) {
           console.error(`✗ Error reading ${fullPath}:`, error.message);
         }
