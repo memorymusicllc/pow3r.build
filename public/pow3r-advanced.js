@@ -16,6 +16,7 @@ class Pow3rAdvanced {
         this.camera = null;
         this.renderer = null;
         this.labelRenderer = null;
+        this.uiContainer = null;
         this.composer = null;
         this.controls = null;
         
@@ -36,6 +37,12 @@ class Pow3rAdvanced {
         this.searchQuery = ''; // Initialize search query
         this.currentFilter = 'all';
         this.selectedNode = null;
+        
+        // 3D UI Components
+        this.searchPanel3D = null;
+        this.detailsCard3D = null;
+        this.lightController3D = null;
+        this.lockButton3D = null;
         
         // Light system
         this.lights = [];
@@ -72,36 +79,43 @@ class Pow3rAdvanced {
     async init() {
         console.log('🌌 Initializing Pow3r.build Advanced System...');
         
-        // Initialize 3D world
-        await this.init3DWorld();
-        
-        // Load real data
-        await this.loadRealData();
-        
-        // Initialize enhanced S3arch
-        this.initEnhancedS3arch();
-        
-        // Initialize UI controls
-        this.initUIControls();
-        
-        // Initialize light system
-        this.initLightSystem();
-        
-        // Create visualization
-        this.createVisualization();
-        
-        // Update stats
-        this.updateStats();
-        
-        // Hide loading
-        this.hideLoading();
-        
-        console.log('✨ Pow3r.build Advanced System initialized successfully!');
+        try {
+            // Initialize 3D world
+            await this.init3DWorld();
+            
+            // Load real data
+            await this.loadRealData();
+            
+            // Initialize enhanced S3arch
+            this.initEnhancedS3arch();
+            
+            // Initialize UI controls
+            this.initUIControls();
+            
+            // Initialize light system
+            this.initLightSystem();
+            
+            // Create visualization
+            this.createVisualization();
+            
+            // Update stats
+            this.updateStats();
+            
+            console.log('✨ Pow3r.build Advanced System initialized successfully!');
+        } catch (error) {
+            console.error('❌ Error during initialization:', error);
+        } finally {
+            // Always hide loading screen
+            this.hideLoading();
+        }
     }
     
     async init3DWorld() {
         const canvas = document.getElementById('graph-canvas');
-        if (!canvas) return;
+        if (!canvas) {
+            console.error('❌ Canvas element not found');
+            return;
+        }
         
         // Scene setup
         this.scene = new THREE.Scene();
@@ -128,7 +142,20 @@ class Pow3rAdvanced {
         this.labelRenderer.domElement.style.position = 'absolute';
         this.labelRenderer.domElement.style.top = '0px';
         this.labelRenderer.domElement.style.pointerEvents = 'none';
+        this.labelRenderer.domElement.style.zIndex = '10';
         canvas.parentNode.appendChild(this.labelRenderer.domElement);
+        
+        // UI container for HTML-based UI components
+        this.uiContainer = document.createElement('div');
+        this.uiContainer.id = 'ui-container-3d';
+        this.uiContainer.style.position = 'fixed';
+        this.uiContainer.style.top = '0';
+        this.uiContainer.style.left = '0';
+        this.uiContainer.style.width = '100%';
+        this.uiContainer.style.height = '100%';
+        this.uiContainer.style.pointerEvents = 'none';
+        this.uiContainer.style.zIndex = '20';
+        document.body.appendChild(this.uiContainer);
         
         // Post-processing for glow effects
         this.composer = new EffectComposer(this.renderer);
@@ -158,6 +185,9 @@ class Pow3rAdvanced {
         
         // Handle resize
         window.addEventListener('resize', () => this.onWindowResize());
+        
+        // Add mouse interaction for 3D UI
+        this.add3DUIInteraction();
     }
     
     initParticleSystem() {
@@ -365,30 +395,33 @@ class Pow3rAdvanced {
     }
     
     loadSampleData() {
-        this.allNodes = [
-            {
-                id: 'sample-1',
-                name: 'Pow3r S3arch',
-                type: 'component',
-                status: 'green',
-                project: 'Pow3r.build',
-                position: { x: -10, y: 5, z: 0 },
-                metadata: { language: 'TypeScript', files: 15, size: 2.3, commits: 42 }
-            },
-            {
-                id: 'sample-2',
-                name: 'Pow3r Graph',
-                type: 'component',
-                status: 'green',
-                project: 'Pow3r.build',
-                position: { x: 10, y: 5, z: 0 },
-                metadata: { language: 'TypeScript', files: 12, size: 1.8, commits: 38 }
-            }
-        ];
-        
-        this.allEdges = [
-            { from: 'sample-1', to: 'sample-2', type: 'dependsOn', strength: 0.8 }
-        ];
+        console.log('📊 Loading sample data...');
+        this.projects = [{
+            projectName: 'Pow3r.build',
+            nodes: [
+                {
+                    id: 'sample-1',
+                    name: 'Pow3r S3arch',
+                    type: 'component',
+                    status: 'green',
+                    position: { x: -10, y: 5, z: 0 },
+                    metadata: { language: 'TypeScript', files: 15, size: 2.3, commits: 42 }
+                },
+                {
+                    id: 'sample-2',
+                    name: 'Pow3r Graph',
+                    type: 'component',
+                    status: 'green',
+                    position: { x: 10, y: 5, z: 0 },
+                    metadata: { language: 'TypeScript', files: 12, size: 1.8, commits: 38 }
+                }
+            ],
+            edges: [
+                { from: 'sample-1', to: 'sample-2', type: 'dependsOn', strength: 0.8 }
+            ]
+        }];
+        this.processData();
+        console.log('✅ Loaded sample data successfully');
     }
     
     createVisualization() {
@@ -405,7 +438,10 @@ class Pow3rAdvanced {
         });
         this.edgeLines = [];
         
-        // Create repo boxes first
+        // Create 3D UI elements first
+        this.create3DUIElements();
+        
+        // Create repo boxes
         this.createRepoBoxes();
         
         // Create node cards
@@ -419,6 +455,417 @@ class Pow3rAdvanced {
         });
         
         console.log(`🎨 Created ${this.nodeMeshes.size} node cards and ${this.edgeLines.length} edges`);
+    }
+    
+    create3DUIElements() {
+        // Create 3D search panel with filter buttons - follows camera unless locked
+        this.create3DSearchPanel();
+        
+        // Create 3D light controller - follows camera unless locked
+        this.create3DLightController();
+        
+        // Create 3D lock button - always visible, controls camera following
+        this.create3DLockButton();
+        
+        // Details card created on demand when node is selected
+    }
+    
+    create3DSearchPanel() {
+        // Create HTML element for search panel
+        const searchDiv = document.createElement('div');
+        searchDiv.id = 'pow3r-s3arch-3d';
+        searchDiv.className = 'pow3r-s3arch';
+        searchDiv.style.width = '400px';
+        searchDiv.style.backgroundColor = 'rgba(0, 17, 34, 0.95)';
+        searchDiv.style.border = '2px solid rgba(0, 255, 136, 0.8)';
+        searchDiv.style.borderRadius = '12px';
+        searchDiv.style.padding = '20px';
+        searchDiv.style.backdropFilter = 'blur(15px)';
+        searchDiv.style.fontFamily = 'Google Prime Courier, monospace';
+        searchDiv.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
+        searchDiv.style.display = 'block';
+        
+        // Search header with collapse button
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.marginBottom = '15px';
+        
+        const title = document.createElement('div');
+        title.textContent = '🔍 Pow3r S3arch';
+        title.style.color = '#00ff88';
+        title.style.fontSize = '18px';
+        title.style.fontWeight = 'bold';
+        
+        const collapseBtn = document.createElement('button');
+        collapseBtn.textContent = '▼';
+        collapseBtn.style.background = 'none';
+        collapseBtn.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+        collapseBtn.style.borderRadius = '50%';
+        collapseBtn.style.width = '30px';
+        collapseBtn.style.height = '30px';
+        collapseBtn.style.color = '#ffffff';
+        collapseBtn.style.cursor = 'pointer';
+        collapseBtn.style.transition = 'all 0.3s ease';
+        
+        header.appendChild(title);
+        header.appendChild(collapseBtn);
+        
+        // Search content (collapsible)
+        const content = document.createElement('div');
+        content.style.transition = 'all 0.3s ease';
+        content.style.overflow = 'hidden';
+        
+        // Search input
+        const input = document.createElement('input');
+        input.id = 's3arch-input';
+        input.type = 'text';
+        input.placeholder = 'Search repositories, nodes, or use repo: prefix...';
+        input.style.width = '100%';
+        input.style.background = 'transparent';
+        input.style.border = 'none';
+        input.style.borderBottom = '1px solid rgba(255, 255, 255, 0.3)';
+        input.style.color = '#ffffff';
+        input.style.fontSize = '16px';
+        input.style.padding = '10px 0';
+        input.style.outline = 'none';
+        input.style.marginBottom = '15px';
+        input.style.fontFamily = 'Google Prime Courier, monospace';
+        
+        // Filter chips container
+        const filterChips = document.createElement('div');
+        filterChips.id = 'filter-chips';
+        filterChips.style.display = 'flex';
+        filterChips.style.flexWrap = 'wrap';
+        filterChips.style.gap = '8px';
+        filterChips.style.marginTop = '15px';
+        
+        const filters = ['all', 'repos', 'nodes', 'green', 'red'];
+        const filterLabels = { all: 'All', repos: 'Repos', nodes: 'Nodes', green: 'Active', red: 'Blocked' };
+        
+        filters.forEach(filter => {
+            const chip = document.createElement('div');
+            chip.className = 'filter-chip';
+            chip.textContent = filterLabels[filter];
+            chip.style.background = filter === 'all' ? 'rgba(0, 255, 136, 0.3)' : 'rgba(0, 255, 136, 0.1)';
+            chip.style.border = '1px solid rgba(0, 255, 136, 0.3)';
+            chip.style.borderRadius = '20px';
+            chip.style.padding = '5px 12px';
+            chip.style.fontSize = '12px';
+            chip.style.color = '#00ff88';
+            chip.style.cursor = 'pointer';
+            chip.style.transition = 'all 0.3s ease';
+            chip.dataset.filter = filter;
+            
+            chip.addEventListener('click', () => {
+                // Remove active from all chips
+                filterChips.querySelectorAll('div').forEach(c => {
+                    c.style.background = 'rgba(0, 255, 136, 0.1)';
+                });
+                // Set this chip as active
+                chip.style.background = 'rgba(0, 255, 136, 0.3)';
+                chip.style.boxShadow = '0 0 10px rgba(0, 255, 136, 0.3)';
+                
+                this.currentFilter = filter;
+                this.performSearch();
+            });
+            
+            filterChips.appendChild(chip);
+        });
+        
+        content.appendChild(input);
+        content.appendChild(filterChips);
+        
+        searchDiv.appendChild(header);
+        searchDiv.appendChild(content);
+        
+        // Add event listeners
+        input.addEventListener('input', (e) => {
+            this.searchQuery = e.target.value;
+            this.performSearch();
+        });
+        
+        collapseBtn.addEventListener('click', () => {
+            this.s3archCollapsed = !this.s3archCollapsed;
+            if (this.s3archCollapsed) {
+                content.style.maxHeight = '0px';
+                content.style.opacity = '0';
+                collapseBtn.textContent = '▶';
+                title.textContent = '🔍';
+                searchDiv.style.width = '60px';
+            } else {
+                content.style.maxHeight = '500px';
+                content.style.opacity = '1';
+                collapseBtn.textContent = '▼';
+                title.textContent = '🔍 Pow3r S3arch';
+                searchDiv.style.width = '400px';
+            }
+        });
+        
+        // Position as overlay element
+        searchDiv.style.position = 'fixed';
+        searchDiv.style.top = '20px';
+        searchDiv.style.left = '20px';
+        searchDiv.style.pointerEvents = 'auto';
+        searchDiv.style.zIndex = '100';
+        
+        this.uiContainer.appendChild(searchDiv);
+        this.searchPanel3D = searchDiv;
+        
+        console.log('✅ 3D Search Panel created with filter buttons');
+    }
+    
+    create3DStatsPanel() {
+        // Create 3D stats panel
+        const panelGeometry = new THREE.PlaneGeometry(15, 12);
+        const panelMaterial = new THREE.MeshBasicMaterial({
+            color: 0x001122,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        
+        const statsPanel = new THREE.Mesh(panelGeometry, panelMaterial);
+        statsPanel.position.set(30, 20, -10);
+        statsPanel.userData = { type: 'stats-panel' };
+        
+        // Add wireframe border
+        const wireframeGeometry = new THREE.EdgesGeometry(panelGeometry);
+        const wireframeMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x00ff88, 
+            transparent: true, 
+            opacity: 0.8 
+        });
+        const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+        statsPanel.add(wireframe);
+        
+        this.scene.add(statsPanel);
+    }
+    
+    create3DLightController() {
+        // Create HTML element for light controller
+        const controllerDiv = document.createElement('div');
+        controllerDiv.id = 'light-controller-3d';
+        controllerDiv.className = 'light-controller';
+        controllerDiv.style.width = '250px';
+        controllerDiv.style.backgroundColor = 'rgba(0, 17, 34, 0.95)';
+        controllerDiv.style.border = '2px solid rgba(0, 255, 136, 0.8)';
+        controllerDiv.style.borderRadius = '12px';
+        controllerDiv.style.padding = '15px';
+        controllerDiv.style.backdropFilter = 'blur(15px)';
+        controllerDiv.style.fontFamily = 'Google Prime Courier, monospace';
+        controllerDiv.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
+        controllerDiv.style.display = 'block';
+        
+        // Title
+        const title = document.createElement('h4');
+        title.textContent = '💡 Light Controller';
+        title.style.color = '#00ff88';
+        title.style.fontSize = '16px';
+        title.style.marginBottom = '10px';
+        title.style.margin = '0 0 10px 0';
+        
+        // Intensity control
+        const intensityControl = document.createElement('div');
+        intensityControl.style.marginBottom = '10px';
+        
+        const intensityLabel = document.createElement('label');
+        intensityLabel.textContent = 'Intensity:';
+        intensityLabel.style.color = '#88aaff';
+        intensityLabel.style.fontSize = '12px';
+        intensityLabel.style.display = 'block';
+        intensityLabel.style.marginBottom = '5px';
+        
+        const intensitySlider = document.createElement('input');
+        intensitySlider.type = 'range';
+        intensitySlider.min = '0';
+        intensitySlider.max = '2';
+        intensitySlider.step = '0.1';
+        intensitySlider.value = '1';
+        intensitySlider.style.width = '100%';
+        
+        intensityControl.appendChild(intensityLabel);
+        intensityControl.appendChild(intensitySlider);
+        
+        // Color control
+        const colorControl = document.createElement('div');
+        
+        const colorLabel = document.createElement('label');
+        colorLabel.textContent = 'Color:';
+        colorLabel.style.color = '#88aaff';
+        colorLabel.style.fontSize = '12px';
+        colorLabel.style.display = 'block';
+        colorLabel.style.marginBottom = '5px';
+        
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.value = '#00ff88';
+        colorPicker.style.width = '100%';
+        colorPicker.style.height = '30px';
+        colorPicker.style.cursor = 'pointer';
+        
+        colorControl.appendChild(colorLabel);
+        colorControl.appendChild(colorPicker);
+        
+        controllerDiv.appendChild(title);
+        controllerDiv.appendChild(intensityControl);
+        controllerDiv.appendChild(colorControl);
+        
+        // Add event listeners
+        intensitySlider.addEventListener('input', (e) => {
+            this.lightIntensity = parseFloat(e.target.value);
+            this.updateLights();
+        });
+        
+        colorPicker.addEventListener('change', (e) => {
+            this.lightColor = parseInt(e.target.value.replace('#', '0x'));
+            this.updateLights();
+        });
+        
+        // Position as overlay element
+        controllerDiv.style.position = 'fixed';
+        controllerDiv.style.bottom = '20px';
+        controllerDiv.style.right = '20px';
+        controllerDiv.style.pointerEvents = 'auto';
+        controllerDiv.style.zIndex = '100';
+        
+        this.uiContainer.appendChild(controllerDiv);
+        this.lightController3D = controllerDiv;
+        
+        console.log('✅ 3D Light Controller created');
+    }
+    
+    create3DTitle() {
+        // Create 3D title using pow3r.status.json schema
+        const titleGeometry = new THREE.PlaneGeometry(25, 8);
+        const titleMaterial = new THREE.MeshBasicMaterial({
+            color: 0x001122,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide
+        });
+        
+        const titlePanel = new THREE.Mesh(titleGeometry, titleMaterial);
+        titlePanel.position.set(0, 35, -10);
+        titlePanel.userData = { type: 'title-panel' };
+        
+        // Add wireframe border
+        const wireframeGeometry = new THREE.EdgesGeometry(titleGeometry);
+        const wireframeMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x00ff88, 
+            transparent: true, 
+            opacity: 0.8 
+        });
+        const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+        titlePanel.add(wireframe);
+        
+        this.scene.add(titlePanel);
+    }
+    
+    create3DLockButton() {
+        // Create HTML element for lock button
+        const buttonDiv = document.createElement('div');
+        buttonDiv.id = 'lock-toggle-3d';
+        buttonDiv.className = 'lock-toggle';
+        buttonDiv.style.width = '60px';
+        buttonDiv.style.height = '60px';
+        buttonDiv.style.backgroundColor = 'rgba(0, 17, 34, 0.95)';
+        buttonDiv.style.border = '2px solid rgba(0, 255, 136, 0.8)';
+        buttonDiv.style.borderRadius = '50%';
+        buttonDiv.style.display = 'flex';
+        buttonDiv.style.alignItems = 'center';
+        buttonDiv.style.justifyContent = 'center';
+        buttonDiv.style.cursor = 'pointer';
+        buttonDiv.style.transition = 'all 0.3s ease';
+        buttonDiv.style.backdropFilter = 'blur(15px)';
+        buttonDiv.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
+        
+        const icon = document.createElement('span');
+        icon.textContent = '🔓';
+        icon.style.fontSize = '28px';
+        
+        buttonDiv.appendChild(icon);
+        
+        // Add click handler - toggles UI visibility
+        buttonDiv.addEventListener('click', () => {
+            this.uiLocked = !this.uiLocked;
+            if (this.uiLocked) {
+                icon.textContent = '🔒';
+                buttonDiv.style.borderColor = '#ff0088';
+                buttonDiv.style.backgroundColor = 'rgba(255, 0, 136, 0.2)';
+                // Hide UI panels when locked
+                if (this.searchPanel3D) this.searchPanel3D.style.display = 'none';
+                if (this.lightController3D) this.lightController3D.style.display = 'none';
+                console.log('🔒 UI panels hidden');
+            } else {
+                icon.textContent = '🔓';
+                buttonDiv.style.borderColor = '#00ff88';
+                buttonDiv.style.backgroundColor = 'rgba(0, 17, 34, 0.95)';
+                // Show UI panels when unlocked
+                if (this.searchPanel3D) this.searchPanel3D.style.display = 'block';
+                if (this.lightController3D) this.lightController3D.style.display = 'block';
+                console.log('🔓 UI panels visible');
+            }
+        });
+        
+        buttonDiv.addEventListener('mouseenter', () => {
+            buttonDiv.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.5)';
+        });
+        
+        buttonDiv.addEventListener('mouseleave', () => {
+            buttonDiv.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
+        });
+        
+        // Position as overlay element
+        buttonDiv.style.position = 'fixed';
+        buttonDiv.style.bottom = '20px';
+        buttonDiv.style.left = '20px';
+        buttonDiv.style.pointerEvents = 'auto';
+        buttonDiv.style.zIndex = '100';
+        
+        this.uiContainer.appendChild(buttonDiv);
+        this.lockButton3D = buttonDiv;
+        
+        console.log('✅ 3D Lock Button created');
+    }
+    
+    create3DTransformControls() {
+        // Create 3D transform controls
+        const buttonGeometry = new THREE.PlaneGeometry(3, 2);
+        const buttonMaterial = new THREE.MeshBasicMaterial({
+            color: 0x001122,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        
+        const positions = [
+            { x: 25, y: 30, z: -10 },
+            { x: 30, y: 30, z: -10 },
+            { x: 35, y: 30, z: -10 },
+            { x: 40, y: 30, z: -10 }
+        ];
+        
+        const buttonLabels = ['2D', '3D', 'Timeline', 'Quantum'];
+        
+        positions.forEach((pos, index) => {
+            const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
+            button.position.set(pos.x, pos.y, pos.z);
+            button.userData = { type: 'transform-button', mode: buttonLabels[index].toLowerCase() };
+            
+            // Add wireframe border
+            const wireframeGeometry = new THREE.EdgesGeometry(buttonGeometry);
+            const wireframeMaterial = new THREE.LineBasicMaterial({ 
+                color: 0x00ff88, 
+                transparent: true, 
+                opacity: 0.8 
+            });
+            const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+            button.add(wireframe);
+            
+            this.scene.add(button);
+        });
     }
     
     createRepoBoxes() {
@@ -484,11 +931,11 @@ class Pow3rAdvanced {
             opacity: 0.9
         });
         
-        // Border material (glowing)
+        // Border material (subtle wireframe)
         const borderMaterial = new THREE.MeshBasicMaterial({
-            color: this.statusColors[node.status] || 0x808080,
+            color: 0x00ff88,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.3
         });
         
         // Create card mesh
@@ -614,49 +1061,31 @@ class Pow3rAdvanced {
     }
     
     initEnhancedS3arch() {
-        const searchInput = document.getElementById('s3arch-input');
-        const suggestions = document.getElementById('s3arch-suggestions');
-        const filterChips = document.getElementById('filter-chips');
-        const searchHistory = document.getElementById('search-history');
+        // Initialize 3D search functionality using pow3r.status.json schema
+        console.log('🔍 Initializing 3D S3arch with pow3r.status.json schema');
         
-        if (!searchInput) return;
-        
-        // Search input handling
-        searchInput.addEventListener('input', (e) => {
-            this.searchQuery = e.target.value;
-            this.showSuggestions();
-        });
-        
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+        // Set up keyboard input for 3D search
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return; // Don't interfere with any remaining inputs
+            
+            // Handle search input in 3D scene
+            if (e.key.length === 1) {
+                this.searchQuery += e.key;
+                this.performSearch();
+            } else if (e.key === 'Backspace') {
+                this.searchQuery = this.searchQuery.slice(0, -1);
+                this.performSearch();
+            } else if (e.key === 'Enter') {
                 this.executeSearch();
             }
         });
         
-        // Filter chips
-        filterChips.addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-chip')) {
-                filterChips.querySelectorAll('.filter-chip').forEach(chip => {
-                    chip.classList.remove('active');
-                });
-                e.target.classList.add('active');
-                this.currentFilter = e.target.dataset.filter;
-                this.performSearch();
-            }
-        });
-        
-        // Load search history
-        this.loadSearchHistory();
-        
-        // Repo collapse toggle
+        // Initialize search state
+        this.searchQuery = '';
+        this.currentFilter = 'all';
         this.isCollapsed = false;
-        const collapseBtn = document.getElementById('repo-collapse-toggle');
-        collapseBtn.addEventListener('click', () => {
-            this.isCollapsed = !this.isCollapsed;
-            this.toggleRepoCollapse(this.isCollapsed);
-            collapseBtn.innerHTML = this.isCollapsed ? '<i class="fas fa-expand-alt"></i>' : '<i class="fas fa-compress-alt"></i>';
-            collapseBtn.title = this.isCollapsed ? 'Expand Nodes' : 'Collapse Nodes';
-        });
+        
+        console.log('✅ 3D S3arch initialized with pow3r.status.json schema');
     }
     
     showSuggestions() {
@@ -718,6 +1147,7 @@ class Pow3rAdvanced {
     }
     
     performSearch() {
+        console.log('🔍 Performing search with query:', this.searchQuery);
         let visibleNodes = this.allNodes;
         const query = this.searchQuery.toLowerCase().trim();
 
@@ -726,16 +1156,19 @@ class Pow3rAdvanced {
             const repoName = query.substring(5);
             visibleNodes = visibleNodes.filter(node => node.project.toLowerCase().includes(repoName));
             this.currentFilter = 'all'; // Ignore other filters when repo specific
+            console.log('📁 Repo search results:', visibleNodes.length);
         } else if (query) {
             visibleNodes = visibleNodes.filter(node =>
                 (node.name && node.name.toLowerCase().includes(query)) ||
                 (node.type && node.type.toLowerCase().includes(query))
             );
+            console.log('🔍 General search results:', visibleNodes.length);
         }
 
         const filter = this.currentFilter;
         if (filter !== 'all' && filter !== 'repos' && filter !== 'nodes') {
             visibleNodes = visibleNodes.filter(node => node.status === filter);
+            console.log('🎯 Filter results:', visibleNodes.length);
         }
 
         this.filteredNodes = visibleNodes;
@@ -1340,14 +1773,58 @@ class Pow3rAdvanced {
     }
     
     showDetailsCard(node) {
-        const detailsCard = document.getElementById('details-card');
-        const detailsTitle = document.getElementById('details-title');
-        const detailsGrid = document.getElementById('details-grid');
+        // Remove existing details card if present
+        if (this.detailsCard3D) {
+            this.scene.remove(this.detailsCard3D);
+            this.detailsCard3D = null;
+        }
         
-        detailsTitle.textContent = node.name;
-        detailsGrid.innerHTML = '';
+        // Create HTML element for details card
+        const cardDiv = document.createElement('div');
+        cardDiv.id = 'details-card-3d';
+        cardDiv.className = 'details-card';
+        cardDiv.style.width = '400px';
+        cardDiv.style.backgroundColor = 'rgba(0, 17, 34, 0.95)';
+        cardDiv.style.border = '2px solid rgba(0, 255, 136, 0.8)';
+        cardDiv.style.borderRadius = '12px';
+        cardDiv.style.padding = '20px';
+        cardDiv.style.backdropFilter = 'blur(15px)';
+        cardDiv.style.fontFamily = 'Google Prime Courier, monospace';
+        cardDiv.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
+        cardDiv.style.display = 'block';
         
-        // Add node details
+        // Header with close button
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.marginBottom = '15px';
+        
+        const title = document.createElement('h3');
+        title.id = 'details-title';
+        title.textContent = node.name;
+        title.style.color = '#00ff88';
+        title.style.fontSize = '18px';
+        title.style.margin = '0';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.color = '#88aaff';
+        closeBtn.style.fontSize = '20px';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.addEventListener('click', () => this.hideDetailsCard());
+        
+        header.appendChild(title);
+        header.appendChild(closeBtn);
+        
+        // Details grid
+        const grid = document.createElement('div');
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        grid.style.gap = '10px';
+        
         const details = [
             { label: 'Type', value: node.type },
             { label: 'Status', value: node.status },
@@ -1361,22 +1838,52 @@ class Pow3rAdvanced {
         
         details.forEach(detail => {
             const item = document.createElement('div');
-            item.className = 'details-item';
-            item.innerHTML = `
-                <div class="details-label">${detail.label}</div>
-                <div class="details-value">${detail.value}</div>
-            `;
-            detailsGrid.appendChild(item);
+            
+            const label = document.createElement('div');
+            label.textContent = detail.label;
+            label.style.color = '#88aaff';
+            label.style.fontSize = '10px';
+            label.style.textTransform = 'uppercase';
+            label.style.marginBottom = '4px';
+            
+            const value = document.createElement('div');
+            value.textContent = detail.value;
+            value.style.color = '#ffffff';
+            value.style.fontSize = '12px';
+            value.style.fontWeight = '500';
+            
+            item.appendChild(label);
+            item.appendChild(value);
+            grid.appendChild(item);
         });
         
-        detailsCard.classList.add('visible');
+        cardDiv.appendChild(header);
+        cardDiv.appendChild(grid);
+        
+        // Position as overlay element
+        cardDiv.style.position = 'fixed';
+        cardDiv.style.bottom = '20px';
+        cardDiv.style.left = '50%';
+        cardDiv.style.transform = 'translateX(-50%)';
+        cardDiv.style.pointerEvents = 'auto';
+        cardDiv.style.zIndex = '100';
+        
+        this.uiContainer.appendChild(cardDiv);
+        this.detailsCard3D = cardDiv;
         this.selectedNode = node;
+        
+        console.log('✅ Details card shown for node:', node.name);
     }
     
     hideDetailsCard() {
-        const detailsCard = document.getElementById('details-card');
-        detailsCard.classList.remove('visible');
-        this.selectedNode = null;
+        if (this.detailsCard3D) {
+            if (this.detailsCard3D.parentNode) {
+                this.detailsCard3D.parentNode.removeChild(this.detailsCard3D);
+            }
+            this.detailsCard3D = null;
+            this.selectedNode = null;
+            console.log('✅ Details card hidden');
+        }
     }
     
     updateStats() {
@@ -1404,6 +1911,8 @@ class Pow3rAdvanced {
         if (this.controls) {
             this.controls.update();
         }
+        
+        // UI components are now fixed in screen space, lock button just hides/shows them
         
         // Enhanced particle animation - shooting stars effect
         if (this.particleSystem && this.particlePositions && this.particleVelocities) {
@@ -1506,13 +2015,19 @@ class Pow3rAdvanced {
         if (!this.camera || !this.renderer) return;
         
         const canvas = this.renderer.domElement;
-        this.camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-        this.labelRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+        this.renderer.setSize(width, height);
+        
+        if (this.labelRenderer) {
+            this.labelRenderer.setSize(width, height);
+        }
         
         if (this.composer) {
-            this.composer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+            this.composer.setSize(width, height);
         }
     }
     
@@ -1521,23 +2036,180 @@ class Pow3rAdvanced {
         const loading = document.getElementById('loading');
         if (loading) {
             loading.style.display = 'none';
-            console.log('Loading screen hidden.');
-            // Check visibility of UI elements right after hiding
-            const searchPanel = document.querySelector('.pow3r-s3arch');
-            if (searchPanel) {
-                const isVisible = window.getComputedStyle(searchPanel).display !== 'none';
-                console.log(`'.pow3r-s3arch' visibility after hideLoading: ${isVisible}`);
-            } else {
-                console.log('Could not find .pow3r-s3arch element');
+            console.log('✅ Loading screen hidden - 3D scene is now visible');
+        }
+    }
+    
+    add3DUIInteraction() {
+        const canvas = this.renderer.domElement;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        canvas.addEventListener('click', (event) => {
+            // Calculate mouse position in normalized device coordinates
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Update the picking ray with the camera and mouse position
+            raycaster.setFromCamera(mouse, this.camera);
+            
+            // Calculate objects intersecting the picking ray
+            const intersects = raycaster.intersectObjects(this.scene.children, true);
+            
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                const userData = clickedObject.userData;
+                
+                if (userData.type === 'transform-button') {
+                    console.log('🎯 Transform button clicked:', userData.mode);
+                    this.handleTransformMode(userData.mode);
+                } else if (userData.type === 'search-panel') {
+                    console.log('🔍 Search panel clicked');
+                    this.focusOnSearchPanel();
+                } else if (userData.type === 'stats-panel') {
+                    console.log('📊 Stats panel clicked');
+                    this.focusOnStatsPanel();
+                } else if (userData.type === 'light-controller') {
+                    console.log('💡 Light controller clicked');
+                    this.focusOnLightController();
+                } else if (userData.type === 'lock-button') {
+                    console.log('🔒 Lock button clicked');
+                    this.toggleUILock();
+                } else if (userData.type === 'title-panel') {
+                    console.log('📝 Title panel clicked');
+                    this.focusOnTitle();
+                }
+            }
+        });
+    }
+    
+    handleTransformMode(mode) {
+        console.log(`🔄 Switching to ${mode} mode`);
+        switch (mode) {
+            case '2d':
+                this.transformTo2D();
+                break;
+            case '3d':
+                this.transformTo3D();
+                break;
+            case 'timeline':
+                this.transformToTimeline();
+                break;
+            case 'quantum':
+                this.transformToQuantum();
+                break;
+        }
+    }
+    
+    focusOnSearchPanel() {
+        // Animate camera to focus on search panel
+        this.animateToPosition(this.camera, new THREE.Vector3(-30, 20, 10), 1000);
+    }
+    
+    focusOnStatsPanel() {
+        // Animate camera to focus on stats panel
+        this.animateToPosition(this.camera, new THREE.Vector3(30, 20, 10), 1000);
+    }
+    
+    focusOnLightController() {
+        // Animate camera to focus on light controller
+        this.animateToPosition(this.camera, new THREE.Vector3(30, -20, 10), 1000);
+    }
+    
+    toggleUILock() {
+        this.uiLocked = !this.uiLocked;
+        console.log(`🔒 UI Lock toggled: ${this.uiLocked ? 'LOCKED' : 'UNLOCKED'}`);
+        
+        // Update lock button visual state
+        const lockButton = this.scene.children.find(child => 
+            child.userData && child.userData.type === 'lock-button'
+        );
+        if (lockButton) {
+            const wireframe = lockButton.children[0];
+            if (wireframe) {
+                wireframe.material.color.setHex(this.uiLocked ? 0xff0088 : 0x00ff88);
             }
         }
+        
+        // If unlocked, make 3D UI objects moveable in 3D space
+        if (!this.uiLocked) {
+            this.enable3DUIMovement();
+        } else {
+            this.disable3DUIMovement();
+        }
+    }
+    
+    enable3DUIMovement() {
+        console.log('🎮 Enabling 3D UI movement - UI objects can now move in 3D space');
+        
+        // Make 3D UI objects moveable by adding random movement
+        this.scene.children.forEach(child => {
+            if (child.userData && (
+                child.userData.type === 'search-panel' ||
+                child.userData.type === 'stats-panel' ||
+                child.userData.type === 'light-controller' ||
+                child.userData.type === 'title-panel'
+            )) {
+                // Add slight random movement to show they're in 3D space
+                child.position.x += (Math.random() - 0.5) * 5;
+                child.position.y += (Math.random() - 0.5) * 5;
+                child.position.z += (Math.random() - 0.5) * 2;
+                
+                // Add slight rotation
+                child.rotation.z += (Math.random() - 0.5) * 0.1;
+            }
+        });
+    }
+    
+    disable3DUIMovement() {
+        console.log('🔒 Disabling 3D UI movement - UI objects locked in position');
+        
+        // Reset 3D UI objects to their original positions
+        this.scene.children.forEach(child => {
+            if (child.userData && (
+                child.userData.type === 'search-panel' ||
+                child.userData.type === 'stats-panel' ||
+                child.userData.type === 'light-controller' ||
+                child.userData.type === 'title-panel'
+            )) {
+                // Reset to original positions
+                if (child.userData.type === 'search-panel') {
+                    child.position.set(-30, 20, -10);
+                    child.rotation.set(0, 0, 0);
+                } else if (child.userData.type === 'stats-panel') {
+                    child.position.set(30, 20, -10);
+                    child.rotation.set(0, 0, 0);
+                } else if (child.userData.type === 'light-controller') {
+                    child.position.set(30, -20, -10);
+                    child.rotation.set(0, 0, 0);
+                } else if (child.userData.type === 'title-panel') {
+                    child.position.set(0, 35, -10);
+                    child.rotation.set(0, 0, 0);
+                }
+            }
+        });
+    }
+    
+    focusOnTitle() {
+        // Animate camera to focus on title
+        this.animateToPosition(this.camera, new THREE.Vector3(0, 35, 10), 1000);
     }
 }
 
 // Initialize Pow3r Advanced when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM loaded, initializing Pow3r.build...');
     new Pow3rAdvanced();
 });
+
+// Also try immediate initialization as fallback
+if (document.readyState === 'loading') {
+    console.log('📄 Document still loading, waiting for DOMContentLoaded...');
+} else {
+    console.log('⚡ Document already loaded, initializing immediately...');
+    new Pow3rAdvanced();
+}
 
 // Export for potential external use
 window.Pow3rAdvanced = Pow3rAdvanced;

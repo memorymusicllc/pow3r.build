@@ -59,7 +59,7 @@
             }
         }
 
-        /* Header */
+        /* Header - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .header {
             position: absolute;
             top: 0;
@@ -69,6 +69,7 @@
             background: linear-gradient(180deg, rgba(0, 17, 34, 0.95) 0%, rgba(0, 17, 34, 0) 100%);
             z-index: 100;
             pointer-events: none;
+            display: none;
         }
 
         .header h1 {
@@ -85,13 +86,14 @@
             opacity: 0.8;
         }
 
-        /* Pow3r S3arch Component - Enhanced */
+        /* Pow3r S3arch Component - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .pow3r-s3arch {
             position: absolute;
             top: 100px;
             left: 30px;
             right: 30px;
             z-index: 200;
+            display: none;
         }
 
         .s3arch-container {
@@ -253,23 +255,22 @@
             color: #00ff88;
         }
 
-        /* Pow3r Graph Component */
+        /* Pow3r Graph Component - FULLSCREEN */
         .pow3r-graph {
-            position: absolute;
-            top: 200px;
-            left: 30px;
-            right: 30px;
-            bottom: 30px;
-            z-index: 150;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
         }
 
         .graph-container {
             width: 100%;
             height: 100%;
-            background: rgba(0, 17, 34, 0.6);
-            border: 0.8px solid rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
+            background: transparent;
             position: relative;
             overflow: hidden;
         }
@@ -277,15 +278,16 @@
         .graph-canvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
 
-        /* Transform3r Controls */
+        /* Transform3r Controls - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .transform3r-controls {
             position: absolute;
             top: 20px;
             right: 20px;
             z-index: 300;
-            display: flex;
+            display: none;
             gap: 10px;
         }
 
@@ -312,7 +314,7 @@
             box-shadow: 0 0 15px rgba(255, 0, 136, 0.4);
         }
 
-        /* Stats Panel */
+        /* Stats Panel - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .stats-panel {
             position: absolute;
             top: 20px;
@@ -324,6 +326,7 @@
             min-width: 250px;
             z-index: 100;
             backdrop-filter: blur(10px);
+            display: none;
         }
 
         .stats-panel h3 {
@@ -363,7 +366,7 @@
         .status-red { background: #ff0000; }
         .status-gray { background: #808080; }
 
-        /* Lock Toggle Button */
+        /* Lock Toggle Button - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .lock-toggle {
             position: absolute;
             bottom: 20px;
@@ -375,7 +378,7 @@
             height: 40px;
             color: #ffffff;
             cursor: pointer;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 300;
@@ -392,7 +395,7 @@
             border-color: #ff0088;
         }
 
-        /* Light Controller */
+        /* Light Controller - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .light-controller {
             position: absolute;
             bottom: 20px;
@@ -404,6 +407,7 @@
             min-width: 200px;
             z-index: 300;
             backdrop-filter: blur(10px);
+            display: none;
         }
 
         .light-controller h4 {
@@ -439,7 +443,7 @@
             cursor: pointer;
         }
 
-        /* Details Card */
+        /* Details Card - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .details-card {
             position: absolute;
             bottom: 20px;
