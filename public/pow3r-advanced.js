@@ -63,7 +63,10 @@ class Pow3rAdvanced {
             gray: 0x808080
         };
         
-        this.init();
+        this.init().catch(error => {
+            console.error('❌ Failed to initialize Pow3r.build:', error);
+            this.hideLoading(); // Ensure loading screen is hidden even on failure
+        });
     }
     
     async init() {
@@ -94,7 +97,6 @@ class Pow3rAdvanced {
         this.hideLoading();
         
         console.log('✨ Pow3r.build Advanced System initialized successfully!');
-        debugger; // <-- Add debugger here
     }
     
     async init3DWorld() {
@@ -257,19 +259,31 @@ class Pow3rAdvanced {
         try {
             console.log('📊 Loading real repository data...');
             const response = await fetch('./data.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             
-            if (data.success && data.projects) {
+            // Check if data is an array (new format from generate-data.js)
+            if (Array.isArray(data)) {
+                this.projects = data;
+                this.processData();
+                console.log(`✅ Loaded ${this.projects.length} projects successfully`);
+            } 
+            // Legacy check for { success: true, projects: [] } wrapper
+            else if (data.success && data.projects) {
                 this.projects = data.projects;
                 this.processData();
                 console.log(`✅ Loaded ${this.projects.length} projects successfully`);
             } else {
-                console.warn('⚠️ No real data found, using sample data');
+                console.warn('⚠️ Data format is incorrect, using sample data');
                 this.loadSampleData();
             }
         } catch (error) {
-            console.error('❌ Error loading real data:', error);
-            this.loadSampleData();
+            console.error('❌ Error loading or parsing real data:', error);
+            this.loadSampleData(); // Fallback to sample data on error
+            // Ensure loading screen is hidden even on failure
+            this.hideLoading();
         }
     }
     
@@ -314,16 +328,6 @@ class Pow3rAdvanced {
                             to: `${project.projectName}-${edge.to}`,
                             type: edge.type || 'relatedTo',
                             strength: edge.strength || 0.5
-                        });
-                    });
-                } else {
-                    // Create default edge to repo box if no edges exist
-                    project.nodes.forEach(node => {
-                        this.allEdges.push({
-                            from: `${project.projectName}-${node.id}`,
-                            to: `${project.projectName}-repo`,
-                            type: 'partOf',
-                            strength: 0.3
                         });
                     });
                 }
@@ -449,7 +453,7 @@ class Pow3rAdvanced {
     
     createRepoLabel(projectName, boxMesh) {
         const labelDiv = document.createElement('div');
-        labelDiv.className = 'repo-label';
+        labelDiv.className = 'repo-box-label';
         labelDiv.textContent = projectName;
         labelDiv.style.color = '#00ff88';
         labelDiv.style.fontSize = '14px';
@@ -1518,7 +1522,6 @@ class Pow3rAdvanced {
         if (loading) {
             loading.style.display = 'none';
             console.log('Loading screen hidden.');
-            debugger; // <-- Add debugger here
             // Check visibility of UI elements right after hiding
             const searchPanel = document.querySelector('.pow3r-s3arch');
             if (searchPanel) {
