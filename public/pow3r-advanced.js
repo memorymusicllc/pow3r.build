@@ -637,10 +637,38 @@ class Pow3rAdvanced {
         searchDiv.appendChild(header);
         searchDiv.appendChild(content);
         
+        // Create suggestions dropdown
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.id = 's3arch-suggestions';
+        suggestionsDiv.style.position = 'absolute';
+        suggestionsDiv.style.top = '100%';
+        suggestionsDiv.style.left = '0';
+        suggestionsDiv.style.right = '0';
+        suggestionsDiv.style.background = 'rgba(0, 17, 34, 0.98)';
+        suggestionsDiv.style.border = '1px solid rgba(0, 255, 136, 0.5)';
+        suggestionsDiv.style.borderRadius = '8px';
+        suggestionsDiv.style.maxHeight = '200px';
+        suggestionsDiv.style.overflowY = 'auto';
+        suggestionsDiv.style.zIndex = '1000';
+        suggestionsDiv.style.display = 'none';
+        suggestionsDiv.style.marginTop = '5px';
+        content.style.position = 'relative';
+        content.appendChild(suggestionsDiv);
+        
         // Add event listeners
         input.addEventListener('input', (e) => {
             this.searchQuery = e.target.value;
             this.performSearch();
+            this.showSuggestions();
+        });
+        
+        input.addEventListener('focus', () => {
+            if (this.searchQuery) this.showSuggestions();
+        });
+        
+        input.addEventListener('blur', () => {
+            // Delay to allow clicking suggestions
+            setTimeout(() => suggestionsDiv.style.display = 'none', 200);
         });
         
         collapseBtn.addEventListener('click', () => {
@@ -1147,6 +1175,8 @@ class Pow3rAdvanced {
     
     showSuggestions() {
         const suggestions = document.getElementById('s3arch-suggestions');
+        if (!suggestions) return;
+        
         if (!this.searchQuery.trim()) {
             suggestions.style.display = 'none';
             return;
@@ -1157,11 +1187,34 @@ class Pow3rAdvanced {
         
         filtered.forEach(item => {
             const div = document.createElement('div');
-            div.className = `suggestion-item ${item.type}`;
-            div.textContent = item.text;
+            div.style.padding = '10px 15px';
+            div.style.cursor = 'pointer';
+            div.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+            div.style.transition = 'background 0.2s ease';
+            div.style.fontSize = '12px';
+            
+            if (item.type === 'repo') {
+                div.style.color = '#00ff88';
+                div.style.fontWeight = 'bold';
+                div.textContent = `📁 ${item.text}`;
+            } else {
+                div.style.color = '#88aaff';
+                div.style.paddingLeft = '25px';
+                div.textContent = `📄 ${item.text}`;
+            }
+            
+            div.addEventListener('mouseenter', () => {
+                div.style.background = 'rgba(0, 255, 136, 0.1)';
+            });
+            
+            div.addEventListener('mouseleave', () => {
+                div.style.background = 'transparent';
+            });
+            
             div.addEventListener('click', () => {
+                const input = document.getElementById('s3arch-input');
+                if (input) input.value = item.text;
                 this.searchQuery = item.text;
-                document.getElementById('s3arch-input').value = item.text;
                 suggestions.style.display = 'none';
                 this.executeSearch();
             });
@@ -1172,30 +1225,35 @@ class Pow3rAdvanced {
     }
     
     getFilteredSuggestions() {
-        const query = this.searchQuery.toLowerCase();
+        const query = this.searchQuery.toLowerCase().trim();
+        if (!query || query.length < 2) return [];
+        
         const suggestions = [];
+        const seen = new Set();
         
         // Add repo suggestions
         this.projects.forEach(project => {
-            if (project.projectName.toLowerCase().includes(query)) {
-                suggestions.push({
-                    text: `repo:${project.projectName}`,
-                    type: 'repo'
-                });
+            if (project.projectName && project.projectName.toLowerCase().includes(query)) {
+                const text = project.projectName;
+                if (!seen.has(text)) {
+                    suggestions.push({ text, type: 'repo' });
+                    seen.add(text);
+                }
             }
         });
         
         // Add node suggestions
         this.allNodes.forEach(node => {
-            if (node.name.toLowerCase().includes(query)) {
-                suggestions.push({
-                    text: node.name,
-                    type: 'node'
-                });
+            if (node.name && node.name.toLowerCase().includes(query)) {
+                const text = node.name;
+                if (!seen.has(text)) {
+                    suggestions.push({ text, type: 'node' });
+                    seen.add(text);
+                }
             }
         });
         
-        return suggestions.slice(0, 10);
+        return suggestions.slice(0, 8);
     }
     
     executeSearch() {
