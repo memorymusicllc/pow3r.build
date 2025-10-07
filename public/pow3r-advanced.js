@@ -2329,18 +2329,22 @@ class Pow3rAdvanced {
     }
 }
 
-// Initialize Pow3r Advanced when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM loaded, initializing Pow3r.build...');
+// Initialize Pow3r Advanced when DOM is loaded (ONCE ONLY)
+let initialized = false;
+function initPow3r() {
+    if (initialized) {
+        console.log('⚠️ Already initialized, skipping...');
+        return;
+    }
+    initialized = true;
+    console.log('🚀 Initializing Pow3r.build...');
     new Pow3rAdvanced();
-});
+}
 
-// Also try immediate initialization as fallback
 if (document.readyState === 'loading') {
-    console.log('📄 Document still loading, waiting for DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', initPow3r);
 } else {
-    console.log('⚡ Document already loaded, initializing immediately...');
-    new Pow3rAdvanced();
+    initPow3r();
 }
 
 // Export for potential external use
