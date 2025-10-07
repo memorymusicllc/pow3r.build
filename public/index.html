@@ -528,74 +528,7 @@
             <p>Quantum Repository Intelligence • Particle Space Theme • Transform3r Ready</p>
         </div>
 
-        <!-- Stats Panel -->
-        <div class="stats-panel">
-            <h3>Repository Stats</h3>
-            <div class="stat-row">
-                <span class="stat-label">Total Projects</span>
-                <span class="stat-value" id="stat-projects">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-green"></span>Active</span>
-                <span class="stat-value" id="stat-active">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-orange"></span>Development</span>
-                <span class="stat-value" id="stat-development">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-red"></span>Blocked</span>
-                <span class="stat-value" id="stat-blocked">-</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label"><span class="status-indicator status-gray"></span>Archived</span>
-                <span class="stat-value" id="stat-archived">-</span>
-            </div>
-            <div class="stat-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(0,255,136,0.3);">
-                <span class="stat-label">Total Nodes</span>
-                <span class="stat-value" id="stat-nodes">-</span>
-            </div>
-        </div>
-
-        <!-- Pow3r S3arch Component - Enhanced -->
-        <div class="pow3r-s3arch">
-            <div class="s3arch-container particle-space-wireframe pow3r-moment">
-                <div class="s3arch-header">
-                    <div class="s3arch-title">🔍 Pow3r S3arch</div>
-                    <button class="s3arch-collapse" id="s3arch-collapse">▼</button>
-                </div>
-                <div class="s3arch-content" id="s3arch-content">
-                    <div class="s3arch-input-wrapper">
-                        <input 
-                            type="text" 
-                            class="s3arch-input" 
-                            placeholder="Search repositories, nodes, or use Transform3r syntax..."
-                            id="s3arch-input"
-                        />
-                        <button class="repo-collapse-btn" id="repo-collapse-toggle" title="Collapse/Expand Nodes">
-                            <i class="fas fa-compress-alt"></i>
-                        </button>
-                    </div>
-                    <div class="s3arch-suggestions" id="s3arch-suggestions"></div>
-                    <div class="filter-chips" id="filter-chips">
-                        <div class="filter-chip active" data-filter="all">All</div>
-                        <div class="filter-chip" data-filter="repo">Repos</div>
-                        <div class="filter-chip" data-filter="node">Nodes</div>
-                        <div class="filter-chip" data-filter="green">Active</div>
-                        <div class="filter-chip" data-filter="red">Blocked</div>
-                    </div>
-                    <div class="search-history" id="search-history"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transform3r Controls -->
-        <div class="transform3r-controls">
-            <button class="transform3r-btn" data-mode="2d">2D</button>
-            <button class="transform3r-btn" data-mode="3d">3D</button>
-            <button class="transform3r-btn" data-mode="timeline">Timeline</button>
-            <button class="transform3r-btn" data-mode="quantum">Quantum</button>
-        </div>
+        <!-- All UI components are now created dynamically in 3D space -->
 
         <!-- Pow3r Graph Component -->
         <div class="pow3r-graph">
@@ -604,32 +537,7 @@
             </div>
         </div>
 
-        <!-- Lock Toggle Button -->
-        <button class="lock-toggle" id="lock-toggle" title="Lock/Unlock UI Position">
-            🔒
-        </button>
-
-        <!-- Light Controller -->
-        <div class="light-controller" id="light-controller">
-            <h4>💡 Light Controller</h4>
-            <div class="light-control">
-                <label>Intensity:</label>
-                <input type="range" id="light-intensity" min="0" max="2" step="0.1" value="1">
-                <button id="add-light">+</button>
-            </div>
-            <div class="light-control">
-                <label>Color:</label>
-                <input type="color" id="light-color" value="#00ff88">
-                <button id="remove-light">-</button>
-            </div>
-        </div>
-
-        <!-- Details Card -->
-        <div class="details-card" id="details-card">
-            <button class="close-btn" id="close-details">&times;</button>
-            <h3 id="details-title">Node Details</h3>
-            <div class="details-grid" id="details-grid"></div>
-        </div>
+        <!-- Lock, Light Controller, and Details Card are created dynamically -->
 
         <!-- Loading State -->
         <div class="loading" id="loading">
