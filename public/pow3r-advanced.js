@@ -441,9 +441,6 @@ class Pow3rAdvanced {
         });
         this.edgeLines = [];
         
-        // Create 3D UI elements first
-        this.create3DUIElements();
-        
         // Create repo boxes
         this.createRepoBoxes();
         
