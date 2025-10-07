@@ -194,47 +194,49 @@ class Pow3rAdvanced {
     }
     
     initParticleSystem() {
-        // Create enhanced particle system that integrates with repo explorer
-        const particleCount = 2000; // Increased for better visual impact
+        // Sparse shooting star particles - 1px with glow, streak, and fade
+        const particleCount = 300; // Much more sparse
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
         const sizes = new Float32Array(particleCount);
         const velocities = new Float32Array(particleCount * 3);
+        const lifetimes = new Float32Array(particleCount); // For fade effect
         
         for (let i = 0; i < particleCount; i++) {
             const i3 = i * 3;
             
-            // Create shooting star effect - particles move in specific directions
+            // Shooting stars come from edges of view
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 0.5 + 0.1;
-            const distance = Math.random() * 300 + 100;
+            const distance = Math.random() * 200 + 300; // Start far away
             
             positions[i3] = Math.cos(angle) * distance;
             positions[i3 + 1] = Math.sin(angle) * distance;
-            positions[i3 + 2] = (Math.random() - 0.5) * 200;
+            positions[i3 + 2] = (Math.random() - 0.5) * 300;
             
-            // Shooting star velocities
+            // Fast shooting star velocities with streak
+            const speed = Math.random() * 1.5 + 0.8;
             velocities[i3] = -Math.cos(angle) * speed;
             velocities[i3 + 1] = -Math.sin(angle) * speed;
-            velocities[i3 + 2] = (Math.random() - 0.5) * 0.2;
+            velocities[i3 + 2] = (Math.random() - 0.5) * 0.3;
             
-            // Enhanced color palette with more variety
-            const colorValues = [
-                [0, 1, 0.533], // techGreen
-                [1, 0, 0.533], // pink
-                [0.533, 0, 1], // purple
-                [1, 0.867, 0], // goldGlitter
-                [0, 0.533, 1], // skyBlue
-                [1, 0.2, 0.2], // red
-                [0.2, 1, 0.2], // bright green
-                [1, 1, 0.2]    // yellow
+            // Shooting star colors - white/blue/gold spectrum
+            const colorTypes = [
+                [1, 1, 1],       // white
+                [0.8, 0.9, 1],   // light blue
+                [1, 0.95, 0.7],  // golden
+                [0.7, 0.9, 1],   // sky blue
+                [1, 0.8, 0.9]    // pink tint
             ];
-            const color = colorValues[Math.floor(Math.random() * colorValues.length)];
+            const color = colorTypes[Math.floor(Math.random() * colorTypes.length)];
             colors[i3] = color[0];
             colors[i3 + 1] = color[1];
             colors[i3 + 2] = color[2];
             
-            sizes[i] = Math.random() * 3 + 1;
+            // 1px size with slight variation for glow effect
+            sizes[i] = 1.0;
+            
+            // Random lifetime for fade effect
+            lifetimes[i] = Math.random();
         }
         
         const geometry = new THREE.BufferGeometry();
@@ -244,11 +246,11 @@ class Pow3rAdvanced {
         geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
         
         const material = new THREE.PointsMaterial({
-            size: 2,
+            size: 1.5, // Small for 1px effect
             vertexColors: true,
             transparent: true,
-            opacity: 0.9,
-            blending: THREE.AdditiveBlending,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending, // Glow effect
             sizeAttenuation: true
         });
         
@@ -258,6 +260,7 @@ class Pow3rAdvanced {
         // Store particle data for animation
         this.particlePositions = positions;
         this.particleVelocities = velocities;
+        this.particleLifetimes = lifetimes;
         this.particleCount = particleCount;
     }
     
@@ -574,8 +577,62 @@ class Pow3rAdvanced {
             filterChips.appendChild(chip);
         });
         
+        // Transform control buttons
+        const transformButtons = document.createElement('div');
+        transformButtons.style.display = 'flex';
+        transformButtons.style.gap = '8px';
+        transformButtons.style.marginTop = '15px';
+        
+        const modes = ['2D', '3D', 'Timeline', 'Quantum'];
+        modes.forEach((mode, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'transform3r-btn';
+            btn.textContent = mode;
+            btn.dataset.mode = mode.toLowerCase();
+            btn.style.background = 'rgba(0, 17, 34, 0.8)';
+            btn.style.border = '1px solid rgba(0, 255, 136, 0.5)';
+            btn.style.borderRadius = '6px';
+            btn.style.color = '#00ff88';
+            btn.style.padding = '8px 12px';
+            btn.style.fontSize = '12px';
+            btn.style.cursor = 'pointer';
+            btn.style.transition = 'all 0.3s ease';
+            
+            if (index === 1) { // 3D is default
+                btn.style.background = 'rgba(0, 255, 136, 0.2)';
+                btn.style.borderColor = '#00ff88';
+            }
+            
+            btn.addEventListener('click', () => {
+                // Remove active from all
+                transformButtons.querySelectorAll('button').forEach(b => {
+                    b.style.background = 'rgba(0, 17, 34, 0.8)';
+                    b.style.borderColor = 'rgba(0, 255, 136, 0.5)';
+                });
+                // Set active
+                btn.style.background = 'rgba(0, 255, 136, 0.2)';
+                btn.style.borderColor = '#00ff88';
+                this.transformGraph(mode.toLowerCase());
+            });
+            
+            btn.addEventListener('mouseenter', () => {
+                if (!btn.style.background.includes('0.2')) {
+                    btn.style.background = 'rgba(0, 255, 136, 0.1)';
+                }
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                if (!btn.style.background.includes('0.2')) {
+                    btn.style.background = 'rgba(0, 17, 34, 0.8)';
+                }
+            });
+            
+            transformButtons.appendChild(btn);
+        });
+        
         content.appendChild(input);
         content.appendChild(filterChips);
+        content.appendChild(transformButtons);
         
         searchDiv.appendChild(header);
         searchDiv.appendChild(content);
@@ -1914,36 +1971,53 @@ class Pow3rAdvanced {
         
         // UI components are now fixed in screen space, lock button just hides/shows them
         
-        // Enhanced particle animation - shooting stars effect
-        if (this.particleSystem && this.particlePositions && this.particleVelocities) {
+        // Shooting star animation with fade and streak effect
+        if (this.particleSystem && this.particlePositions && this.particleVelocities && this.particleLifetimes) {
             const positions = this.particleSystem.geometry.attributes.position.array;
+            const sizes = this.particleSystem.geometry.attributes.size.array;
             
             for (let i = 0; i < this.particleCount; i++) {
                 const i3 = i * 3;
                 
-                // Update positions based on velocities
+                // Update positions (shooting motion)
                 positions[i3] += this.particleVelocities[i3];
                 positions[i3 + 1] += this.particleVelocities[i3 + 1];
                 positions[i3 + 2] += this.particleVelocities[i3 + 2];
                 
-                // Reset particles that have moved too far
-                const distance = Math.sqrt(
-                    positions[i3] * positions[i3] + 
-                    positions[i3 + 1] * positions[i3 + 1] + 
-                    positions[i3 + 2] * positions[i3 + 2]
-                );
+                // Update lifetime for fade effect
+                this.particleLifetimes[i] -= 0.008;
                 
-                if (distance > 400) {
-                    // Respawn particle at edge
+                // Fade based on lifetime
+                const lifetime = this.particleLifetimes[i];
+                if (lifetime > 0) {
+                    // Streak effect - size based on velocity and lifetime
+                    const speed = Math.sqrt(
+                        this.particleVelocities[i3] * this.particleVelocities[i3] +
+                        this.particleVelocities[i3 + 1] * this.particleVelocities[i3 + 1]
+                    );
+                    sizes[i] = (1.0 + speed * 0.3) * lifetime;
+                } else {
+                    // Respawn as new shooting star from edge
                     const angle = Math.random() * Math.PI * 2;
-                    const respawnDistance = 350;
-                    positions[i3] = Math.cos(angle) * respawnDistance;
-                    positions[i3 + 1] = Math.sin(angle) * respawnDistance;
-                    positions[i3 + 2] = (Math.random() - 0.5) * 200;
+                    const distance = 400 + Math.random() * 100;
+                    positions[i3] = Math.cos(angle) * distance;
+                    positions[i3 + 1] = Math.sin(angle) * distance;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 300;
+                    
+                    // Reset velocity
+                    const speed = Math.random() * 1.5 + 0.8;
+                    this.particleVelocities[i3] = -Math.cos(angle) * speed;
+                    this.particleVelocities[i3 + 1] = -Math.sin(angle) * speed;
+                    this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.3;
+                    
+                    // Reset lifetime
+                    this.particleLifetimes[i] = 1.0;
+                    sizes[i] = 1.0;
                 }
             }
             
             this.particleSystem.geometry.attributes.position.needsUpdate = true;
+            this.particleSystem.geometry.attributes.size.needsUpdate = true;
         }
         
         // Animate nodes with enhanced movement
