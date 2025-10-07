@@ -281,14 +281,8 @@
             display: block;
         }
 
-        /* Transform3r Controls - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .transform3r-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 300;
-            display: none;
-            gap: 10px;
+            display: none !important;
         }
 
         .transform3r-btn {
@@ -314,19 +308,8 @@
             box-shadow: 0 0 15px rgba(255, 0, 136, 0.4);
         }
 
-        /* Stats Panel - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
         .stats-panel {
-            position: absolute;
-            top: 20px;
-            right: 200px;
-            background: rgba(0, 17, 34, 0.8);
-            border: 0.8px solid rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            padding: 20px;
-            min-width: 250px;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            display: none;
+            display: none !important;
         }
 
         .stats-panel h3 {
@@ -366,23 +349,8 @@
         .status-red { background: #ff0000; }
         .status-gray { background: #808080; }
 
-        /* Lock Toggle Button - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
-        .lock-toggle {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 17, 34, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            color: #ffffff;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            transition: all 0.3s ease;
+        .lock-toggle:not(#lock-toggle-3d) {
+            display: none !important;
         }
 
         .lock-toggle:hover {
@@ -395,19 +363,8 @@
             border-color: #ff0088;
         }
 
-        /* Light Controller - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
-        .light-controller {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 17, 34, 0.8);
-            border: 0.8px solid rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            padding: 15px;
-            min-width: 200px;
-            z-index: 300;
-            backdrop-filter: blur(10px);
-            display: none;
+        .light-controller:not(#light-controller-3d) {
+            display: none !important;
         }
 
         .light-controller h4 {
@@ -443,20 +400,8 @@
             cursor: pointer;
         }
 
-        /* Details Card - HIDDEN BY DEFAULT, 3D VERSION IN SCENE */
-        .details-card {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 17, 34, 0.95);
-            border: 0.8px solid rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 400px;
-            z-index: 300;
-            backdrop-filter: blur(15px);
-            display: none;
+        .details-card:not(#details-card-3d) {
+            display: none !important;
         }
 
         .details-card.visible {
