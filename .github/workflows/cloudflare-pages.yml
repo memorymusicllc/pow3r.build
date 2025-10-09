@@ -26,16 +26,19 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd server
           npm ci
+          cd server && npm ci
 
       - name: Generate embedded data
         run: |
           node scripts/generate-data.js || echo "⚠️ Data generation skipped (local paths not available)"
           
-      - name: Build
+      - name: Build React App
         run: |
-          echo "✅ Build completed - static files ready"
+          npm run build
+          cp -r dist/* public/
+          cp pow3r.status.config.json public/
+          echo "✅ React app built and copied to public/"
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1

@@ -1,0 +1,253 @@
+{
+  "projectName": "pow3r.build",
+  "lastUpdate": "2025-10-09T00:00:00Z",
+  "source": "local",
+  "repositoryPath": "/workspace",
+  "branch": "cursor/update-component-library-and-build-integration-fc29",
+  "status": "green",
+  "stats": {
+    "totalCommitsLast30Days": 0,
+    "totalCommitsLast14Days": 0,
+    "fileCount": 100,
+    "sizeMB": 10.5,
+    "primaryLanguage": "JavaScript",
+    "workingTreeClean": true
+  },
+  "nodes": [
+    {
+      "id": "pow3r-search-ui",
+      "name": "Pow3r Search UI",
+      "type": "component",
+      "category": "UI Component",
+      "description": "TRON-style Advanced Search UI with particle space theme",
+      "status": "green",
+      "fileType": "component.ui.react",
+      "tags": ["search", "ui", "tron", "particles", "react"],
+      "metadata": {
+        "nodeId": "pow3r-search-ui",
+        "category": "UI Component",
+        "type": "component",
+        "package": "@pow3r/search-ui",
+        "version": "1.0.0"
+      },
+      "stats": {
+        "fileCount": 18,
+        "sizeMB": 1.2,
+        "primaryLanguage": "TypeScript"
+      },
+      "quality": {
+        "completeness": 0.95,
+        "qualityScore": 0.9,
+        "notes": "Production ready"
+      },
+      "position": {
+        "x": -100,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "id": "pow3r-graph",
+      "name": "Pow3r Graph",
+      "type": "component",
+      "category": "Visualization",
+      "description": "2D/3D graph transformations with Timeline 3D and Transform3r",
+      "status": "green",
+      "fileType": "component.graph",
+      "tags": ["graph", "3d", "timeline", "transform", "visualization"],
+      "metadata": {
+        "nodeId": "pow3r-graph",
+        "category": "Visualization",
+        "type": "component",
+        "package": "@pow3r/graph",
+        "version": "1.0.0"
+      },
+      "stats": {
+        "fileCount": 8,
+        "sizeMB": 0.8,
+        "primaryLanguage": "TypeScript"
+      },
+      "quality": {
+        "completeness": 0.9,
+        "qualityScore": 0.85,
+        "notes": "Core functionality complete"
+      },
+      "position": {
+        "x": 100,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "id": "pow3r-build-app",
+      "name": "Pow3r Build App",
+      "type": "service",
+      "category": "Application",
+      "description": "Main application with 3D visualization",
+      "status": "green",
+      "fileType": "app.frontend",
+      "tags": ["app", "three.js", "visualization", "quantum"],
+      "metadata": {
+        "nodeId": "pow3r-build-app",
+        "category": "Application",
+        "type": "service"
+      },
+      "stats": {
+        "fileCount": 15,
+        "sizeMB": 2.5,
+        "primaryLanguage": "JavaScript"
+      },
+      "quality": {
+        "completeness": 0.8,
+        "qualityScore": 0.75,
+        "notes": "Integrating components"
+      },
+      "position": {
+        "x": 0,
+        "y": 100,
+        "z": 0
+      }
+    },
+    {
+      "id": "particle-space-theme",
+      "name": "Particle Space Theme",
+      "type": "config",
+      "category": "Theme",
+      "description": "Particle Space theme with data particles, energy waves, and wireframes",
+      "status": "green",
+      "fileType": "config.theme",
+      "tags": ["theme", "particles", "design-system"],
+      "metadata": {
+        "nodeId": "particle-space-theme",
+        "category": "Theme",
+        "type": "config"
+      },
+      "stats": {
+        "fileCount": 1,
+        "sizeMB": 0.05,
+        "primaryLanguage": "TypeScript"
+      },
+      "quality": {
+        "completeness": 1.0,
+        "qualityScore": 0.95,
+        "notes": "Complete theme system"
+      },
+      "position": {
+        "x": 0,
+        "y": -100,
+        "z": 0
+      }
+    },
+    {
+      "id": "pow3r-status-schema",
+      "name": "Pow3r Status Schema",
+      "type": "config",
+      "category": "Schema",
+      "description": "Schema for pow3r.status.json files",
+      "status": "green",
+      "fileType": "config.schema",
+      "tags": ["schema", "validation", "config"],
+      "metadata": {
+        "nodeId": "pow3r-status-schema",
+        "category": "Schema",
+        "type": "config"
+      },
+      "stats": {
+        "fileCount": 1,
+        "sizeMB": 0.1,
+        "primaryLanguage": "TypeScript"
+      },
+      "quality": {
+        "completeness": 1.0,
+        "qualityScore": 0.95,
+        "notes": "Complete schema with validation"
+      },
+      "position": {
+        "x": 150,
+        "y": -100,
+        "z": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "from": "pow3r-build-app",
+      "to": "pow3r-search-ui",
+      "type": "uses",
+      "label": "Uses search component",
+      "strength": 1.0,
+      "metadata": {
+        "edgeId": "edge-1",
+        "type": "uses"
+      }
+    },
+    {
+      "id": "edge-2",
+      "from": "pow3r-build-app",
+      "to": "pow3r-graph",
+      "type": "uses",
+      "label": "Uses graph component",
+      "strength": 1.0,
+      "metadata": {
+        "edgeId": "edge-2",
+        "type": "uses"
+      }
+    },
+    {
+      "id": "edge-3",
+      "from": "pow3r-search-ui",
+      "to": "particle-space-theme",
+      "type": "uses",
+      "label": "Uses theme",
+      "strength": 0.9,
+      "metadata": {
+        "edgeId": "edge-3",
+        "type": "uses"
+      }
+    },
+    {
+      "id": "edge-4",
+      "from": "pow3r-graph",
+      "to": "particle-space-theme",
+      "type": "uses",
+      "label": "Uses theme",
+      "strength": 0.9,
+      "metadata": {
+        "edgeId": "edge-4",
+        "type": "uses"
+      }
+    },
+    {
+      "id": "edge-5",
+      "from": "pow3r-graph",
+      "to": "pow3r-status-schema",
+      "type": "implements",
+      "label": "Implements schema",
+      "strength": 1.0,
+      "metadata": {
+        "edgeId": "edge-5",
+        "type": "implements"
+      }
+    },
+    {
+      "id": "edge-6",
+      "from": "pow3r-graph",
+      "to": "pow3r-search-ui",
+      "type": "uses",
+      "label": "Integrates search",
+      "strength": 0.8,
+      "metadata": {
+        "edgeId": "edge-6",
+        "type": "uses"
+      }
+    }
+  ],
+  "metadata": {
+    "version": "2.0",
+    "configType": "v2",
+    "created": "2025-10-09T00:00:00Z",
+    "description": "Pow3r.build component library and build integration",
+    "tags": ["pow3r", "build", "components", "visualization"]
+  }
+}
