@@ -4,6 +4,7 @@
 - **MANDATORY**: React Three Fiber/Redux UI/Zustand/Vite/Tailwind CSS/Playwright/CloudFlare/Abacus.ai/React Flow
 - **REQUIRED**: Use specified technologies for all new implementations
 - **PROHIBITED**: DO NOT use technologies outside the approved stack
+- **MANDATORY**: 3JS, GRAPHS, COMPONENTS AND PRIMITIVES MUST USE OUR POW3R.STATUS.JSON CONFIG
 
 ## Automation Permissions
 - **AUTHORIZED TOOLS**: terminal/fs/web/edit_file/E2E/Full-Auto/Background Agents/Github/CloudFlare/Playwright/Auto-Merge/GitHub CLI/GitHub Actions/GitHub App/token/Cloudflare Pages/Workers token/PR Auto-merge/Github Settings/GitHub CLI access/filesystem write/read CI job statuses and Cloudflare account outputs/shell and filesystem/write

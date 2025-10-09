@@ -1,0 +1,104 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "pow3r.status.json",
+    "description": "A comprehensive graph of all digital assets, code, and knowledge particles, defining their state, relationships, and metadata for AI-driven synthesis.",
+    "type": "object",
+    "properties": {
+      "graphId": {
+        "type": "string",
+        "description": "Unique identifier for this snapshot of the URVS graph."
+      },
+      "lastScan": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Timestamp of the last time the AI agent scanned all sources."
+      },
+      "assets": [
+        {
+          "id": {
+            "type": "string",
+            "description": "A unique, content-addressable hash or URI for the asset."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "component.ui.react", "component.ui.3d", "service.backend", "config.schema",
+              "doc.markdown", "doc.canvas", "plugin.obsidian", "agent.abacus", "library.js",
+              "workflow.ci-cd", "test.e2e", "knowledge.particle"
+            ],
+            "description": "The specific type of the asset."
+          },
+          "source": {
+            "type": "string",
+            "enum": ["github", "abacus", "xai", "aistudio", "obsidian", "local", "cloudflare"],
+            "description": "The original source system of the asset."
+          },
+          "location": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI or file path pointing to the asset's location."
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string", "description": "AI-generated summary of the asset's purpose." },
+              "tags": { "type": "array", "items": { "type": "string" }, "description": "AI-extracted keywords and concepts." },
+              "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+              "authors": { "type": "array", "items": { "type": "string" } },
+              "createdAt": { "type": "string", "format": "date-time" },
+              "lastUpdate": { "type": "string", "format": "date-time" }
+            }
+          },
+          "status": {
+            "type": "object",
+            "properties": {
+              "phase": {
+                "type": "string",
+                "enum": ["green", "orange", "red", "gray"],
+                "description": "Green (active/best-practice), Orange (in-progress/needs-review), Red (broken/stale), Gray (archived/deprecated)."
+              },
+              "completeness": { "type": "number", "minimum": 0, "maximum": 1 },
+              "qualityScore": { "type": "number", "minimum": 0, "maximum": 1, "description": "AI-assessed score based on code complexity, documentation, and adherence to standards." },
+              "notes": { "type": "string", "description": "AI-generated notes, warnings, or recommendations." }
+            }
+          },
+          "dependencies": {
+            "type": "object",
+            "properties": {
+              "io": { "$ref": "#/your_universal_schema/definitions/Node/properties/io" },
+              "universalConfigRef": { "type": "string", "description": "Reference to the specific version of your universal schema it uses." }
+            }
+          },
+          "analytics": {
+            "type": "object",
+            "properties": {
+              "embedding": { "type": "array", "items": { "type": "number" }, "description": "Vector embedding for semantic similarity search." },
+              "connectivity": { "type": "integer", "description": "Number of direct connections to other assets." },
+              "centralityScore": { "type": "number", "description": "A graph-theory metric indicating its importance in the system." },
+              "activityLast30Days": { "type": "integer", "description": "Commit count, modification count, or access frequency." }
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "from": { "type": "string", "description": "The 'id' of the source asset." },
+          "to": { "type": "string", "description": "The 'id' of the target asset." },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dependsOn",      // Direct dependency (e.g., import)
+              "implements",     // Code implements a concept from a doc
+              "references",     // One asset mentions another
+              "relatedTo",      // Semantically similar (AI-discovered)
+              "conflictsWith",  // Redundant or conflicting implementations
+              "partOf"          // A smaller particle is part of a larger component
+            ],
+            "description": "The nature of the relationship between the assets."
+          },
+          "strength": { "type": "number", "minimum": 0, "maximum": 1, "description": "Confidence score for AI-discovered relationships." }
+        }
+      ]
+    }
+  }

@@ -1996,7 +1996,7 @@ class Pow3rAdvanced {
                 this.detailsCard3D.parentNode.removeChild(this.detailsCard3D);
             }
             this.detailsCard3D = null;
-            this.selectedNode = null;
+        this.selectedNode = null;
             console.log('✅ Details card hidden');
         }
     }

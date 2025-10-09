@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Test for Pow3r.build Initialization</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #111; color: #fff; }
+        #test-result { padding: 20px; border-radius: 5px; font-size: 24px; font-weight: bold; }
+        .success { background-color: #28a745; color: white; }
+        .failure { background-color: #dc3545; color: white; }
+        pre { background-color: #333; padding: 10px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <h1>Pow3r.build Initialization Test</h1>
+    <p>This page tests if the main application class (`Pow3rAdvanced`) can be initialized without crashing. The application itself will not be visible; this only reports the result of the initialization sequence.</p>
+    <div id="test-result">Running test...</div>
+    <pre id="error-output"></pre>
+
+    <!-- Canvas element required by the script, but it will not be used -->
+    <div style="display: none;">
+        <canvas id="graph-canvas"></canvas>
+    </div>
+
+    <!-- Three.js and Dependencies (copied from index.html) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <!-- Test Runner Script -->
+    <script type="module">
+        import './pow3r-advanced.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultDiv = document.getElementById('test-result');
+            const errorOutput = document.getElementById('error-output');
+
+            try {
+                // The script pow3r-advanced.js automatically instantiates the class on DOMContentLoaded.
+                // If it succeeds without throwing an error before this point, the test has passed.
+                
+                // We add a small delay to ensure all async operations in init() have a chance to complete or fail.
+                setTimeout(() => {
+                    resultDiv.textContent = '✅ SUCCESS: Pow3rAdvanced class initialized without any critical errors.';
+                    resultDiv.className = 'success';
+                }, 1000);
+
+            } catch (e) {
+                resultDiv.textContent = '❌ FAILURE: A critical error occurred during initialization.';
+                resultDiv.className = 'failure';
+                errorOutput.textContent = `Error: ${e.message}\n\nStack Trace:\n${e.stack}`;
+            }
+
+            // Catch any unhandled promise rejections that might not be caught by try/catch
+            window.addEventListener('unhandledrejection', function(event) {
+                resultDiv.textContent = '❌ FAILURE: An unhandled promise rejection occurred during initialization.';
+                resultDiv.className = 'failure';
+                errorOutput.textContent = `Error: ${event.reason.message}\n\nStack Trace:\n${event.reason.stack}`;
+            });
+        });
+    </script>
+</body>
+</html>
