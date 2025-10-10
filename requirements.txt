@@ -1,12 +1,11 @@
 # Repository to 3D Visualization Tool
 # Requirements
 
-# No external dependencies required!
-# Uses Python standard library only
+# Core dependencies for GitHub integration
+requests>=2.31.0      # HTTP requests for GitHub API
 
-# Future enhancements (optional):
+# Optional dependencies for enhanced features:
 # - aiohttp>=3.9.0    # Async HTTP client for API calls
-# - requests>=2.31.0  # HTTP requests
 # - gitpython>=3.1.0  # Advanced Git operations
 # - pyyaml>=6.0       # YAML configuration parsing
 # - networkx>=3.0     # Graph generation

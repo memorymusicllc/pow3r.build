@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Pow3rGraph } from '../components/Pow3rGraph';
 import { Transform3r } from '../components/Transform3r';
 import { Timeline3D } from '../components/Timeline3D';
-import { TronSearchBasicOutline } from '@pow3r/search-ui';
+import { TronSearch } from '@pow3r/search-ui';
 import { Pow3rStatusConfig, validatePow3rStatus, transformToGraphData } from '../schemas/pow3rStatusSchema';
 
 interface Pow3rBuildIntegrationProps {
@@ -47,13 +47,16 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [timelineData, setTimelineData] = useState<any>(null);
 
+  // Basic Outline theme only (no particles)
 
   // Initialize with first config
   useEffect(() => {
-    if (configs.length > 0 && !selectedConfig) {
-      setSelectedConfig(configs[0]);
+    if (configs.length > 0) {
+      // Validate configs and pick the first valid one
+      const firstValid = configs.find(c => validatePow3rStatus(c).valid) || configs[0];
+      setSelectedConfig(firstValid);
     }
-  }, [configs, selectedConfig]);
+  }, [configs]);
 
   // Handle config selection
   const handleConfigSelect = useCallback((config: Pow3rStatusConfig) => {
@@ -219,11 +222,16 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
           zIndex: 1000,
           width: '400px'
         }}>
-          <TronSearchBasicOutline
+          <TronSearch
             data={transformToGraphData(selectedConfig)}
             onSearch={handleSearch}
             onFilter={handleFilter}
-            placeholder="Search..."
+            placeholder="Search the grid..."
+            theme="basic-outline"
+            enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { TronSearchBasicOutline } from '../../pow3r-search-ui/src/components/TronSearchBasicOutline';
+import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 
 interface ThreeJSSearchComponentProps {
   scene: THREE.Scene;
@@ -25,6 +25,7 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const css2DObjectRef = useRef<CSS2DObject | null>(null);
 
+  // Basic Outline theme uses no particle config
 
   useEffect(() => {
     if (!containerRef.current || !scene) return;
@@ -51,10 +52,15 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
         width: '400px'
       }}
     >
-      <TronSearchBasicOutline
+      <TronSearch
         data={data}
         onSearch={onSearch}
-        placeholder="Search..."
+        placeholder="Search the grid..."
+        theme="basic-outline"
+        enableParticles={false}
+        glowIntensity={0}
+        wireOpacity={0.9}
+        animationSpeed={1.0}
       />
     </div>
   );
