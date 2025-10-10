@@ -191,7 +191,17 @@ class Pow3rComplete {
     async loadRealData() {
         try {
             console.log('📊 Loading real repository data...');
-            const response = await fetch('./data.json');
+            // Try CloudFlare worker first, fallback to local data.json
+            let response;
+            try {
+                response = await fetch('https://thewatchmen.pages.dev/api/data-aggregator');
+                if (!response.ok) {
+                    throw new Error('CloudFlare API not available');
+                }
+            } catch (error) {
+                console.log('⚠️ CloudFlare API not available, using local data');
+                response = await fetch('./data.json');
+            }
             const data = await response.json();
             
             if (data.success && data.projects) {

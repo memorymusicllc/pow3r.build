@@ -22,6 +22,7 @@ This tool provides a complete workflow to:
 
 ## Quick Start
 
+### Local Repository Analysis
 ```bash
 cd "/Users/creator/Documents/DEV/Repo to 3D"
 
@@ -35,7 +36,20 @@ python run_phase1.py --markdown "selection.md" --base-path "/path"
 ./start-visualization.sh
 ```
 
-→ **[See QUICKSTART.md for detailed steps](QUICKSTART.md)**
+### GitHub Integration (NEW!)
+```bash
+# Set your GitHub token
+export GITHUB_TOKEN=your_github_token
+
+# Scan GitHub repositories
+python run_github_integration.py --org your-organization
+
+# Or scan a single repository
+python run_github_integration.py --repo owner/repo --server
+```
+
+→ **[See QUICKSTART.md for detailed steps](QUICKSTART.md)**  
+→ **[See GitHub Integration Guide](README-github-integration.md)**
 
 ## Installation
 
@@ -243,14 +257,24 @@ This tool is divided into distinct phases:
 
 **→ [See Phase 2 Guide](PHASE2_GUIDE.md) for detailed documentation**
 
-### Phase 3: Advanced Features 📋 FUTURE
+### Phase 3: GitHub Integration & CloudFlare ✅ COMPLETE
+- **GitHub Repository Scanner** - Analyze any GitHub repo or organization
+- **Automatic Status Updates** - CloudFlare workers monitor repo changes
+- **Real-time Synchronization** - Webhooks trigger immediate updates
+- **Cloud-based Processing** - No local scanning required
+- **Multi-source Aggregation** - Combines local and GitHub data
+- **Scalable Architecture** - CloudFlare KV and R2 storage
+
+**→ [See GitHub Integration Guide](README-github-integration.md)**
+
+### Phase 4: Advanced Features 📋 FUTURE
 - Actual dependency graph parsing
 - Time-based commit animations
 - Multiple layout algorithms
 - Export to image/video formats
-- GitHub/GitLab API integration
-- Real-time monitoring
+- Real-time monitoring with WebSocket
 - Team collaboration features
+- AI-powered insights
 
 ## Troubleshooting
 
