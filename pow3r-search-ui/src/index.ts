@@ -32,6 +32,10 @@ export { default as FilterChips } from './components/FilterChips';
 export { default as LogicOperators } from './components/LogicOperators';
 export { default as SearchIcon } from './components/SearchIcon';
 
+// Basic Outline Theme Components
+export { default as BasicOutlineSearch } from './components/BasicOutlineSearch';
+export { default as BasicOutlineWireframe } from './components/BasicOutlineWireframe';
+
 // Particle Space Theme Components
 export { default as TronSearchParticleSpace } from './components/TronSearchParticleSpace';
 export { default as ParticleSpaceSystem } from './components/ParticleSpaceSystem';
@@ -50,6 +54,7 @@ export { default as TronSearchNode } from './integrations/ReactFlow';
 export * from './types';
 
 // Themes
+export * from './themes/BasicOutlineTheme';
 export * from './themes/ParticleSpaceTheme';
 
 // Re-exports for convenience

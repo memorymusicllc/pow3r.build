@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
 import { TronSearchProps, TronSearchFlowProps } from '../types';
 import TronSearch from '../components/TronSearch';
 
@@ -7,21 +6,21 @@ import TronSearch from '../components/TronSearch';
  * TRON Search Node for React Flow
  * Custom node that includes search functionality
  */
-export const TronSearchNode: React.FC<NodeProps & TronSearchFlowProps> = ({
+export const TronSearchNode: React.FC<any & TronSearchFlowProps> = ({
   data,
   selected,
   ...nodeProps
 }) => {
   const handleSearch = useCallback((query: string, suggestion?: any) => {
     // Emit search event to parent
-    if (data.onSearch) {
+    if (data?.onSearch) {
       data.onSearch(query, suggestion);
     }
   }, [data]);
 
   const handleFilter = useCallback((filters: any[]) => {
     // Emit filter event to parent
-    if (data.onFilter) {
+    if (data?.onFilter) {
       data.onFilter(filters);
     }
   }, [data]);
@@ -30,32 +29,20 @@ export const TronSearchNode: React.FC<NodeProps & TronSearchFlowProps> = ({
     <div
       style={{
         background: 'rgba(0, 0, 0, 0.8)',
-        border: selected ? '2px solid #00ff88' : '1px solid rgba(255, 255, 255, 0.2)',
+        border: selected ? '2px solid #ffffff' : '1px solid rgba(255, 255, 255, 0.2)',
         borderRadius: '8px',
         padding: '16px',
         minWidth: '300px',
         minHeight: '100px',
         boxShadow: selected 
-          ? '0 0 20px rgba(0, 255, 136, 0.5)' 
+          ? '0 0 20px rgba(255, 255, 255, 0.5)' 
           : '0 0 10px rgba(0, 0, 0, 0.3)',
         transition: 'all 0.3s ease'
       }}
     >
-      {/* Input Handle */}
-      <Handle
-        type="target"
-        position={Position.Top}
-        style={{
-          background: '#00ff88',
-          border: '2px solid #000000',
-          width: '12px',
-          height: '12px'
-        }}
-      />
-      
       {/* Search Component */}
       <TronSearch
-        data={data.searchData}
+        data={data?.searchData}
         onSearch={handleSearch}
         onFilter={handleFilter}
         placeholder="Search nodes..."
@@ -63,19 +50,7 @@ export const TronSearchNode: React.FC<NodeProps & TronSearchFlowProps> = ({
         style={{
           width: '100%'
         }}
-        {...data.searchProps}
-      />
-      
-      {/* Output Handle */}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        style={{
-          background: '#ff00ff',
-          border: '2px solid #000000',
-          width: '12px',
-          height: '12px'
-        }}
+        {...data?.searchProps}
       />
     </div>
   );
@@ -116,28 +91,31 @@ export const TronSearchEdge: React.FC<any> = ({
       />
       
       {/* Search overlay on edge */}
-      <foreignObject
-        x={(sourceX + targetX) / 2 - 50}
-        y={(sourceY + targetY) / 2 - 25}
-        width="100"
-        height="50"
-        style={{ pointerEvents: 'none' }}
+      <div
+        style={{
+          position: 'absolute',
+          left: `${(sourceX + targetX) / 2 - 50}px`,
+          top: `${(sourceY + targetY) / 2 - 25}px`,
+          width: '100px',
+          height: '50px',
+          pointerEvents: 'none'
+        }}
       >
         <div
           style={{
             background: 'rgba(0, 0, 0, 0.8)',
-            border: '1px solid rgba(0, 255, 136, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.5)',
             borderRadius: '4px',
             padding: '4px 8px',
             fontSize: '10px',
-            color: '#00ff88',
+            color: '#ffffff',
             textAlign: 'center',
             backdropFilter: 'blur(4px)'
           }}
         >
           {data?.label || 'Search'}
         </div>
-      </foreignObject>
+      </div>
     </>
   );
 };
@@ -156,7 +134,7 @@ export const TronSearchPanel: React.FC<TronSearchProps> = (props) => {
         zIndex: 1000,
         width: '300px',
         background: 'rgba(0, 0, 0, 0.9)',
-        border: '1px solid rgba(0, 255, 136, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
         borderRadius: '8px',
         padding: '16px',
         backdropFilter: 'blur(10px)',
@@ -167,7 +145,7 @@ export const TronSearchPanel: React.FC<TronSearchProps> = (props) => {
         style={{
           fontSize: '14px',
           fontWeight: '600',
-          color: '#00ff88',
+          color: '#ffffff',
           marginBottom: '12px',
           textAlign: 'center'
         }}

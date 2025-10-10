@@ -154,6 +154,30 @@ export interface TronTheme {
   };
 }
 
+// Basic Outline Theme types
+export interface BasicOutlineTheme {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    surface: string;
+    text: string;
+    textSecondary: string;
+  };
+  effects: {
+    glow: boolean;
+    particles: boolean;
+    animations: boolean;
+    wireframe: boolean;
+  };
+  animations: {
+    speed: number;
+    easing: string;
+    duration: number;
+  };
+}
+
 // Particle system types
 export interface ParticleConfig {
   colors: string[];

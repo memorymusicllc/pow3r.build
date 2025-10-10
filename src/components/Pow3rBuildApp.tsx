@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { TronSearchParticleSpace } from '../../pow3r-search-ui/src/components/TronSearchParticleSpace';
+import { BasicOutlineSearch } from '../../pow3r-search-ui/src/components/BasicOutlineSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
-import { createParticleSpaceTheme } from '../../pow3r-search-ui/src/themes/ParticleSpaceTheme';
+import { createBasicOutlineTheme } from '../../pow3r-search-ui/src/themes/BasicOutlineTheme';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
 
 interface Pow3rBuildAppProps {
@@ -39,28 +39,23 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
   const scene3DRef = useRef<any>(null);
 
   // Theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 150,
-        size: 2.0,
-        speed: 1.2,
-        colors: ['#00ff88', '#ff0088', '#8800ff'],
-        attraction: 0.8
-      },
-      energy: {
-        waveLength: 25,
-        amplitude: 8,
-        frequency: 0.03,
-        colors: ['#00ff88', '#ff0088', '#8800ff']
-      }
+  const basicOutlineTheme = createBasicOutlineTheme({
+    effects: {
+      glow: false,
+      particles: false,
+      animations: true,
+      wireframe: true
     },
-    pow3rMoments: {
-      magic: {
-        enabled: true,
-        particles: ['#ffd700', '#ff0088', '#00ff88', '#8800ff'],
-        intensity: 2.0
-      }
+    animations: {
+      speed: 1.0,
+      easing: 'ease-in-out',
+      duration: 300
+    },
+    wires: {
+      thickness: 1,
+      opacity: 1.0,
+      color: { light: '#000000', dark: '#ffffff' },
+      style: 'solid'
     }
   });
 
@@ -352,16 +347,14 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           zIndex: 1000,
           width: '400px'
         }}>
-          <TronSearchParticleSpace
+          <BasicOutlineSearch
             data={data}
             onSearch={handleSearch}
-            placeholder="Search the quantum grid..."
-            particleSpaceConfig={particleSpaceTheme}
-            brightness={0.7}
-            enableQuantumAttraction={true}
-            enableNebula={true}
-            enableMist={true}
-            enableEnergyWaves={true}
+            placeholder="Search..."
+            basicOutlineConfig={basicOutlineTheme}
+            enableParticles={false}
+            enableFilters={true}
+            enableLogic={true}
           />
         </div>
       )}
