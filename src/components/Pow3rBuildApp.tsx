@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { TronSearchParticleSpace } from '../../pow3r-search-ui/src/components/TronSearchParticleSpace';
+import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
-import { createParticleSpaceTheme } from '../../pow3r-search-ui/src/themes/ParticleSpaceTheme';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
 
 interface Pow3rBuildAppProps {
@@ -38,67 +37,43 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scene3DRef = useRef<any>(null);
 
-  // Theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 150,
-        size: 2.0,
-        speed: 1.2,
-        colors: ['#00ff88', '#ff0088', '#8800ff'],
-        attraction: 0.8
-      },
-      energy: {
-        waveLength: 25,
-        amplitude: 8,
-        frequency: 0.03,
-        colors: ['#00ff88', '#ff0088', '#8800ff']
-      }
-    },
-    pow3rMoments: {
-      magic: {
-        enabled: true,
-        particles: ['#ffd700', '#ff0088', '#00ff88', '#8800ff'],
-        intensity: 2.0
-      }
-    }
-  });
+  // Theme: Basic Outline only (no particles)
 
   // Load data
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        
         let configData: Pow3rStatusConfig;
-        
+
         if (config) {
           configData = config;
         } else {
-          // Try API first
+          // Prefer dynamic API (Cloudflare function) then fallbacks
+          let rawData: any | null = null;
           try {
-            const apiRes = await fetch('/api/status');
-            if (apiRes.ok) {
-              configData = await apiRes.json();
-            } else {
-              throw new Error('API not available');
-            }
-          } catch {
-            // Try static config next
+            const apiRes = await fetch('/api/projects');
+            if (apiRes.ok) rawData = await apiRes.json();
+          } catch {}
+
+          if (!rawData) {
             try {
               const response = await fetch('/pow3r.status.config.json');
               configData = await response.json();
-            } catch {
-              // Fallback to data.json
-              const response = await fetch(dataUrl);
-              const rawData = await response.json();
-              
-              // Transform data.json to pow3r.status.config format if needed
-              configData = transformDataToConfig(rawData);
-            }
+              setData(configData);
+              setIsLoading(false);
+              return;
+            } catch {}
           }
+
+          if (!rawData) {
+            const response = await fetch(dataUrl);
+            rawData = await response.json();
+          }
+
+          configData = transformDataToConfig(rawData);
         }
-        
+
         setData(configData);
         setIsLoading(false);
       } catch (err) {
@@ -107,7 +82,6 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, [dataUrl, config]);
 
@@ -362,16 +336,15 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           zIndex: 1000,
           width: '400px'
         }}>
-          <TronSearchParticleSpace
+          <TronSearch
             data={data}
             onSearch={handleSearch}
-            placeholder="Search the quantum grid..."
-            particleSpaceConfig={particleSpaceTheme}
-            brightness={0.7}
-            enableQuantumAttraction={true}
-            enableNebula={true}
-            enableMist={true}
-            enableEnergyWaves={true}
+            placeholder="Search the grid..."
+            theme="basic-outline"
+            enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}
