@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { BasicOutlineSearch } from '../../pow3r-search-ui/src/components/BasicOutlineSearch';
-import { createBasicOutlineTheme } from '../../pow3r-search-ui/src/themes/BasicOutlineTheme';
+import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 
 interface ThreeJSSearchComponentProps {
   scene: THREE.Scene;
@@ -26,19 +25,7 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const css2DObjectRef = useRef<CSS2DObject | null>(null);
 
-  const basicOutlineTheme = createBasicOutlineTheme({
-    effects: {
-      glow: false,
-      particles: false,
-      animations: true,
-      wireframe: true
-    },
-    animations: {
-      speed: 1.0,
-      easing: 'ease-in-out',
-      duration: 300
-    }
-  });
+  // Basic Outline theme uses no particle config
 
   useEffect(() => {
     if (!containerRef.current || !scene) return;
@@ -65,14 +52,15 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
         width: '400px'
       }}
     >
-      <BasicOutlineSearch
+      <TronSearch
         data={data}
         onSearch={onSearch}
-        placeholder="Search..."
-        basicOutlineConfig={basicOutlineTheme}
+        placeholder="Search the grid..."
+        theme="basic-outline"
         enableParticles={false}
-        enableFilters={true}
-        enableLogic={true}
+        glowIntensity={0}
+        wireOpacity={0.9}
+        animationSpeed={1.0}
       />
     </div>
   );
