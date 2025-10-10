@@ -241,16 +241,50 @@ class RepositoryVisualization {
             this.updateLoadingText('Loading data...');
             
             let data;
+            let source = 'unknown';
             
+            // Try pow3r.status.config.json first (aggregated format)
             try {
-                console.log('Trying data.json...');
-                const response = await fetch('/data.json');
-                data = await response.json();
-                console.log('✓ Loaded from data.json');
-            } catch {
-                const response = await fetch('/api/projects');
-                data = await response.json();
-                console.log('✓ Loaded from API');
+                console.log('Trying pow3r.status.config.json...');
+                const response = await fetch('/pow3r.status.config.json');
+                const config = await response.json();
+                
+                // Check if this is aggregated format
+                if (config.nodes && config.edges) {
+                    console.log('✓ Loaded aggregated config from pow3r.status.config.json');
+                    // Convert to expected format
+                    data = {
+                        projects: [{
+                            projectName: config.projectName || 'Unified Repository Network',
+                            nodes: config.nodes,
+                            edges: config.edges,
+                            configType: config.metadata?.configType || 'v2'
+                        }]
+                    };
+                    source = 'pow3r.status.config.json (aggregated)';
+                } else {
+                    // Legacy format with project structure
+                    console.log('✓ Loaded from pow3r.status.config.json (legacy)');
+                    data = { projects: [config] };
+                    source = 'pow3r.status.config.json';
+                }
+            } catch (e) {
+                console.log('pow3r.status.config.json not available:', e.message);
+                
+                // Try data.json
+                try {
+                    console.log('Trying data.json...');
+                    const response = await fetch('/data.json');
+                    data = await response.json();
+                    console.log('✓ Loaded from data.json');
+                    source = 'data.json';
+                } catch {
+                    // Try API as last resort
+                    const response = await fetch('/api/projects');
+                    data = await response.json();
+                    console.log('✓ Loaded from API');
+                    source = 'API';
+                }
             }
             
             if (!data?.projects?.length) {
@@ -258,6 +292,7 @@ class RepositoryVisualization {
             }
             
             this.projects = data.projects;
+            console.log(`📂 Data source: ${source}`);
             
             console.log(`📊 Processing ${data.projects.length} projects...`);
             
