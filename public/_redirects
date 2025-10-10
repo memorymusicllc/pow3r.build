@@ -1,14 +1,11 @@
 # Cloudflare Pages redirects and rewrites
 
-# Serve static JSON files directly
+# Serve static assets first
+/assets/*  /assets/:splat  200
+
+# Serve specific JSON files
 /data.json  /data.json  200
 /pow3r.status.config.json  /pow3r.status.config.json  200
-
-# Serve static assets
-/assets/*  /assets/:splat  200
-/*.js  /:splat  200
-/*.css  /:splat  200
-/*.json  /:splat  200
 
 # API proxy (if needed)
 /api/*  https://your-api-backend.com/:splat  200

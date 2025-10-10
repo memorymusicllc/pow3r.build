@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Test</title>
+</head>
+<body>
+    <h1>Data Loading Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testDataLoading() {
+            const results = document.getElementById('results');
+            
+            // Test pow3r.status.config.json
+            try {
+                const response = await fetch('/pow3r.status.config.json');
+                const data = await response.json();
+                results.innerHTML += `<p>✅ pow3r.status.config.json loaded: ${data.nodes?.length || 0} nodes</p>`;
+                console.log('pow3r.status.config.json:', data);
+            } catch (error) {
+                results.innerHTML += `<p>❌ pow3r.status.config.json failed: ${error.message}</p>`;
+                console.error('pow3r.status.config.json error:', error);
+            }
+            
+            // Test data.json
+            try {
+                const response = await fetch('/data.json');
+                const data = await response.json();
+                results.innerHTML += `<p>✅ data.json loaded: ${data.projects?.length || 0} projects</p>`;
+                console.log('data.json:', data);
+            } catch (error) {
+                results.innerHTML += `<p>❌ data.json failed: ${error.message}</p>`;
+                console.error('data.json error:', error);
+            }
+        }
+        
+        testDataLoading();
+    </script>
+</body>
+</html>
