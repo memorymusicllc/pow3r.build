@@ -37,32 +37,43 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scene3DRef = useRef<any>(null);
 
+  // Theme: Basic Outline only (no particles)
 
   // Load data
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        
         let configData: Pow3rStatusConfig;
-        
+
         if (config) {
           configData = config;
         } else {
-          // Try to load from multiple sources
+          // Prefer dynamic API (Cloudflare function) then fallbacks
+          let rawData: any | null = null;
           try {
-            const response = await fetch('/pow3r.status.config.json');
-            configData = await response.json();
-          } catch {
-            // Fallback to data.json
-            const response = await fetch(dataUrl);
-            const rawData = await response.json();
-            
-            // Transform data.json to pow3r.status.config format if needed
-            configData = transformDataToConfig(rawData);
+            const apiRes = await fetch('/api/projects');
+            if (apiRes.ok) rawData = await apiRes.json();
+          } catch {}
+
+          if (!rawData) {
+            try {
+              const response = await fetch('/pow3r.status.config.json');
+              configData = await response.json();
+              setData(configData);
+              setIsLoading(false);
+              return;
+            } catch {}
           }
+
+          if (!rawData) {
+            const response = await fetch(dataUrl);
+            rawData = await response.json();
+          }
+
+          configData = transformDataToConfig(rawData);
         }
-        
+
         setData(configData);
         setIsLoading(false);
       } catch (err) {
@@ -71,7 +82,6 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, [dataUrl, config]);
 
@@ -329,11 +339,12 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           <TronSearch
             data={data}
             onSearch={handleSearch}
-            placeholder="Search the quantum grid..."
-            theme="tron"
-            wireOpacity={0.8}
-            glowIntensity={0}
+            placeholder="Search the grid..."
+            theme="basic-outline"
             enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}

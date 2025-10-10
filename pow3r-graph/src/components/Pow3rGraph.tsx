@@ -57,6 +57,7 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   
+  // Basic Outline theme only (no particles)
 
   // Initialize graph data
   useEffect(() => {
@@ -354,11 +355,12 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
             data={data}
             onSearch={handleSearch}
             onFilter={handleFilter}
-            placeholder="Search the quantum grid..."
-            theme="tron"
-            wireOpacity={0.8}
-            glowIntensity={0}
+            placeholder="Search the grid..."
+            theme="basic-outline"
             enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}

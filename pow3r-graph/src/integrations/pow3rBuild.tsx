@@ -47,13 +47,16 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [timelineData, setTimelineData] = useState<any>(null);
 
+  // Basic Outline theme only (no particles)
 
   // Initialize with first config
   useEffect(() => {
-    if (configs.length > 0 && !selectedConfig) {
-      setSelectedConfig(configs[0]);
+    if (configs.length > 0) {
+      // Validate configs and pick the first valid one
+      const firstValid = configs.find(c => validatePow3rStatus(c).valid) || configs[0];
+      setSelectedConfig(firstValid);
     }
-  }, [configs, selectedConfig]);
+  }, [configs]);
 
   // Handle config selection
   const handleConfigSelect = useCallback((config: Pow3rStatusConfig) => {
@@ -223,11 +226,12 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
             data={transformToGraphData(selectedConfig)}
             onSearch={handleSearch}
             onFilter={handleFilter}
-            placeholder="Search the quantum grid..."
-            theme="tron"
-            wireOpacity={0.8}
-            glowIntensity={0}
+            placeholder="Search the grid..."
+            theme="basic-outline"
             enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}

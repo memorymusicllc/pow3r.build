@@ -22,5 +22,5 @@ export { default as Pow3rBuildIntegration } from './integrations/pow3rBuild';
 // Schemas
 export * from './schemas/pow3rStatusSchema';
 
-// Re-exports from search-ui (Basic Outline Theme)
+// Re-exports from search-ui
 export { TronSearch } from '@pow3r/search-ui';

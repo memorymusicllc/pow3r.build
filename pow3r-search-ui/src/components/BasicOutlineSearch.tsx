@@ -2,49 +2,37 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '../store/searchStore';
 import { TronSearchProps, SearchSuggestion, FilterChip, LogicOperator } from '../types';
 import { BasicOutlineWireframe } from './BasicOutlineWireframe';
-import { ParticleSpaceSystem } from './ParticleSpaceSystem';
 import { SearchIcon } from './SearchIcon';
 import { SuggestionDropdown } from './SuggestionDropdown';
 import { FilterChips } from './FilterChips';
 import { LogicOperators } from './LogicOperators';
-import { ParticleSpaceConfig, createParticleSpaceTheme } from '../themes/ParticleSpaceTheme';
-import { createBasicOutlineTheme } from '../themes/BasicOutlineTheme';
+import { BasicOutlineConfig, createBasicOutlineTheme } from '../themes/BasicOutlineTheme';
 
 /**
- * TRON Search UI with Particle Space Theme
- * Everything is made of data represented as particles of light, energy waves, lasers, nebula/gas, and almost-glass mist
+ * Basic Outline Search UI Component
+ * Simple, clean search interface with basic outline theme
  */
-export const TronSearchParticleSpace: React.FC<TronSearchProps & {
-  particleSpaceConfig?: Partial<ParticleSpaceConfig>;
-  brightness?: number; // 0-1, room brightness
-  enableQuantumAttraction?: boolean;
-  enableNebula?: boolean;
-  enableMist?: boolean;
-  enableEnergyWaves?: boolean;
+export const BasicOutlineSearch: React.FC<TronSearchProps & {
+  basicOutlineConfig?: Partial<BasicOutlineConfig>;
 }> = ({
   data,
   onSearch,
   onFilter,
-  placeholder = "Search the quantum grid...",
+  placeholder = "Search...",
   collapsed = false,
   className = "",
   style = {},
   theme = "basic-outline",
-  particleColors = ["#00ff88", "#ff0088", "#8800ff"],
-  wireOpacity = 0.8,
-  glowIntensity = 1.5,
+  particleColors = ["#ffffff"],
+  wireOpacity = 1.0,
+  glowIntensity = 1.0,
   animationSpeed = 1.0,
   maxSuggestions = 8,
   enableHistory = true,
   enableFilters = true,
   enableLogic = true,
-  enableParticles = true,
-  particleSpaceConfig = {},
-  brightness = 0.5,
-  enableQuantumAttraction = true,
-  enableNebula = true,
-  enableMist = true,
-  enableEnergyWaves = true,
+  enableParticles = false,
+  basicOutlineConfig = {},
   ...props
 }) => {
   // State
@@ -56,9 +44,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
   const [isFocused, setIsFocused] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterChip[]>([]);
   const [logicOperators, setLogicOperators] = useState<LogicOperator[]>([]);
-  const [pow3rMoment, setPow3rMoment] = useState<keyof ParticleSpaceConfig['pow3rMoments'] | null>(null);
-  const [isParticleizing, setIsParticleizing] = useState(false);
-  const [isDeparticleizing, setIsDeparticleizing] = useState(false);
   
   // Refs
   const inputRef = useRef<HTMLInputElement>(null);
@@ -78,32 +63,14 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
 
   // Create basic outline theme
   const basicOutlineTheme = createBasicOutlineTheme({
-    effects: {
-      glow: false,
-      particles: false,
-      animations: true,
-      wireframe: true
+    ...basicOutlineConfig,
+    wires: {
+      ...basicOutlineConfig.wires,
+      opacity: wireOpacity
     },
     animations: {
-      speed: animationSpeed,
-      easing: 'ease-in-out',
-      duration: 300
-    },
-    wires: {
-      thickness: 1,
-      opacity: wireOpacity,
-      color: { light: '#000000', dark: '#ffffff' },
-      style: 'solid'
-    }
-  });
-
-  // Create particle space theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    ...particleSpaceConfig,
-    brightness: {
-      enabled: true,
-      highContrast: brightness > 0.8,
-      adaptive: true
+      ...basicOutlineConfig.animations,
+      speed: animationSpeed
     }
   });
 
@@ -205,10 +172,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
       const newSuggestions = generateSuggestions(value);
       updateSuggestions(newSuggestions);
       setShowSuggestions(true);
-      
-      // Trigger reactive Pow3r moment
-      setPow3rMoment('reactive');
-      setTimeout(() => setPow3rMoment(null), 1000);
     } else {
       setShowSuggestions(false);
     }
@@ -277,10 +240,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
       addToHistory(suggestion.text);
     }
     
-    // Trigger data Pow3r moment
-    setPow3rMoment('data');
-    setTimeout(() => setPow3rMoment(null), 1500);
-    
     // Trigger search
     if (onSearch) {
       onSearch(suggestion.text, suggestion);
@@ -296,10 +255,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
       addToHistory(searchValue);
     }
     
-    // Trigger primary action Pow3r moment
-    setPow3rMoment('primaryAction');
-    setTimeout(() => setPow3rMoment(null), 2000);
-    
     // Trigger search
     if (onSearch) {
       onSearch(searchValue, null);
@@ -313,10 +268,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
     setActiveFilters(filters);
     updateFilters(filters);
     
-    // Trigger reactive Pow3r moment
-    setPow3rMoment('reactive');
-    setTimeout(() => setPow3rMoment(null), 1000);
-    
     if (onFilter) {
       onFilter(filters);
     }
@@ -325,29 +276,13 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
   // Handle logic operator change
   const handleLogicChange = useCallback((operators: LogicOperator[]) => {
     setLogicOperators(operators);
-    
-    // Trigger icons Pow3r moment
-    setPow3rMoment('icons');
-    setTimeout(() => setPow3rMoment(null), 800);
   }, []);
 
-  // Toggle expanded state with particleization
+  // Toggle expanded state
   const toggleExpanded = useCallback(() => {
+    setIsExpanded(prev => !prev);
     if (!isExpanded) {
-      // Particleization (entering)
-      setIsParticleizing(true);
-      setTimeout(() => {
-        setIsExpanded(true);
-        setIsParticleizing(false);
-        setTimeout(() => inputRef.current?.focus(), 100);
-      }, 400);
-    } else {
-      // Departicleization (exiting)
-      setIsDeparticleizing(true);
-      setTimeout(() => {
-        setIsExpanded(false);
-        setIsDeparticleizing(false);
-      }, 300);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isExpanded]);
 
@@ -372,44 +307,31 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
     }
   }, [data, searchValue, generateSuggestions, updateSuggestions]);
 
-  // Handle loading state
-  useEffect(() => {
-    if (isFocused && searchValue.trim()) {
-      setPow3rMoment('loading');
-      const timer = setTimeout(() => setPow3rMoment(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isFocused, searchValue]);
-
   return (
     <div
       ref={containerRef}
-      className={`particle-space-search-container ${className}`}
+      className={`basic-outline-search-container ${className}`}
       style={{
         position: 'relative',
         display: 'inline-block',
-        fontFamily: particleSpaceTheme.text.font,
+        fontFamily: basicOutlineTheme.text.font,
         ...style
       }}
       {...props}
     >
       {/* Main Search Container */}
       <div
-        className={`particle-space-search-main ${isExpanded ? 'expanded' : 'collapsed'} ${isParticleizing ? 'particleizing' : ''} ${isDeparticleizing ? 'departicleizing' : ''}`}
+        className={`basic-outline-search-main ${isExpanded ? 'expanded' : 'collapsed'}`}
         style={{
           position: 'relative',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: basicOutlineTheme.effects.animations ? 
+            `all ${basicOutlineTheme.animations.duration}ms ${basicOutlineTheme.animations.easing}` : 
+            'none',
           cursor: isExpanded ? 'text' : 'pointer'
         }}
         onClick={!isExpanded ? toggleExpanded : undefined}
-        onMouseEnter={() => {
-          setIsHovered(true);
-          setPow3rMoment('interaction');
-          setTimeout(() => setPow3rMoment(null), 500);
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false);
-        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Basic Outline Wireframe */}
         <BasicOutlineWireframe
@@ -418,16 +340,6 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
           isHovered={isHovered}
           isFocused={isFocused}
         />
-        
-        {/* Particle Space System */}
-        {enableParticles && (
-          <ParticleSpaceSystem
-            config={particleSpaceTheme}
-            isActive={isHovered || isFocused || !!pow3rMoment}
-            pow3rMoment={pow3rMoment || undefined}
-            intensity={pow3rMoment ? particleSpaceTheme.pow3rMoments[pow3rMoment].intensity : 1.0}
-          />
-        )}
         
         {/* Search Icon (when collapsed) */}
         {!isExpanded && (
@@ -446,28 +358,24 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
             value={searchValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => {
-              setIsFocused(true);
-              setPow3rMoment('active');
-              setTimeout(() => setPow3rMoment(null), 1000);
-            }}
+            onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
-            className="particle-space-search-input"
+            className="basic-outline-search-input"
             style={{
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              color: '#ffffff',
+              color: basicOutlineTheme.colors.text,
               fontSize: '16px',
               padding: '12px 16px',
               width: '100%',
-              fontFamily: particleSpaceTheme.text.font,
-              fontWeight: particleSpaceTheme.text.weight,
-              opacity: particleSpaceTheme.text.alpha.normal,
+              fontFamily: basicOutlineTheme.text.font,
+              fontWeight: basicOutlineTheme.text.weight,
+              opacity: basicOutlineTheme.text.alpha.normal,
               '::placeholder': {
-                color: 'rgba(255, 255, 255, 0.5)',
-                opacity: particleSpaceTheme.text.alpha.normal
+                color: basicOutlineTheme.colors.textSecondary,
+                opacity: basicOutlineTheme.text.alpha.normal
               }
             }}
             autoComplete="off"
@@ -506,49 +414,8 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
           maxSuggestions={maxSuggestions}
         />
       )}
-      
-      {/* CSS Animations */}
-      <style jsx>{`
-        @keyframes particleization {
-          0% {
-            opacity: 0;
-            transform: scale(0.8);
-            filter: blur(10px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0px);
-          }
-        }
-        
-        @keyframes departicleization {
-          0% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0px);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(0.8);
-            filter: blur(10px);
-          }
-        }
-        
-        .particleizing {
-          animation: particleization ${particleSpaceTheme.particleization.enter.duration}ms ${particleSpaceTheme.particleization.enter.easing};
-        }
-        
-        .departicleizing {
-          animation: departicleization ${particleSpaceTheme.particleization.exit.duration}ms ${particleSpaceTheme.particleization.exit.easing};
-        }
-        
-        .particle-space-search-input:focus {
-          opacity: ${particleSpaceTheme.text.alpha.pow3r};
-        }
-      `}</style>
     </div>
   );
 };
 
-export default TronSearchParticleSpace;
+export default BasicOutlineSearch;
