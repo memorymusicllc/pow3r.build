@@ -1375,48 +1375,56 @@ class Pow3rAdvanced {
     initUIControls() {
         // Enhanced Lock toggle
         const lockToggle = document.getElementById('lock-toggle');
-        lockToggle.addEventListener('click', () => {
-            this.uiLocked = !this.uiLocked;
-            lockToggle.classList.toggle('locked', this.uiLocked);
-            
-            if (this.uiLocked) {
-                lockToggle.innerHTML = '<i class="fas fa-lock icon"></i>';
-                this.lockUIComponents();
-                console.log('🔒 UI components locked in place');
-            } else {
-                lockToggle.innerHTML = '<i class="fas fa-unlock icon"></i>';
-                this.unlockUIComponents();
-                console.log('🔓 UI components unlocked - free positioning');
-            }
-        });
+        if (lockToggle) {
+            lockToggle.addEventListener('click', () => {
+                this.uiLocked = !this.uiLocked;
+                lockToggle.classList.toggle('locked', this.uiLocked);
+                
+                if (this.uiLocked) {
+                    lockToggle.innerHTML = '<i class="fas fa-lock icon"></i>';
+                    this.lockUIComponents();
+                    console.log('🔒 UI components locked in place');
+                } else {
+                    lockToggle.innerHTML = '<i class="fas fa-unlock icon"></i>';
+                    this.unlockUIComponents();
+                    console.log('🔓 UI components unlocked - free positioning');
+                }
+            });
+        }
         
         // S3arch collapse
         const collapseBtn = document.getElementById('s3arch-collapse');
         const s3archContent = document.getElementById('s3arch-content');
-        collapseBtn.addEventListener('click', () => {
-            this.s3archCollapsed = !this.s3archCollapsed;
-            collapseBtn.classList.toggle('collapsed', this.s3archCollapsed);
-            s3archContent.classList.toggle('collapsed', this.s3archCollapsed);
-        });
+        if (collapseBtn && s3archContent) {
+            collapseBtn.addEventListener('click', () => {
+                this.s3archCollapsed = !this.s3archCollapsed;
+                collapseBtn.classList.toggle('collapsed', this.s3archCollapsed);
+                s3archContent.classList.toggle('collapsed', this.s3archCollapsed);
+            });
+        }
         
         // Transform3r controls
         const transformBtns = document.querySelectorAll('.transform3r-btn');
-        transformBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                transformBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.transformGraph(btn.dataset.mode);
+        if (transformBtns.length > 0) {
+            transformBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    transformBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.transformGraph(btn.dataset.mode);
+                });
             });
-        });
+        }
         
         // Light controls
         this.initLightControls();
         
         // Details card close
         const closeBtn = document.getElementById('close-details');
-        closeBtn.addEventListener('click', () => {
-            this.hideDetailsCard();
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideDetailsCard();
+            });
+        }
     }
     
     initLightControls() {
@@ -1425,23 +1433,31 @@ class Pow3rAdvanced {
         const addBtn = document.getElementById('add-light');
         const removeBtn = document.getElementById('remove-light');
         
-        intensitySlider.addEventListener('input', (e) => {
-            this.lightIntensity = parseFloat(e.target.value);
-            this.updateLights();
-        });
+        if (intensitySlider) {
+            intensitySlider.addEventListener('input', (e) => {
+                this.lightIntensity = parseFloat(e.target.value);
+                this.updateLights();
+            });
+        }
         
-        colorPicker.addEventListener('change', (e) => {
-            this.lightColor = parseInt(e.target.value.replace('#', '0x'));
-            this.updateLights();
-        });
+        if (colorPicker) {
+            colorPicker.addEventListener('change', (e) => {
+                this.lightColor = parseInt(e.target.value.replace('#', '0x'));
+                this.updateLights();
+            });
+        }
         
-        addBtn.addEventListener('click', () => {
-            this.addLight();
-        });
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                this.addLight();
+            });
+        }
         
-        removeBtn.addEventListener('click', () => {
-            this.removeLight();
-        });
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                this.removeLight();
+            });
+        }
     }
     
     updateLights() {

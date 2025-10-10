@@ -61,8 +61,12 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
 
   // Initialize graph data
   useEffect(() => {
+    console.log('Pow3rGraph received data:', data);
     if (data) {
+      console.log('Setting filtered nodes:', data.nodes?.length || 0, 'nodes');
       setFilteredNodes(data.nodes || []);
+    } else {
+      console.log('No data received by Pow3rGraph');
     }
   }, [data]);
 
@@ -310,6 +314,7 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
 
   // Render graph based on current transform
   useEffect(() => {
+    console.log('Rendering graph with transform:', currentTransform.type, 'filteredNodes:', filteredNodes.length);
     switch (currentTransform.type) {
       case '2d':
         render2DGraph();
@@ -321,7 +326,7 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
         renderTimeline();
         break;
     }
-  }, [currentTransform, render2DGraph, render3DGraph, renderTimeline]);
+  }, [currentTransform, render2DGraph, render3DGraph, renderTimeline, filteredNodes]);
 
   return (
     <div

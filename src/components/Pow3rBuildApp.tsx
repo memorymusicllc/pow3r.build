@@ -96,6 +96,11 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
 
         setData(configData);
         setIsLoading(false);
+        
+        // Hide loading screen when data is loaded
+        if (typeof window !== 'undefined' && (window as any).hideLoadingScreen) {
+          (window as any).hideLoadingScreen();
+        }
       } catch (err) {
         console.error('Error loading data:', err);
         setError('Failed to load data');
