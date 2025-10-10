@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import TronSearch from '../../pow3r-search-ui/src/components/TronSearch';
+import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
@@ -37,33 +37,43 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scene3DRef = useRef<any>(null);
 
-  // Basic Outline theme uses TronSearch (no Particle Space config)
+  // Theme: Basic Outline only (no particles)
 
   // Load data
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        
         let configData: Pow3rStatusConfig;
-        
+
         if (config) {
           configData = config;
         } else {
-          // Try to load from multiple sources
+          // Prefer dynamic API (Cloudflare function) then fallbacks
+          let rawData: any | null = null;
           try {
-            const response = await fetch('/pow3r.status.config.json');
-            configData = await response.json();
-          } catch {
-            // Fallback to data.json
-            const response = await fetch(dataUrl);
-            const rawData = await response.json();
-            
-            // Transform data.json to pow3r.status.config format if needed
-            configData = transformDataToConfig(rawData);
+            const apiRes = await fetch('/api/projects');
+            if (apiRes.ok) rawData = await apiRes.json();
+          } catch {}
+
+          if (!rawData) {
+            try {
+              const response = await fetch('/pow3r.status.config.json');
+              configData = await response.json();
+              setData(configData);
+              setIsLoading(false);
+              return;
+            } catch {}
           }
+
+          if (!rawData) {
+            const response = await fetch(dataUrl);
+            rawData = await response.json();
+          }
+
+          configData = transformDataToConfig(rawData);
         }
-        
+
         setData(configData);
         setIsLoading(false);
       } catch (err) {
@@ -72,7 +82,6 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, [dataUrl, config]);
 
@@ -331,7 +340,11 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
             data={data}
             onSearch={handleSearch}
             placeholder="Search the grid..."
-            theme="tron"
+            theme="basic-outline"
+            enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}

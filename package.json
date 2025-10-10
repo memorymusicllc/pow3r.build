@@ -8,7 +8,9 @@
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "build:components": "npm run build --prefix pow3r-search-ui && npm run build --prefix pow3r-graph"
+    "build:components": "npm run build --prefix pow3r-search-ui && npm run build --prefix pow3r-graph",
+    "scan:github": "node ./scripts/scan-github.js",
+    "data:generate": "node ./scripts/generate-data.js"
   },
   "keywords": [
     "pow3r",

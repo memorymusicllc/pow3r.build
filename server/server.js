@@ -17,7 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuration
-const BASE_PATH = process.env.BASE_PATH || '/Users/creator/Documents/DEV';
+const BASE_PATH = process.env.BASE_PATH || path.join(__dirname, '../output/github');
 const MAX_DEPTH = parseInt(process.env.MAX_DEPTH || '10', 10);
 
 // Middleware

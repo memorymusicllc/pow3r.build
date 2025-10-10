@@ -57,7 +57,7 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   
-  // Basic Outline Theme uses TronSearch (no Particle Space theme)
+  // Basic Outline theme only (no particles)
 
   // Initialize graph data
   useEffect(() => {
@@ -356,7 +356,11 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
             onSearch={handleSearch}
             onFilter={handleFilter}
             placeholder="Search the grid..."
-            theme="tron"
+            theme="basic-outline"
+            enableParticles={false}
+            glowIntensity={0}
+            wireOpacity={0.9}
+            animationSpeed={1.0}
           />
         </div>
       )}
