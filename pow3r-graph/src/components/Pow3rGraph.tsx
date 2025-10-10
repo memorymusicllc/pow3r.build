@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TronSearchParticleSpace } from '@pow3r/search-ui';
-import { ParticleSpaceConfig, createParticleSpaceTheme } from '@pow3r/search-ui/themes/ParticleSpaceTheme';
+import { TronSearch } from '@pow3r/search-ui';
 import { SearchSuggestion, FilterChip } from '@pow3r/search-ui/types';
 
 interface Pow3rGraphProps {
@@ -58,25 +57,6 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   
-  // Particle Space Theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 150,
-        size: 2.0,
-        speed: 1.2,
-        colors: ['#00ff88', '#ff0088', '#8800ff'],
-        attraction: 0.8
-      }
-    },
-    pow3rMoments: {
-      magic: {
-        enabled: true,
-        particles: ['#ffd700', '#ff0088', '#00ff88', '#8800ff'],
-        intensity: 2.0
-      }
-    }
-  });
 
   // Initialize graph data
   useEffect(() => {
@@ -370,17 +350,15 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
             width: '400px'
           }}
         >
-          <TronSearchParticleSpace
+          <TronSearch
             data={data}
             onSearch={handleSearch}
             onFilter={handleFilter}
             placeholder="Search the quantum grid..."
-            particleSpaceConfig={particleSpaceTheme}
-            brightness={0.7}
-            enableQuantumAttraction={true}
-            enableNebula={true}
-            enableMist={true}
-            enableEnergyWaves={true}
+            theme="tron"
+            wireOpacity={0.8}
+            glowIntensity={0}
+            enableParticles={false}
           />
         </div>
       )}

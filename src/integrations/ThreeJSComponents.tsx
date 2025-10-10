@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { TronSearchParticleSpace } from '../../pow3r-search-ui/src/components/TronSearchParticleSpace';
-import { createParticleSpaceTheme } from '../../pow3r-search-ui/src/themes/ParticleSpaceTheme';
+import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 
 interface ThreeJSSearchComponentProps {
   scene: THREE.Scene;
@@ -26,17 +25,6 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const css2DObjectRef = useRef<CSS2DObject | null>(null);
 
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 100,
-        size: 1.5,
-        speed: 1.0,
-        colors: ['#00ff88', '#ff0088', '#8800ff'],
-        attraction: 0.7
-      }
-    }
-  });
 
   useEffect(() => {
     if (!containerRef.current || !scene) return;
@@ -63,16 +51,14 @@ export const ThreeJSSearchComponent: React.FC<ThreeJSSearchComponentProps> = ({
         width: '400px'
       }}
     >
-      <TronSearchParticleSpace
+      <TronSearch
         data={data}
         onSearch={onSearch}
         placeholder="Search the quantum grid..."
-        particleSpaceConfig={particleSpaceTheme}
-        brightness={0.7}
-        enableQuantumAttraction={true}
-        enableNebula={true}
-        enableMist={true}
-        enableEnergyWaves={true}
+        theme="tron"
+        wireOpacity={0.8}
+        glowIntensity={0}
+        enableParticles={false}
       />
     </div>
   );
