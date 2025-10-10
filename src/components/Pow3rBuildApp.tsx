@@ -3,6 +3,7 @@ import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
+import { defaultConfig } from '../data/defaultConfig';
 
 interface Pow3rBuildAppProps {
   dataUrl?: string;
@@ -81,8 +82,18 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
                 console.log('Loaded data.json:', rawData);
               }
             } catch (error) {
-              console.error('Failed to load data.json:', error);
-              throw new Error('No data sources available');
+              console.log('Failed to load data.json, using embedded default config');
+              // Use embedded default config as fallback
+              configData = defaultConfig as Pow3rStatusConfig;
+              console.log('Using embedded default config:', configData);
+              setData(configData);
+              setIsLoading(false);
+              
+              // Hide loading screen when data is loaded
+              if (typeof window !== 'undefined' && (window as any).hideLoadingScreen) {
+                (window as any).hideLoadingScreen();
+              }
+              return;
             }
           }
 
@@ -90,7 +101,9 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
             configData = transformDataToConfig(rawData);
             console.log('Transformed data to config:', configData);
           } else {
-            throw new Error('No data available');
+            // Use embedded default config as final fallback
+            console.log('No raw data available, using embedded default config');
+            configData = defaultConfig as Pow3rStatusConfig;
           }
         }
 
