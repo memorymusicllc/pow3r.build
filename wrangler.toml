@@ -21,3 +21,32 @@ binding = "POW3R_STATUS_KV"
 id = "${POW3R_STATUS_KV_ID}"
 preview_id = "${POW3R_STATUS_KV_PREVIEW_ID}"
 
+# KV Namespaces
+[[kv_namespaces]]
+binding = "REPO_SCANS"
+id = "repo_scans_namespace_id"
+
+[[kv_namespaces]]
+binding = "REPO_STATUS"
+id = "repo_status_namespace_id"
+
+[[kv_namespaces]]
+binding = "POWER_STATUS"
+id = "power_status_namespace_id"
+
+# R2 Bucket for power.status.json storage
+[[r2_buckets]]
+binding = "POWER_STATUS_BUCKET"
+bucket_name = "power-status-files"
+
+# Environment variables
+[vars]
+GITHUB_WEBHOOK_SECRET = "your-webhook-secret-here"
+NOTIFICATION_WEBHOOK = "https://your-notification-endpoint.com/webhook"
+AGGREGATION_WEBHOOK = "https://thewatchmen.pages.dev/api/data-aggregator"
+
+# Secrets (set these with wrangler secret put)
+# GITHUB_TOKEN - GitHub personal access token
+# TELEGRAM_BOT_TOKEN - Optional Telegram bot token
+# TELEGRAM_CHAT_ID - Optional Telegram chat ID
+
