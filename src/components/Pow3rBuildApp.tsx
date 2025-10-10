@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { TronSearchParticleSpace } from '../../pow3r-search-ui/src/components/TronSearchParticleSpace';
+import TronSearch from '../../pow3r-search-ui/src/components/TronSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
-import { createParticleSpaceTheme } from '../../pow3r-search-ui/src/themes/ParticleSpaceTheme';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
 
 interface Pow3rBuildAppProps {
@@ -38,31 +37,7 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scene3DRef = useRef<any>(null);
 
-  // Theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 150,
-        size: 2.0,
-        speed: 1.2,
-        colors: ['#00ff88', '#ff0088', '#8800ff'],
-        attraction: 0.8
-      },
-      energy: {
-        waveLength: 25,
-        amplitude: 8,
-        frequency: 0.03,
-        colors: ['#00ff88', '#ff0088', '#8800ff']
-      }
-    },
-    pow3rMoments: {
-      magic: {
-        enabled: true,
-        particles: ['#ffd700', '#ff0088', '#00ff88', '#8800ff'],
-        intensity: 2.0
-      }
-    }
-  });
+  // Basic Outline theme uses the base TronSearch without particle-space config
 
   // Load data
   useEffect(() => {
@@ -352,16 +327,12 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           zIndex: 1000,
           width: '400px'
         }}>
-          <TronSearchParticleSpace
+          <TronSearch
             data={data}
             onSearch={handleSearch}
-            placeholder="Search the quantum grid..."
-            particleSpaceConfig={particleSpaceTheme}
-            brightness={0.7}
-            enableQuantumAttraction={true}
-            enableNebula={true}
-            enableMist={true}
-            enableEnergyWaves={true}
+            placeholder="Search the grid..."
+            enableParticles={false}
+            theme="basic-outline"
           />
         </div>
       )}
