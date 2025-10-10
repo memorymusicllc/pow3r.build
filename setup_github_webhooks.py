@@ -1,199 +1,199 @@
 #!/usr/bin/env python3
 """
-Setup GitHub Webhooks for All Repositories
-Creates webhooks that trigger status updates on CloudFlare Workers
+Setup GitHub Webhooks for automatic power.status.json updates
 """
 
-import os
-import sys
 import requests
 import json
+import argparse
+from typing import List, Dict
 
 
-def setup_webhook_for_repo(repo_full_name, webhook_url, secret, token):
-    """Setup webhook for a single repository"""
+class GitHubWebhookSetup:
+    """Setup webhooks for GitHub repositories"""
     
-    headers = {
-        'Authorization': f'token {token}',
-        'Accept': 'application/vnd.github.v3+json'
-    }
-    
-    # Check if webhook already exists
-    webhooks_response = requests.get(
-        f'https://api.github.com/repos/{repo_full_name}/hooks',
-        headers=headers
-    )
-    
-    if webhooks_response.status_code != 200:
-        print(f'  ❌ Failed to fetch webhooks: {webhooks_response.status_code}')
-        return False
-    
-    existing_webhooks = webhooks_response.json()
-    
-    # Check if our webhook URL already exists
-    for hook in existing_webhooks:
-        if hook['config'].get('url') == webhook_url:
-            print(f'  ✓ Webhook already exists (id: {hook["id"]})')
-            return True
-    
-    # Create new webhook
-    webhook_config = {
-        'name': 'web',
-        'active': True,
-        'events': [
-            'push',
-            'pull_request',
-            'release',
-            'create',
-            'delete',
-            'repository'
-        ],
-        'config': {
-            'url': webhook_url,
-            'content_type': 'json',
-            'secret': secret,
-            'insecure_ssl': '0'
-        }
-    }
-    
-    response = requests.post(
-        f'https://api.github.com/repos/{repo_full_name}/hooks',
-        headers=headers,
-        json=webhook_config
-    )
-    
-    if response.status_code == 201:
-        hook_data = response.json()
-        print(f'  ✓ Webhook created (id: {hook_data["id"]})')
-        return True
-    else:
-        print(f'  ❌ Failed to create webhook: {response.status_code}')
-        print(f'     {response.text}')
-        return False
-
-
-def setup_webhooks_for_all_repos(webhook_url, secret, token, username=None, org=None):
-    """Setup webhooks for all repositories"""
-    
-    print(f"\n🔗 Setting up GitHub Webhooks")
-    print(f"Webhook URL: {webhook_url}")
-    print("=" * 70 + "\n")
-    
-    # Get all repositories
-    headers = {
-        'Authorization': f'token {token}',
-        'Accept': 'application/vnd.github.v3+json'
-    }
-    
-    repos = []
-    page = 1
-    
-    while True:
-        if org:
-            url = f'https://api.github.com/orgs/{org}/repos'
-        elif username:
-            url = f'https://api.github.com/users/{username}/repos'
-        else:
-            url = 'https://api.github.com/user/repos'
+    def __init__(self, token: str, webhook_url: str, secret: str):
+        self.token = token
+        self.webhook_url = webhook_url
+        self.secret = secret
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json'
+        })
+        self.base_url = 'https://api.github.com'
         
-        response = requests.get(
-            url,
-            headers=headers,
-            params={'page': page, 'per_page': 100}
+    def setup_webhook(self, repo_full_name: str) -> Dict:
+        """Setup webhook for a single repository"""
+        print(f"🔧 Setting up webhook for: {repo_full_name}")
+        
+        # Check if webhook already exists
+        existing = self.get_existing_webhook(repo_full_name)
+        if existing:
+            print(f"  ✅ Webhook already exists (ID: {existing['id']})")
+            return existing
+            
+        # Create new webhook
+        webhook_config = {
+            'name': 'web',
+            'active': True,
+            'events': [
+                'push',
+                'pull_request',
+                'issues',
+                'release',
+                'repository'
+            ],
+            'config': {
+                'url': self.webhook_url,
+                'content_type': 'json',
+                'secret': self.secret,
+                'insecure_ssl': '0'
+            }
+        }
+        
+        response = self.session.post(
+            f"{self.base_url}/repos/{repo_full_name}/hooks",
+            json=webhook_config
         )
+        
+        if response.status_code == 201:
+            webhook = response.json()
+            print(f"  ✅ Webhook created successfully (ID: {webhook['id']})")
+            return webhook
+        else:
+            print(f"  ❌ Failed to create webhook: {response.status_code}")
+            print(f"     {response.json().get('message', 'Unknown error')}")
+            return None
+            
+    def get_existing_webhook(self, repo_full_name: str) -> Dict:
+        """Check if webhook already exists"""
+        response = self.session.get(f"{self.base_url}/repos/{repo_full_name}/hooks")
         
         if response.status_code != 200:
-            print(f"❌ Failed to fetch repositories: {response.status_code}")
-            sys.exit(1)
+            return None
+            
+        webhooks = response.json()
+        for webhook in webhooks:
+            if webhook.get('config', {}).get('url') == self.webhook_url:
+                return webhook
+                
+        return None
         
-        page_repos = response.json()
-        if not page_repos:
-            break
+    def setup_org_webhooks(self, org: str) -> List[Dict]:
+        """Setup webhooks for all repositories in an organization"""
+        print(f"🏢 Setting up webhooks for organization: {org}")
         
-        repos.extend(page_repos)
-        page += 1
-    
-    print(f"Found {len(repos)} repositories\n")
-    
-    # Setup webhook for each repo
-    results = []
-    for idx, repo in enumerate(repos, 1):
-        print(f"[{idx}/{len(repos)}] {repo['full_name']}")
+        # Get all repositories
+        repos = []
+        page = 1
         
-        # Skip if no admin permission
-        if not repo['permissions'].get('admin', False):
-            print(f"  ⚠️  No admin permission, skipping")
-            results.append((repo['full_name'], False, 'no_permission'))
-            continue
+        while True:
+            response = self.session.get(
+                f"{self.base_url}/orgs/{org}/repos",
+                params={'page': page, 'per_page': 100}
+            )
+            
+            if response.status_code != 200:
+                print(f"❌ Failed to fetch repositories: {response.status_code}")
+                break
+                
+            batch = response.json()
+            if not batch:
+                break
+                
+            repos.extend(batch)
+            page += 1
+            
+        print(f"📦 Found {len(repos)} repositories")
         
-        success = setup_webhook_for_repo(
-            repo['full_name'],
-            webhook_url,
-            secret,
-            token
+        # Setup webhook for each repository
+        results = []
+        for repo in repos:
+            result = self.setup_webhook(repo['full_name'])
+            if result:
+                results.append(result)
+                
+        print(f"\n✅ Successfully set up {len(results)} webhooks")
+        return results
+        
+    def test_webhook(self, repo_full_name: str, webhook_id: int):
+        """Send a test ping to the webhook"""
+        print(f"🏓 Testing webhook for {repo_full_name}...")
+        
+        response = self.session.post(
+            f"{self.base_url}/repos/{repo_full_name}/hooks/{webhook_id}/pings"
         )
         
-        results.append((repo['full_name'], success, 'created' if success else 'failed'))
-    
-    # Summary
-    print("\n" + "=" * 70)
-    print("📊 SETUP COMPLETE")
-    print("=" * 70)
-    
-    successful = [r for r in results if r[1]]
-    failed = [r for r in results if not r[1] and r[2] != 'no_permission']
-    skipped = [r for r in results if r[2] == 'no_permission']
-    
-    print(f"Total: {len(results)}")
-    print(f"✅ Successful: {len(successful)}")
-    print(f"❌ Failed: {len(failed)}")
-    print(f"⚠️  Skipped (no permission): {len(skipped)}")
-    
-    if failed:
-        print(f"\nFailed repositories:")
-        for repo_name, _, _ in failed:
-            print(f"  - {repo_name}")
-    
-    print("\n" + "=" * 70 + "\n")
+        if response.status_code == 204:
+            print("  ✅ Test ping sent successfully!")
+        else:
+            print(f"  ❌ Test failed: {response.status_code}")
+            
+    def list_webhooks(self, repo_full_name: str):
+        """List all webhooks for a repository"""
+        response = self.session.get(f"{self.base_url}/repos/{repo_full_name}/hooks")
+        
+        if response.status_code != 200:
+            print(f"❌ Failed to list webhooks: {response.status_code}")
+            return
+            
+        webhooks = response.json()
+        print(f"\n📋 Webhooks for {repo_full_name}:")
+        
+        for webhook in webhooks:
+            print(f"\n  ID: {webhook['id']}")
+            print(f"  URL: {webhook['config'].get('url', 'N/A')}")
+            print(f"  Events: {', '.join(webhook['events'])}")
+            print(f"  Active: {'✅' if webhook['active'] else '❌'}")
+            
+            if webhook.get('last_response'):
+                status = webhook['last_response'].get('status', 'N/A')
+                print(f"  Last Response: {status}")
 
 
 def main():
-    # Get configuration
-    token = os.environ.get('GITHUB_TOKEN')
-    if not token:
-        if len(sys.argv) > 1:
-            token = sys.argv[1]
+    """CLI interface for webhook setup"""
+    parser = argparse.ArgumentParser(description='Setup GitHub webhooks for automatic updates')
+    parser.add_argument('--token', required=True, help='GitHub personal access token')
+    parser.add_argument('--webhook-url', required=True, 
+                       help='CloudFlare worker webhook URL (e.g., https://your-worker.workers.dev/api/github-webhook)')
+    parser.add_argument('--secret', required=True, help='Webhook secret for verification')
+    parser.add_argument('--org', help='GitHub organization')
+    parser.add_argument('--repo', help='Single repository (format: owner/repo)')
+    parser.add_argument('--list', action='store_true', help='List existing webhooks')
+    parser.add_argument('--test', type=int, help='Test webhook by ID')
+    
+    args = parser.parse_args()
+    
+    if not args.org and not args.repo:
+        parser.error('Either --org or --repo must be specified')
+        
+    setup = GitHubWebhookSetup(args.token, args.webhook_url, args.secret)
+    
+    if args.list:
+        if args.repo:
+            setup.list_webhooks(args.repo)
         else:
-            print("❌ GitHub token required")
-            print("Usage: python setup_github_webhooks.py [token] [webhook_url] [secret]")
-            print("Or set GITHUB_TOKEN, WEBHOOK_URL, WEBHOOK_SECRET environment variables")
-            sys.exit(1)
-    
-    webhook_url = os.environ.get('WEBHOOK_URL')
-    if not webhook_url:
-        if len(sys.argv) > 2:
-            webhook_url = sys.argv[2]
-        else:
-            print("❌ Webhook URL required")
-            print("Example: https://your-domain.pages.dev/api/github-webhook")
-            sys.exit(1)
-    
-    secret = os.environ.get('WEBHOOK_SECRET')
-    if not secret:
-        if len(sys.argv) > 3:
-            secret = sys.argv[3]
-        else:
-            # Generate a random secret
-            import secrets
-            secret = secrets.token_urlsafe(32)
-            print(f"Generated webhook secret: {secret}")
-            print("⚠️  Save this secret and add it to your CloudFlare KV as GITHUB_WEBHOOK_SECRET")
-    
-    username = os.environ.get('GITHUB_USERNAME')
-    org = os.environ.get('GITHUB_ORG')
-    
-    # Setup webhooks
-    setup_webhooks_for_all_repos(webhook_url, secret, token, username, org)
+            print("Please specify --repo to list webhooks")
+    elif args.test and args.repo:
+        setup.test_webhook(args.repo, args.test)
+    elif args.repo:
+        setup.setup_webhook(args.repo)
+    elif args.org:
+        setup.setup_org_webhooks(args.org)
+        
+    print("\n🎉 Webhook setup complete!")
+    print("\nNext steps:")
+    print("1. Deploy the CloudFlare workers using: wrangler publish")
+    print("2. Configure CloudFlare KV namespaces:")
+    print("   - REPO_SCANS")
+    print("   - REPO_STATUS")
+    print("   - POWER_STATUS")
+    print("3. Set CloudFlare secrets:")
+    print("   - GITHUB_TOKEN")
+    print("   - GITHUB_WEBHOOK_SECRET")
+    print("4. Test the webhook using --test flag")
 
 
 if __name__ == '__main__':
