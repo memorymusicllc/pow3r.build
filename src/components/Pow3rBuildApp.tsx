@@ -69,26 +69,36 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
     const loadData = async () => {
       try {
         setIsLoading(true);
-        
         let configData: Pow3rStatusConfig;
-        
+
         if (config) {
           configData = config;
         } else {
-          // Try to load from multiple sources
+          // Prefer dynamic API (Cloudflare function) then fallbacks
+          let rawData: any | null = null;
           try {
-            const response = await fetch('/pow3r.status.config.json');
-            configData = await response.json();
-          } catch {
-            // Fallback to data.json
-            const response = await fetch(dataUrl);
-            const rawData = await response.json();
-            
-            // Transform data.json to pow3r.status.config format if needed
-            configData = transformDataToConfig(rawData);
+            const apiRes = await fetch('/api/projects');
+            if (apiRes.ok) rawData = await apiRes.json();
+          } catch {}
+
+          if (!rawData) {
+            try {
+              const response = await fetch('/pow3r.status.config.json');
+              configData = await response.json();
+              setData(configData);
+              setIsLoading(false);
+              return;
+            } catch {}
           }
+
+          if (!rawData) {
+            const response = await fetch(dataUrl);
+            rawData = await response.json();
+          }
+
+          configData = transformDataToConfig(rawData);
         }
-        
+
         setData(configData);
         setIsLoading(false);
       } catch (err) {
@@ -97,7 +107,6 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         setIsLoading(false);
       }
     };
-    
     loadData();
   }, [dataUrl, config]);
 
