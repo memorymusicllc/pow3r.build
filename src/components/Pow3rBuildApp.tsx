@@ -54,24 +54,44 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           try {
             const apiRes = await fetch('/api/projects');
             if (apiRes.ok) rawData = await apiRes.json();
-          } catch {}
+          } catch (error) {
+            console.log('API /api/projects not available, trying fallbacks...');
+          }
 
           if (!rawData) {
             try {
               const response = await fetch('/pow3r.status.config.json');
-              configData = await response.json();
-              setData(configData);
-              setIsLoading(false);
-              return;
-            } catch {}
+              if (response.ok) {
+                configData = await response.json();
+                console.log('Loaded pow3r.status.config.json:', configData);
+                setData(configData);
+                setIsLoading(false);
+                return;
+              }
+            } catch (error) {
+              console.log('pow3r.status.config.json not available, trying data.json...');
+            }
           }
 
           if (!rawData) {
-            const response = await fetch(dataUrl);
-            rawData = await response.json();
+            try {
+              const response = await fetch(dataUrl);
+              if (response.ok) {
+                rawData = await response.json();
+                console.log('Loaded data.json:', rawData);
+              }
+            } catch (error) {
+              console.error('Failed to load data.json:', error);
+              throw new Error('No data sources available');
+            }
           }
 
-          configData = transformDataToConfig(rawData);
+          if (rawData) {
+            configData = transformDataToConfig(rawData);
+            console.log('Transformed data to config:', configData);
+          } else {
+            throw new Error('No data available');
+          }
         }
 
         setData(configData);

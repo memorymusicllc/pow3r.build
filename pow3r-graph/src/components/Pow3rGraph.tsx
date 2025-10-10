@@ -193,12 +193,19 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // Set canvas size to match container
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Set up canvas
+    // Set up canvas background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    console.log(`Rendering ${filteredNodes.length} nodes on canvas ${canvas.width}x${canvas.height}`);
     
     // Draw nodes
     filteredNodes.forEach((node, index) => {
@@ -219,17 +226,6 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
       ctx.font = '12px Google Prime Courier';
       ctx.textAlign = 'center';
       ctx.fillText(node.name || node.id, x, y + 5);
-      
-      // Click handler
-      canvas.addEventListener('click', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        
-        if (Math.sqrt((clickX - x) ** 2 + (clickY - y) ** 2) <= 20) {
-          handleNodeSelect(node);
-        }
-      });
     });
     
     // Draw edges
@@ -368,6 +364,8 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
       {/* Graph Canvas */}
       <canvas
         ref={canvasRef}
+        width={800}
+        height={600}
         style={{
           width: '100%',
           height: '100%',
@@ -377,7 +375,22 @@ export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
           // Handle mouse interactions
         }}
         onClick={(e) => {
-          // Handle clicks
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          
+          const rect = canvas.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const clickY = e.clientY - rect.top;
+          
+          // Check if click is on a node
+          filteredNodes.forEach((node, index) => {
+            const x = 100 + (index % 5) * 120;
+            const y = 100 + Math.floor(index / 5) * 120;
+            
+            if (Math.sqrt((clickX - x) ** 2 + (clickY - y) ** 2) <= 20) {
+              handleNodeSelect(node);
+            }
+          });
         }}
       />
       
