@@ -1,8 +1,13 @@
 # Cloudflare Pages redirects and rewrites
 
-# SPA fallback - all routes go to index.html
-/*    /index.html   200
+# Serve static files directly (JSON, CSS, JS, etc.)
+/data.json  /data.json  200
+/pow3r.status.config.json  /pow3r.status.config.json  200
+/assets/*  /assets/:splat  200
 
 # API proxy (if needed)
 /api/*  https://your-api-backend.com/:splat  200
+
+# SPA fallback - all other routes go to index.html
+/*    /index.html   200
 
