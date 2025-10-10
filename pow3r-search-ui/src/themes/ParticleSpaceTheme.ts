@@ -275,7 +275,145 @@ export const createParticleSpaceTheme = (config: Partial<ParticleSpaceConfig> = 
 
 // Theme variants
 export const particleSpaceThemes = {
-  default: defaultParticleSpaceConfig,
+  'basic-outline': createParticleSpaceTheme({
+    // Basic Outline Theme - Clean, minimal wireframe aesthetic
+    wires: {
+      thickness: 1.0,
+      opacity: 1.0,
+      color: { 
+        light: '#000000', 
+        dark: '#ffffff' 
+      },
+      style: 'solid'
+    },
+    
+    // Minimal particle system
+    particles: {
+      data: {
+        count: 20,
+        size: 1.0,
+        speed: 0.5,
+        colors: ['#ffffff', '#cccccc'],
+        attraction: 0.3
+      },
+      energy: {
+        waveLength: 10,
+        amplitude: 2,
+        frequency: 0.01,
+        colors: ['#ffffff', '#cccccc']
+      },
+      nebula: {
+        density: 0.1,
+        colors: ['#ffffff', '#cccccc'],
+        opacity: 0.2
+      },
+      mist: {
+        opacity: 0.1,
+        blur: 5,
+        colors: ['#ffffff', '#cccccc']
+      }
+    },
+    
+    // Disabled Pow3r moments for clean look
+    pow3rMoments: {
+      active: {
+        processing: false,
+        particles: [],
+        intensity: 0
+      },
+      responsive: {
+        viewChanging: false,
+        particles: [],
+        intensity: 0
+      },
+      primaryAction: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      icons: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      reactive: {
+        graphChanging: false,
+        particles: [],
+        intensity: 0
+      },
+      motion: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      loading: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      data: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      magic: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      },
+      interaction: {
+        enabled: false,
+        particles: [],
+        intensity: 0
+      }
+    },
+    
+    // Clean text styling
+    text: {
+      font: 'Google Prime Courier, Courier New, monospace',
+      weight: 'normal',
+      alpha: {
+        normal: 0.9,
+        pow3r: 1.0
+      }
+    },
+    
+    // Minimal animations
+    particleization: {
+      enter: {
+        duration: 200,
+        easing: 'ease-out',
+        particles: []
+      },
+      exit: {
+        duration: 200,
+        easing: 'ease-in',
+        particles: []
+      }
+    },
+    
+    // High contrast for clean look
+    brightness: {
+      enabled: true,
+      highContrast: true,
+      adaptive: false
+    }
+  }),
+  
+  // Keep other themes for reference but make basic-outline the default
+  default: createParticleSpaceTheme({
+    wires: {
+      thickness: 0.8,
+      opacity: 0.8,
+      color: { light: '#000000', dark: '#ffffff' },
+      style: 'solid'
+    },
+    brightness: {
+      enabled: true,
+      highContrast: false,
+      adaptive: true
+    }
+  }),
   
   bright: createParticleSpaceTheme({
     wires: {

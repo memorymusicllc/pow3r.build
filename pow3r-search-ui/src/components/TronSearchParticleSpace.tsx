@@ -28,7 +28,7 @@ export const TronSearchParticleSpace: React.FC<TronSearchProps & {
   collapsed = false,
   className = "",
   style = {},
-  theme = "particle-space",
+  theme = "basic-outline",
   particleColors = ["#00ff88", "#ff0088", "#8800ff"],
   wireOpacity = 0.8,
   glowIntensity = 1.5,
