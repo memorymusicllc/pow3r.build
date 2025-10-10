@@ -3,4 +3,16 @@ compatibility_date = "2024-01-01"
 
 # Pages configuration
 pages_build_output_dir = "public"
+pages_function_dir = "functions"
+
+[vars]
+# Configure a namespace name; create it separately via Wrangler if not exists
+STATUS_KV_NAMESPACE = "STATUS_KV"
+
+[env.production]
+vars = { STATUS_KV_NAMESPACE = "STATUS_KV" }
+
+[[kv_namespaces]]
+binding = "STATUS_KV"
+id = ""  # fill in with real KV namespace id when provisioned
 

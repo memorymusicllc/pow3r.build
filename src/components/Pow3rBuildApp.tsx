@@ -75,17 +75,27 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         if (config) {
           configData = config;
         } else {
-          // Try to load from multiple sources
+          // Try API first
           try {
-            const response = await fetch('/pow3r.status.config.json');
-            configData = await response.json();
+            const apiRes = await fetch('/api/status');
+            if (apiRes.ok) {
+              configData = await apiRes.json();
+            } else {
+              throw new Error('API not available');
+            }
           } catch {
-            // Fallback to data.json
-            const response = await fetch(dataUrl);
-            const rawData = await response.json();
-            
-            // Transform data.json to pow3r.status.config format if needed
-            configData = transformDataToConfig(rawData);
+            // Try static config next
+            try {
+              const response = await fetch('/pow3r.status.config.json');
+              configData = await response.json();
+            } catch {
+              // Fallback to data.json
+              const response = await fetch(dataUrl);
+              const rawData = await response.json();
+              
+              // Transform data.json to pow3r.status.config format if needed
+              configData = transformDataToConfig(rawData);
+            }
           }
         }
         

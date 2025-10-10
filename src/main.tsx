@@ -7,7 +7,7 @@ import './styles/global.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Pow3rBuildApp 
-      dataUrl="/pow3r.status.config.json"
+      dataUrl="/data.json"
       enableSearch={true}
       enableGraph={true}
       enable3D={true}
