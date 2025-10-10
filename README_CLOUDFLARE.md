@@ -207,7 +207,18 @@ node scripts/generate-data.js
 
 **What it does**:
 1. Scans `/Users/creator/Documents/DEV`
-2. Finds all `pow3r.status.json` files
+2. Finds all `pow3r.status.json` files via:
+   - Local scan: `scripts/generate-data.js`
+   - GitHub org scan: `scripts/github-scan.js` (requires `GITHUB_TOKEN`, `GITHUB_ORG`)
+
+### Webhook + API
+
+- Endpoint: `/functions/api/webhook.js` (GitHub Webhook)
+  - Verifies `X-Hub-Signature-256` using `GITHUB_WEBHOOK_SECRET`
+  - Fetches or generates `pow3r.status.json` for the changed repo
+  - Updates `POW3R_STATUS_KV` key `projects:data`
+- Endpoint: `/functions/api/projects.js`
+  - Returns KV aggregate if present, else falls back to static `public/data.json`
 3. Finds all `dev-status.config.json` files
 4. Combines into single data.json
 5. Saves to `public/data.json`

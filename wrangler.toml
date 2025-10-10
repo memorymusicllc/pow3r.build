@@ -4,10 +4,8 @@ compatibility_date = "2024-01-01"
 # Pages configuration
 pages_build_output_dir = "public"
 
-# KV Namespace for status storage
-# Create with: wrangler kv:namespace create "STATUS_KV"
 [[kv_namespaces]]
-binding = "STATUS_KV"
-id = "your_kv_namespace_id"  # Replace with your actual KV namespace ID
-preview_id = "your_preview_kv_namespace_id"  # Optional: for preview deployments
+binding = "POW3R_STATUS_KV"
+id = "${POW3R_STATUS_KV_ID}"
+preview_id = "${POW3R_STATUS_KV_PREVIEW_ID}"
 
