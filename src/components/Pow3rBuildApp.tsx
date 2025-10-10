@@ -98,8 +98,20 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           }
 
           if (rawData) {
+            console.log('Raw data structure:', {
+              hasProjects: !!rawData.projects,
+              projectCount: rawData.projects?.length || 0,
+              hasNodes: !!rawData.nodes,
+              nodeCount: rawData.nodes?.length || 0,
+              hasEdges: !!rawData.edges,
+              edgeCount: rawData.edges?.length || 0
+            });
             configData = transformDataToConfig(rawData);
-            console.log('Transformed data to config:', configData);
+            console.log('Transformed data to config:', {
+              nodeCount: configData.nodes?.length || 0,
+              edgeCount: configData.edges?.length || 0,
+              projectName: configData.projectName
+            });
           } else {
             // Use embedded default config as final fallback
             console.log('No raw data available, using embedded default config');

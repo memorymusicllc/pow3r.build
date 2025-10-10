@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug JSON Loading</title>
+    <style>
+        body { font-family: monospace; background: #001122; color: #00ff88; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #00ff88; }
+        .error { color: #ff0088; }
+        .success { color: #00ff88; }
+    </style>
+</head>
+<body>
+    <h1>JSON Loading Debug</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testJSONLoading() {
+            const results = document.getElementById('results');
+            
+            // Test pow3r.status.config.json
+            try {
+                const response = await fetch('/pow3r.status.config.json');
+                const data = await response.json();
+                results.innerHTML += `<div class="result success">✅ pow3r.status.config.json loaded: ${data.nodes?.length || 0} nodes</div>`;
+                console.log('pow3r.status.config.json:', data);
+            } catch (error) {
+                results.innerHTML += `<div class="result error">❌ pow3r.status.config.json failed: ${error.message}</div>`;
+                console.error('pow3r.status.config.json error:', error);
+            }
+            
+            // Test data.json
+            try {
+                const response = await fetch('/data.json');
+                const data = await response.json();
+                results.innerHTML += `<div class="result success">✅ data.json loaded: ${data.projects?.length || 0} projects</div>`;
+                console.log('data.json:', data);
+            } catch (error) {
+                results.innerHTML += `<div class="result error">❌ data.json failed: ${error.message}</div>`;
+                console.error('data.json error:', error);
+            }
+        }
+        
+        testJSONLoading();
+    </script>
+</body>
+</html>

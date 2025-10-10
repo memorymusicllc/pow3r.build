@@ -3,7 +3,7 @@
 # Serve static assets first
 /assets/*  /assets/:splat  200
 
-# Serve specific JSON files
+# Serve JSON files with proper content type
 /data.json  /data.json  200
 /pow3r.status.config.json  /pow3r.status.config.json  200
 
