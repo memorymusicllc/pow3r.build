@@ -51,10 +51,12 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
 
   // Initialize with first config
   useEffect(() => {
-    if (configs.length > 0 && !selectedConfig) {
-      setSelectedConfig(configs[0]);
+    if (configs.length > 0) {
+      // Validate configs and pick the first valid one
+      const firstValid = configs.find(c => validatePow3rStatus(c).valid) || configs[0];
+      setSelectedConfig(firstValid);
     }
-  }, [configs, selectedConfig]);
+  }, [configs]);
 
   // Handle config selection
   const handleConfigSelect = useCallback((config: Pow3rStatusConfig) => {

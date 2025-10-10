@@ -4,3 +4,8 @@ compatibility_date = "2024-01-01"
 # Pages configuration
 pages_build_output_dir = "public"
 
+[[kv_namespaces]]
+binding = "POW3R_STATUS_KV"
+id = "${POW3R_STATUS_KV_ID}"
+preview_id = "${POW3R_STATUS_KV_PREVIEW_ID}"
+

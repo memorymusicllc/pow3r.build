@@ -28,10 +28,12 @@ jobs:
         run: |
           npm ci
           cd server && npm ci
+          echo "Installing Node 18 fetch polyfill not required (Node18 has fetch)"
 
       - name: Generate embedded data
         run: |
-          node scripts/generate-data.js || echo "⚠️ Data generation skipped (local paths not available)"
+          node scripts/github-scan.js || echo "⚠️ GitHub scan skipped"
+          node scripts/generate-data.js || echo "⚠️ Local scan skipped (local paths not available)"
           
       - name: Build React App
         run: |
