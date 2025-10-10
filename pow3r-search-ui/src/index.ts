@@ -42,6 +42,10 @@ export { default as ParticleSpaceSystem } from './components/ParticleSpaceSystem
 export { default as ParticleSpaceWireframe } from './components/ParticleSpaceWireframe';
 export { default as ParticleSpaceDemo } from './components/ParticleSpaceDemo';
 
+// Basic Outline Theme Components
+export { default as TronSearchBasicOutline } from './components/TronSearchBasicOutline';
+export { default as BasicOutlineWireframe } from './components/BasicOutlineWireframe';
+
 // Store & Hooks
 export { default as useStore } from './store/searchStore';
 export { default as useTronSearch } from './hooks/useTronSearch';
