@@ -47,6 +47,17 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         setIsLoading(true);
         let configData: Pow3rStatusConfig;
 
+        // Force use of embedded config for debugging
+        console.log('🔧 DEBUG: Using embedded default config directly');
+        configData = defaultConfig as Pow3rStatusConfig;
+        console.log('🔧 DEBUG: Embedded config loaded:', {
+          nodeCount: configData.nodes?.length || 0,
+          edgeCount: configData.edges?.length || 0,
+          projectName: configData.projectName,
+          firstNode: configData.nodes?.[0]
+        });
+        
+        if (false) { // Disabled for debugging
         if (config) {
           configData = config;
         } else {
@@ -118,6 +129,7 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
             configData = defaultConfig as Pow3rStatusConfig;
           }
         }
+        } // End of disabled block
 
         setData(configData);
         setIsLoading(false);
