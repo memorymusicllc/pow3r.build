@@ -41,11 +41,15 @@ python run_phase1.py --markdown "selection.md" --base-path "/path"
 # Set your GitHub token
 export GITHUB_TOKEN=your_github_token
 
-# Scan GitHub repositories
-python run_github_integration.py --org your-organization
+# Interactive setup
+python setup_github_integration.py
 
-# Or scan a single repository
-python run_github_integration.py --repo owner/repo --server
+# Or scan directly
+python github_scanner.py --token $GITHUB_TOKEN --org your-organization
+python github_scanner.py --token $GITHUB_TOKEN --repo owner/repo
+
+# Aggregate all data
+python data_aggregator.py
 ```
 
 → **[See QUICKSTART.md for detailed steps](QUICKSTART.md)**  
@@ -86,7 +90,31 @@ python analyze.py ~/dev/projects
 python analyze.py /Users/creator/Documents/DEV
 ```
 
+## CloudFlare Deployment (NEW!)
+
+Deploy the entire system to CloudFlare with automatic GitHub webhook integration:
+
+```bash
+# Deploy to CloudFlare Pages
+wrangler pages deploy public
+
+# Configure webhooks for automatic updates
+# See GITHUB_INTEGRATION_COMPLETE.md for details
+```
+
+The CloudFlare workers automatically:
+- 🔄 Update when repositories change
+- 📊 Generate power.status.json files
+- 🌐 Serve aggregated data via API
+- ⚡ Cache for optimal performance
+
 ## Features
+
+### GitHub Integration & CloudFlare Workers (NEW!)
+- **Automatic Repository Scanning** - Scan entire GitHub organizations
+- **Webhook Integration** - Auto-update on push, PR, issues
+- **CloudFlare Workers** - Serverless processing and API
+- **Real-time Updates** - Changes reflected immediately
 
 ### Phase 0: Repository Selection
 
