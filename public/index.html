@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Pow3r.build - Quantum Repository Intelligence</title>
     <style>
         * {
@@ -60,8 +63,8 @@
             color: #88aaff;
         }
     </style>
-  <script type="module" crossorigin src="/assets/main-D2goJu1s.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-D3UH6yg6.css">
+  <script type="module" crossorigin src="/assets/main-D2goJu1s.js?v=2"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-D3UH6yg6.css?v=2">
 </head>
 <body>
     <!-- Loading Screen -->
@@ -76,19 +79,30 @@
     <!-- React App Entry Point -->
     
     <script>
-        // Hide loading screen when React app is ready
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.style.opacity = '0';
-                    loadingScreen.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 500);
-                }
-            }, 1000);
-        });
+        // Hide loading screen when React app signals it's ready
+        window.hideLoadingScreen = function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        };
+        
+        // Fallback: hide after 15 seconds if React app doesn't signal
+        setTimeout(() => {
+            if (document.getElementById('loading-screen').style.display !== 'none') {
+                console.warn('Loading screen fallback triggered - React app may not be working');
+                window.hideLoadingScreen();
+            }
+        }, 15000);
+        
+        // Clear any existing global variables that might interfere
+        if (window.Pow3rAdvanced) {
+            delete window.Pow3rAdvanced;
+        }
     </script>
 </body>
 </html>
