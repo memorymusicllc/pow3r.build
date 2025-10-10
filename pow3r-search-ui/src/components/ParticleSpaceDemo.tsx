@@ -9,7 +9,7 @@ import { SearchSuggestion, FilterChip } from '../types';
  */
 export const ParticleSpaceDemo: React.FC = () => {
   const [brightness, setBrightness] = useState(0.5);
-  const [currentTheme, setCurrentTheme] = useState<keyof typeof particleSpaceThemes>('default');
+  const [currentTheme, setCurrentTheme] = useState<keyof typeof particleSpaceThemes>('basic-outline');
   const [searchResults, setSearchResults] = useState<SearchSuggestion[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterChip[]>([]);
   const [pow3rMoments, setPow3rMoments] = useState<string[]>([]);
