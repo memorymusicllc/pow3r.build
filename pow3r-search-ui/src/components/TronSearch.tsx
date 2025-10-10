@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useStore } from '../store/searchStore';
 import { TronSearchProps, SearchSuggestion, FilterChip, LogicOperator } from '../types';
-import { TronWireframe } from './TronWireframe';
+import { BasicOutlineWireframe } from './BasicOutlineWireframe';
+import { createBasicOutlineTheme } from '../themes/BasicOutlineTheme';
 import { ParticleSystem } from './ParticleSystem';
 import { SearchIcon } from './SearchIcon';
 import { SuggestionDropdown } from './SuggestionDropdown';
@@ -66,6 +67,27 @@ export const TronSearch: React.FC<TronSearchProps> = ({
     updateSuggestions,
     updateFilters
   } = useStore();
+
+  // Create basic outline theme
+  const basicOutlineTheme = createBasicOutlineTheme({
+    effects: {
+      glow: false,
+      particles: false,
+      animations: true,
+      wireframe: true
+    },
+    animations: {
+      speed: animationSpeed,
+      easing: 'ease-in-out',
+      duration: 300
+    },
+    wires: {
+      thickness: 1,
+      opacity: wireOpacity,
+      color: { light: '#000000', dark: '#ffffff' },
+      style: 'solid'
+    }
+  });
 
   // Generate suggestions from data
   const generateSuggestions = useCallback((query: string): SearchSuggestion[] => {
@@ -323,14 +345,12 @@ export const TronSearch: React.FC<TronSearchProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* TRON Wireframe */}
-        <TronWireframe
+        {/* Basic Outline Wireframe */}
+        <BasicOutlineWireframe
+          config={basicOutlineTheme}
           isExpanded={isExpanded}
           isHovered={isHovered}
           isFocused={isFocused}
-          wireOpacity={wireOpacity}
-          glowIntensity={glowIntensity}
-          animationSpeed={animationSpeed}
         />
         
         {/* Particle System */}

@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
 import { TronSearchProps, TronSearchR3FProps } from '../types';
 import TronSearch from '../components/TronSearch';
 
@@ -13,51 +12,19 @@ export const TronSearchR3F: React.FC<TronSearchR3FProps> = ({
   scale = [1, 1, 1],
   ...props
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const { camera, gl } = useThree();
-
-  // Handle 3D positioning and scaling
-  useEffect(() => {
-    if (meshRef.current) {
-      meshRef.current.position.set(...position);
-      meshRef.current.rotation.set(...rotation);
-      meshRef.current.scale.set(...scale);
-    }
-  }, [position, rotation, scale]);
-
-  // Animate based on interaction
-  useFrame((state) => {
-    if (meshRef.current) {
-      // Subtle rotation animation
-      meshRef.current.rotation.y += 0.001;
-      
-      // Hover effect
-      if (props.isHovered) {
-        meshRef.current.scale.setScalar(1.05);
-      } else {
-        meshRef.current.scale.setScalar(1.0);
-      }
-    }
-  });
-
   return (
-    <mesh ref={meshRef}>
-      <planeGeometry args={[2, 1]} />
-      <meshBasicMaterial transparent opacity={0} />
-      <Html
-        transform
-        sprite
-        distanceFactor={10}
-        position={[0, 0, 0.1]}
-        style={{
-          width: '200px',
-          height: '100px',
-          pointerEvents: 'auto'
-        }}
-      >
-        <TronSearch {...props} />
-      </Html>
-    </mesh>
+    <div
+      style={{
+        position: 'absolute',
+        left: `${position[0]}px`,
+        top: `${position[1]}px`,
+        transform: `scale(${scale[0]}) rotate(${rotation[2]}rad)`,
+        transformOrigin: 'center',
+        pointerEvents: 'auto'
+      }}
+    >
+      <TronSearch {...props} />
+    </div>
   );
 };
 
