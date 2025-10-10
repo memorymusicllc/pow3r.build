@@ -23,5 +23,5 @@ export { default as Pow3rBuildIntegration } from './integrations/pow3rBuild';
 export * from './schemas/pow3rStatusSchema';
 
 // Re-exports from search-ui
-export { TronSearchParticleSpace } from '@pow3r/search-ui';
-export { createParticleSpaceTheme } from '@pow3r/search-ui/themes/ParticleSpaceTheme';
+export { TronSearch } from '@pow3r/search-ui';
+// Basic Outline theme uses TronSearch; no Particle Space exports

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Pow3rGraph } from '../components/Pow3rGraph';
 import { Transform3r } from '../components/Transform3r';
 import { Timeline3D } from '../components/Timeline3D';
-import { TronSearchParticleSpace } from '@pow3r/search-ui';
-import { createParticleSpaceTheme } from '@pow3r/search-ui/themes/ParticleSpaceTheme';
+import { TronSearch } from '@pow3r/search-ui';
 import { Pow3rStatusConfig, validatePow3rStatus, transformToGraphData } from '../schemas/pow3rStatusSchema';
 
 interface Pow3rBuildIntegrationProps {
@@ -48,25 +47,7 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [timelineData, setTimelineData] = useState<any>(null);
 
-  // Particle Space Theme
-  const particleSpaceTheme = createParticleSpaceTheme({
-    particles: {
-      data: {
-        count: 200,
-        size: 2.0,
-        speed: 1.5,
-        colors: ['#00ff88', '#ff0088', '#8800ff', '#ffd700'],
-        attraction: 1.0
-      }
-    },
-    pow3rMoments: {
-      magic: {
-        enabled: true,
-        particles: ['#ffd700', '#ff0088', '#00ff88', '#8800ff'],
-        intensity: 2.5
-      }
-    }
-  });
+  // Basic Outline Theme uses TronSearch (no Particle Space theme)
 
   // Initialize with first config
   useEffect(() => {
@@ -239,17 +220,12 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
           zIndex: 1000,
           width: '400px'
         }}>
-          <TronSearchParticleSpace
+          <TronSearch
             data={transformToGraphData(selectedConfig)}
             onSearch={handleSearch}
             onFilter={handleFilter}
-            placeholder="Search the quantum grid..."
-            particleSpaceConfig={particleSpaceTheme}
-            brightness={0.7}
-            enableQuantumAttraction={true}
-            enableNebula={true}
-            enableMist={true}
-            enableEnergyWaves={true}
+            placeholder="Search the grid..."
+            theme="tron"
           />
         </div>
       )}
