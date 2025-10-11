@@ -18,6 +18,11 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
 from config_manager import ConfigManager
+from status_utils import (
+    create_status_info,
+    get_status_state,
+    convert_new_to_legacy
+)
 
 
 class ComprehensiveAnalyzer:
@@ -204,12 +209,12 @@ class ComprehensiveAnalyzer:
             "features": self.extract_features(comp_path),
             "purpose": self.infer_purpose(component),
             "tags": self.generate_tags(component, raw_data),
-            "status": {
-                "phase": raw_data['local']['status'],
-                "completeness": self.estimate_completeness(comp_path),
-                "quality_score": self.assess_quality(comp_path),
-                "notes": ""
-            },
+            "status": create_status_info(
+                state=self._infer_status_state(raw_data['local']['status'], comp_path),
+                progress=int(self.estimate_completeness(comp_path) * 100),
+                quality_score=self.assess_quality(comp_path),
+                notes=""
+            ),
             "visualization": {
                 "position": self.calculate_position(component, len(raw_data.get('components', []))),
                 "size": self.calculate_size(comp_path),
@@ -393,6 +398,28 @@ class ComprehensiveAnalyzer:
         tags.extend([t.lower() for t in tech])
         
         return list(set([t for t in tags if t]))
+    
+    def _infer_status_state(self, legacy_status: str, comp_path: Path) -> str:
+        """Infer status state from legacy status and component characteristics"""
+        # Map legacy status to new status
+        legacy_to_new = {
+            'green': 'built',
+            'orange': 'building',
+            'red': 'broken',
+            'gray': 'backlogged'
+        }
+        
+        base_status = legacy_to_new.get(legacy_status, 'backlogged')
+        
+        # Check for blockers
+        if (comp_path / 'TODO.md').exists() or (comp_path / 'BLOCKED.md').exists():
+            return 'blocked'
+        
+        # Check if deprecated
+        if (comp_path / 'DEPRECATED.md').exists():
+            return 'burned'
+        
+        return base_status
     
     def estimate_completeness(self, path: Path) -> float:
         """Estimate component completeness"""

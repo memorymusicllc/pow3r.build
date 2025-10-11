@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, './src'),
       '@pow3r/search-ui': path.resolve(__dirname, './pow3r-search-ui/src'),
       '@pow3r/graph': path.resolve(__dirname, './pow3r-graph/src'),
       'three': 'three',

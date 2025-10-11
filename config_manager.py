@@ -9,6 +9,13 @@ import hashlib
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Tuple, Optional
+from status_utils import (
+    normalize_status, 
+    create_status_info, 
+    get_status_state, 
+    get_status_progress,
+    calculate_overall_status
+)
 
 
 class ConfigManager:
@@ -67,10 +74,11 @@ class ConfigManager:
         return self.create(config)
     
     def get_status(self) -> str:
-        """Get current phase status of primary asset"""
+        """Get current status state of primary asset"""
         config = self.read()
         if config and 'assets' in config and len(config['assets']) > 0:
-            return config['assets'][0].get('status', {}).get('phase', 'unknown')
+            status = config['assets'][0].get('status', {})
+            return get_status_state(status)
         return 'unknown'
     
     def validate(self) -> Tuple[bool, List[str]]:
@@ -98,10 +106,31 @@ class ConfigManager:
                 # Validate status
                 if 'status' in asset:
                     status = asset['status']
-                    if 'phase' not in status:
-                        errors.append(f"Asset {i}: Missing status.phase")
-                    elif status['phase'] not in ['green', 'orange', 'red', 'gray']:
-                        errors.append(f"Asset {i}: Invalid phase: {status['phase']}")
+                    
+                    # Support both new and legacy formats
+                    if isinstance(status, dict):
+                        # New format: requires 'state' and 'progress'
+                        if 'state' in status:
+                            valid_states = ['building', 'backlogged', 'blocked', 'burned', 'built', 'broken']
+                            if status['state'] not in valid_states:
+                                errors.append(f"Asset {i}: Invalid status.state: {status['state']}")
+                            if 'progress' not in status:
+                                errors.append(f"Asset {i}: Missing status.progress")
+                            elif not isinstance(status['progress'], (int, float)) or status['progress'] < 0 or status['progress'] > 100:
+                                errors.append(f"Asset {i}: Invalid status.progress (must be 0-100)")
+                        # Legacy format: requires 'phase'
+                        elif 'phase' in status:
+                            if status['phase'] not in ['green', 'orange', 'red', 'gray']:
+                                errors.append(f"Asset {i}: Invalid legacy phase: {status['phase']}")
+                        else:
+                            errors.append(f"Asset {i}: Status must have 'state' (new format) or 'phase' (legacy format)")
+                    elif isinstance(status, str):
+                        # String status (either new or legacy)
+                        valid_statuses = ['building', 'backlogged', 'blocked', 'burned', 'built', 'broken', 'green', 'orange', 'red', 'gray']
+                        if status not in valid_statuses:
+                            errors.append(f"Asset {i}: Invalid status string: {status}")
+                    else:
+                        errors.append(f"Asset {i}: Status must be string or dict")
         
         # Validate edges
         if 'edges' in config:
@@ -131,12 +160,32 @@ class ConfigManager:
         }
     
     def _count_by_status(self, assets: List[Dict]) -> Dict:
-        """Count assets by status phase"""
-        counts = {'green': 0, 'orange': 0, 'red': 0, 'gray': 0}
+        """Count assets by status state (new format)"""
+        counts = {
+            'building': 0, 
+            'backlogged': 0, 
+            'blocked': 0, 
+            'burned': 0, 
+            'built': 0, 
+            'broken': 0
+        }
+        legacy_counts = {'green': 0, 'orange': 0, 'red': 0, 'gray': 0}
+        
         for asset in assets:
-            phase = asset.get('status', {}).get('phase', 'gray')
-            counts[phase] = counts.get(phase, 0) + 1
-        return counts
+            status = asset.get('status', {})
+            state = get_status_state(status)
+            counts[state] = counts.get(state, 0) + 1
+            
+            # Also maintain legacy count for backward compatibility
+            normalized = normalize_status(status)
+            if 'legacy' in normalized and 'phase' in normalized['legacy']:
+                legacy_phase = normalized['legacy']['phase']
+                legacy_counts[legacy_phase] = legacy_counts.get(legacy_phase, 0) + 1
+        
+        return {
+            'new': counts,
+            'legacy': legacy_counts
+        }
     
     def _count_by_type(self, assets: List[Dict]) -> Dict:
         """Count assets by type"""

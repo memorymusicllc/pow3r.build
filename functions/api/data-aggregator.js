@@ -3,6 +3,8 @@
  * Aggregates all power.status.json files and serves them for 3D visualization
  */
 
+import { normalizeStatus, getStatusState, getStatusProgress } from './status-utils.js';
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   
@@ -141,11 +143,14 @@ function formatProject(name, powerStatus, source) {
   
   // Process assets as nodes
   for (const asset of powerStatus.assets || []) {
+    const normalizedStatus = normalizeStatus(asset.status || 'backlogged');
+    
     const node = {
       id: asset.id,
       name: asset.metadata?.title || 'Unknown',
       type: mapAssetType(asset.type),
-      status: asset.status?.phase || 'gray',
+      status: normalizedStatus.state,
+      progress: normalizedStatus.progress,
       size: calculateNodeSize(asset),
       activity: asset.analytics?.activityLast30Days || 0,
       centrality: asset.analytics?.centralityScore || 0.5,
@@ -153,9 +158,11 @@ function formatProject(name, powerStatus, source) {
         description: asset.metadata?.description || '',
         tags: asset.metadata?.tags || [],
         location: asset.location || '',
-        qualityScore: asset.status?.qualityScore || 0.7,
-        completeness: asset.status?.completeness || 0.8,
-        notes: asset.status?.notes || ''
+        qualityScore: normalizedStatus.quality?.qualityScore || 0.7,
+        completeness: normalizedStatus.legacy?.completeness || 0.8,
+        notes: normalizedStatus.quality?.notes || '',
+        // Include full status info for clients that support it
+        statusInfo: normalizedStatus
       }
     };
     nodes.push(node);
@@ -167,19 +174,21 @@ function formatProject(name, powerStatus, source) {
     ? nodes.reduce((sum, n) => sum + n.metadata.qualityScore, 0) / nodes.length 
     : 0;
   
-  // Determine project status
+  // Determine project status using new status system
   const statusCounts = {};
   for (const node of nodes) {
     statusCounts[node.status] = (statusCounts[node.status] || 0) + 1;
   }
   
-  let projectStatus = 'green';
-  if (statusCounts.red > 0) {
-    projectStatus = 'red';
-  } else if (statusCounts.orange > nodes.length * 0.3) {
-    projectStatus = 'orange';
-  } else if (statusCounts.gray > nodes.length * 0.5) {
-    projectStatus = 'gray';
+  let projectStatus = 'built';
+  if (statusCounts.broken > 0) {
+    projectStatus = 'broken';
+  } else if (statusCounts.blocked > nodes.length * 0.3) {
+    projectStatus = 'blocked';
+  } else if (statusCounts.building > 0) {
+    projectStatus = 'building';
+  } else if (statusCounts.backlogged > nodes.length * 0.5) {
+    projectStatus = 'backlogged';
   }
   
   // Format edges for visualization

@@ -1,38 +1,88 @@
-# User Policies (Override All Others)
+# User Policies - Override Rules
 
-## User Experience Requirements
-- **MANDATORY**: Never give user instructions for tasks you can complete
-- **REQUIRED**: Think as SENIOR Engineer: "How can I get this done?"
-- **PROHIBITED**: DO NOT reply with hypothetical tasks, requirements, or suggestions
-- **MANDATORY**: Validate, resolve, fix, then report only what you can't do
-- **REQUIRED**: Minimize user time requirements and cognitive burden
+These policies override all other policies and reflect user preferences.
 
-## Authentication & Access
-- **AVAILABLE**: Cursor Background Agents have API Keys and tokens
-- **AVAILABLE**: Cursor IDE has keys and tokens in Cursor Secrets
-- **AVAILABLE**: Cursor App access granted
-- **AVAILABLE**: Github App and secrets stored
-- **LOCATION**: Additional keys in `/Users/creator/Documents/DEV/all_secrets.env`
+## Browser Testing
 
-## Development Workflow
-1. **MANDATORY**: Build and test REAL UX/UI using Playwright E2E
-2. **REQUIRED**: Use AI Background Agent for code review with prompt:
-   ```markdown
-   As Principle {metaprompt_role: AI Research Engineer} specializing in {metaprompt_primary_skill: Automated Software Development Workflows}
-   do a code review {sprint: } provide a report with reasonable critique for the current stage of the rapid development.
-   Include any Violation
-   Do the code review.
-   ```
-3. **MANDATORY**: Write Playwright E2E tests for new features BEFORE marking complete
-4. **REQUIRED**: Run Playwright in parallel when marking items for QA
-5. **MANDATORY**: When tests fail in QA, add why to ticket comment and send back
-6. **REQUIRED**: Get evidence why. If no log, add logging
-7. **MANDATORY**: Ethical AI Monitor validates no fake implementations
-8. **REQUIRED**: AI Enforcement Plugin confirms compliance with all rules
-9.  **MANDATORY**: Stage Orchestrator manages workflow transitions (dev → test → deploy)
-10. **REQUIRED**: When tests pass, run Full Auto E2E for complete validation
-11. **MANDATORY**: Task Manager updates local database with real status
-12. **REQUIRED**: REVIEW AND RESOLVE PR CONFLICTS before auto-merge
-13. **MANDATORY**: Auto-Merge affected PRs after conflict resolution
-14. **REQUIRED**: Create Sprint for unresolved bugs and complete them
-15. **MANDATORY**: Continue to backlog items using same automation flow
+### PROHIBITED: Tor Browser
+- DO NOT use Tor Browser for testing
+- Use Chrome, Firefox, or Safari for testing
+
+## Data Handling
+
+### MANDATORY: No Fake Data
+- DO NOT GENERATE FAKE DATA
+- DO NOT RUN SIMULATIONS
+- DO NOT use mock data or mock code
+- DO NOT create theatrical code
+
+## Documentation
+
+### REQUIRED: README Management
+- When creating feature READMEs (README-[feature].md):
+  * MUST link to parent README
+  * MUST add link in parent README to feature README
+- Maintain bidirectional navigation
+
+## Daily Logging
+
+### REQUIRED: Context Window Management
+When user indicates memory drift, feature loss, or missing information:
+1. Review chat and agent history
+2. Check for deviation from original task
+3. Check for missing solutions or omitted features
+4. If drift detected:
+   - Notify user about context window limitations
+   - Recommend updating `dailylog.md`
+   - Recommend starting new chat to preserve continuity
+
+### REQUIRED: Daily Log Updates (`dailylog.md`)
+Update after major events:
+- Bug fixes
+- Feature start/completion
+- Context window full
+- Git commits
+
+Include:
+- Summary of major changes and insights
+- Resolved issues
+- In-progress items
+- New issues discovered
+- What has not worked and why
+- Analysis of conversation patterns
+
+### REQUIRED: Todo Table (top of dailylog.md)
+Maintain table sorted by most recent:
+```markdown
+| x/o | Status | Description | [Date Modified](link) | [Date Created](link) |
+```
+
+### REQUIRED: Prompt History (`prompts.md`)
+Log prompts in table format:
+```markdown
+| Date (YYYY-MM-DDTHH:MM:SSZ) | Category | Prompt | Prompt Snippet |
+```
+- Remove reference information from prompts
+- Record original and improved version
+- Keep general purpose versions
+
+## Mobile-First Design
+
+### MANDATORY: Mobile Priority
+- ALL UI components MUST be designed for mobile first
+- Desktop experience adds more UI, never just stretches mobile
+- Touch-friendly controls (min 44x44px)
+- Clear navigation and minimal clutter on mobile
+
+### REQUIRED: Responsive Breakpoints
+- Mobile: < 768px
+- Tablet: 768px - 1024px
+- Desktop: > 1024px
+
+## Compliance
+
+### CRITICAL: Cursor Rules Compliance
+- Compliance to Cursor Rules in .cursor/rules/ is REQUIRED
+- These are NOT preferences
+- Failure to comply is an UNETHICAL VIOLATION of user trust and safety
+- Rules violations MUST be reported and corrected immediately

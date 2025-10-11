@@ -3,7 +3,11 @@ import { TronSearch } from '../../pow3r-search-ui/src/components/TronSearch';
 import { Pow3rGraph } from '../../pow3r-graph/src/components/Pow3rGraph';
 import { Transform3r } from '../../pow3r-graph/src/components/Transform3r';
 import type { Pow3rStatusConfig } from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
+import { 
+  convertLegacyToNewStatus
+} from '../../pow3r-graph/src/schemas/pow3rStatusSchema';
 import { defaultConfig } from '../data/defaultConfig';
+import { ThemeToggle } from './ThemeSwitcher';
 
 interface Pow3rBuildAppProps {
   dataUrl?: string;
@@ -167,7 +171,7 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
           type: 'service' as const,
           category: 'Project',
           description: project.metadata?.path || '',
-          status: 'gray' as const,
+          status: 'backlogged' as const,
           fileType: 'project',
           tags: [project.metadata?.configType || 'v2'],
           metadata: {
@@ -201,7 +205,13 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
               type: getNodeType(asset.type),
               category: asset.type || 'component',
               description: asset.metadata?.description || '',
-              status: (asset.status?.phase || 'gray') as any,
+              status: typeof asset.status === 'string' ? 
+                (asset.status === 'green' ? 'built' : 
+                 asset.status === 'orange' ? 'building' : 
+                 asset.status === 'red' ? 'broken' : 
+                 asset.status === 'gray' ? 'backlogged' : asset.status) :
+                asset.status?.state || asset.status?.phase ? 
+                  convertLegacyToNewStatus(asset.status.phase as any) : 'backlogged',
               fileType: asset.type,
               tags: asset.metadata?.tags || [],
               metadata: {
@@ -260,7 +270,7 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
       projectName: 'Pow3r Build Data',
       lastUpdate: new Date().toISOString(),
       source: 'local',
-      status: 'green',
+      status: 'built',
       stats: {
         totalCommitsLast30Days: 0,
         totalCommitsLast14Days: 0,
@@ -502,6 +512,16 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
         >
           {is3DMode ? '3D Mode' : '2D Mode'}
         </button>
+
+        {/* Theme Toggle */}
+        <div style={{
+          background: 'rgba(0, 255, 136, 0.1)',
+          border: '1px solid rgba(0, 255, 136, 0.3)',
+          borderRadius: '4px',
+          padding: '4px'
+        }}>
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Selected Node Details */}
@@ -576,9 +596,11 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
               </div>
               <div style={{ 
                 fontSize: '14px', 
-                color: selectedNode.status === 'green' ? '#00ff88' : 
-                       selectedNode.status === 'orange' ? '#ff8800' :
-                       selectedNode.status === 'red' ? '#ff0088' : '#888888',
+                color: selectedNode.status === 'built' ? '#00ff88' : 
+                       selectedNode.status === 'building' ? '#ff8800' :
+                       selectedNode.status === 'broken' ? '#ff0088' :
+                       selectedNode.status === 'blocked' ? '#ff8800' :
+                       selectedNode.status === 'burned' ? '#555555' : '#888888',
                 fontWeight: 'bold'
               }}>
                 {selectedNode.status || 'Unknown'}

@@ -53,15 +53,38 @@
           "status": {
             "type": "object",
             "properties": {
-              "phase": {
+              "state": {
                 "type": "string",
-                "enum": ["green", "orange", "red", "gray"],
-                "description": "Green (active/best-practice), Orange (in-progress/needs-review), Red (broken/stale), Gray (archived/deprecated)."
+                "enum": ["building", "backlogged", "blocked", "burned", "built", "broken"],
+                "description": "Current development state: building (actively in development), backlogged (planned but not started), blocked (waiting on dependencies), burned (deprecated/removed), built (complete and working), broken (has errors/issues)."
               },
-              "completeness": { "type": "number", "minimum": 0, "maximum": 1 },
-              "qualityScore": { "type": "number", "minimum": 0, "maximum": 1, "description": "AI-assessed score based on code complexity, documentation, and adherence to standards." },
-              "notes": { "type": "string", "description": "AI-generated notes, warnings, or recommendations." }
-            }
+              "progress": { 
+                "type": "integer", 
+                "minimum": 0, 
+                "maximum": 100,
+                "description": "Completion progress as a percentage (0-100)."
+              },
+              "quality": {
+                "type": "object",
+                "properties": {
+                  "qualityScore": { "type": "number", "minimum": 0, "maximum": 1, "description": "AI-assessed score based on code complexity, documentation, and adherence to standards." },
+                  "notes": { "type": "string", "description": "AI-generated notes, warnings, or recommendations." }
+                }
+              },
+              "legacy": {
+                "type": "object",
+                "description": "Legacy status fields for backward compatibility",
+                "properties": {
+                  "phase": {
+                    "type": "string",
+                    "enum": ["green", "orange", "red", "gray"],
+                    "description": "Legacy phase field: green=built, orange=building, red=broken, gray=backlogged"
+                  },
+                  "completeness": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "required": ["state", "progress"]
           },
           "dependencies": {
             "type": "object",

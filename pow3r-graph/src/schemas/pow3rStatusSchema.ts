@@ -3,13 +3,30 @@
  * Defines the structure for pow3r.status.json files
  */
 
+// Status type definitions
+export type NodeStatus = 'building' | 'backlogged' | 'blocked' | 'burned' | 'built' | 'broken';
+export type LegacyStatus = 'green' | 'orange' | 'red' | 'gray';
+
+export interface NodeStatusInfo {
+  state: NodeStatus;
+  progress: number; // 0-100
+  quality?: {
+    qualityScore?: number; // 0-1
+    notes?: string;
+  };
+  legacy?: {
+    phase?: LegacyStatus;
+    completeness?: number; // 0-1
+  };
+}
+
 export interface Pow3rStatusNode {
   id: string;
   name: string;
   type: 'component' | 'service' | 'data' | 'workflow' | 'api' | 'test' | 'config' | 'documentation';
   category: string;
   description?: string;
-  status: 'green' | 'orange' | 'red' | 'gray';
+  status: NodeStatus | LegacyStatus | NodeStatusInfo; // Support both new and legacy formats
   fileType?: string;
   tags?: string[];
   metadata?: {
@@ -81,7 +98,7 @@ export interface Pow3rStatusConfig {
   source: 'local' | 'remote';
   repositoryPath?: string;
   branch?: string;
-  status: 'green' | 'orange' | 'red' | 'gray';
+  status: NodeStatus | LegacyStatus | NodeStatusInfo; // Support both new and legacy formats
   stats: {
     totalCommitsLast30Days: number;
     totalCommitsLast14Days: number;
@@ -122,9 +139,21 @@ export const validatePow3rStatus = (data: any): { valid: boolean; errors: string
       if (!node.status) errors.push(`Node ${index}: Missing status`);
       
       // Validate status values
-      const validStatuses = ['green', 'orange', 'red', 'gray'];
-      if (!validStatuses.includes(node.status)) {
-        errors.push(`Node ${index}: Invalid status '${node.status}'`);
+      const validNewStatuses: NodeStatus[] = ['building', 'backlogged', 'blocked', 'burned', 'built', 'broken'];
+      const validLegacyStatuses: LegacyStatus[] = ['green', 'orange', 'red', 'gray'];
+      const allValidStatuses = [...validNewStatuses, ...validLegacyStatuses];
+      
+      if (typeof node.status === 'string') {
+        if (!allValidStatuses.includes(node.status as any)) {
+          errors.push(`Node ${index}: Invalid status '${node.status}'`);
+        }
+      } else if (typeof node.status === 'object') {
+        if (!node.status.state || !validNewStatuses.includes(node.status.state)) {
+          errors.push(`Node ${index}: Invalid or missing status.state`);
+        }
+        if (typeof node.status.progress !== 'number' || node.status.progress < 0 || node.status.progress > 100) {
+          errors.push(`Node ${index}: Invalid or missing status.progress (must be 0-100)`);
+        }
       }
       
       // Validate type values
@@ -273,6 +302,76 @@ export const createTimelineTransform = (config: Pow3rStatusConfig, nodeId: strin
       return milestoneTime <= currentTime;
     })
   };
+};
+
+// Status conversion utilities
+export const convertLegacyToNewStatus = (legacyStatus: LegacyStatus): NodeStatus => {
+  const statusMap: Record<LegacyStatus, NodeStatus> = {
+    'green': 'built',
+    'orange': 'building',
+    'red': 'broken',
+    'gray': 'backlogged'
+  };
+  return statusMap[legacyStatus];
+};
+
+export const convertNewToLegacyStatus = (newStatus: NodeStatus): LegacyStatus => {
+  const statusMap: Record<NodeStatus, LegacyStatus> = {
+    'built': 'green',
+    'building': 'orange',
+    'broken': 'red',
+    'backlogged': 'gray',
+    'blocked': 'orange',
+    'burned': 'gray'
+  };
+  return statusMap[newStatus];
+};
+
+export const normalizeNodeStatus = (status: NodeStatus | LegacyStatus | NodeStatusInfo): NodeStatusInfo => {
+  if (typeof status === 'object') {
+    return status;
+  }
+  
+  // Check if it's a new status
+  const newStatuses: NodeStatus[] = ['building', 'backlogged', 'blocked', 'burned', 'built', 'broken'];
+  if (newStatuses.includes(status as NodeStatus)) {
+    const progress = status === 'built' ? 100 : status === 'building' ? 50 : status === 'backlogged' ? 0 : 0;
+    return {
+      state: status as NodeStatus,
+      progress,
+      legacy: {
+        phase: convertNewToLegacyStatus(status as NodeStatus)
+      }
+    };
+  }
+  
+  // It's a legacy status
+  return {
+    state: convertLegacyToNewStatus(status as LegacyStatus),
+    progress: status === 'green' ? 100 : status === 'orange' ? 50 : 0,
+    legacy: {
+      phase: status as LegacyStatus
+    }
+  };
+};
+
+export const getNodeStatusState = (node: Pow3rStatusNode): NodeStatus => {
+  if (typeof node.status === 'object') {
+    return node.status.state;
+  }
+  const newStatuses: NodeStatus[] = ['building', 'backlogged', 'blocked', 'burned', 'built', 'broken'];
+  if (newStatuses.includes(node.status as NodeStatus)) {
+    return node.status as NodeStatus;
+  }
+  return convertLegacyToNewStatus(node.status as LegacyStatus);
+};
+
+export const getNodeProgress = (node: Pow3rStatusNode): number => {
+  if (typeof node.status === 'object') {
+    return node.status.progress;
+  }
+  const statusInfo = normalizeNodeStatus(node.status);
+  return statusInfo.progress;
 };
 
 export default Pow3rStatusConfig;
