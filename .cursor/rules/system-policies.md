@@ -68,3 +68,36 @@
 - All user input MUST be validated
 - All API parameters MUST be sanitized
 - All database queries MUST use parameterized statements
+
+### Agent to User Status Communication & Full-Auto Execution
+- **STATUS FORMAT**: Reply with ONE TASK LIST showing final verification status:
+  - "- [x] 🟢 VERIFIED: {name. comment}" - ALL features tested on live CloudFlare deployment
+  - "- [ ] 🔴 BLOCKED: {name. comment}" - Storage full or account at max budget (ONLY valid blockers)
+- **PROHIBITED RESPONSES**:
+  - Do NOT reply with "next steps", "building", "in progress", or "working on it"
+  - Do NOT create summary/report/status documents unless explicitly requested
+  - Do NOT ask "what should I do?" or "shall I proceed?"
+  - Do NOT claim success without CloudFlare deployment ID and live URL testing
+  - Do NOT claim credentials unavailable, 
+    - All Secrets in CloudFlare
+    - All Secrets in Cursor IDE
+    - CloudFlare App / Cursor MCP
+    - Our custom MCP Server on CloudFlare
+    - All ACLs, API Keys, Access Tokens, and variables local environment
+    - All ACLs, API Keys, Access Tokens, and variables ../
+- **FAILURE DEFINITION**: Responding before completing full deployment and verification = failed full-auto
+
+## Enforcement
+- Violation of these rules constitutes a breach of user trust
+- Must immediately correct any false status reports
+- Must implement proper verification before any success claims
+- Must acknowledge and fix the specific bypass that led to violation, including improving the .cursor/ enforcement-mechanisms
+
+## MANDATORY TECH STACK
+- REDUX UI (UNBOUND from data and style)
+- CSS THEMES
+- TAILWIND BASIC CSS
+- ZUSTAND 
+- VITE
+- REACT THREE FIBER 
+- CANNOT USE SHADCN, RADIX, OR NEXTJS
