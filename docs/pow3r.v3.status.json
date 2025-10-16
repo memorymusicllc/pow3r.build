@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "pow3r.v3.status.json",
+  "description": "Version 3 Pow3r status schema for reliable architectural status diagrams.",
+  "type": "object",
+  "properties": {
+    "graphId": { "type": "string" },
+    "lastScan": { "type": "string", "format": "date-time" },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "description": "Typed asset classification",
+            "enum": [
+              "component.ui.react", "component.ui.3d", "component.application",
+              "service.backend", "service.api", "service.serverless", "service.repository",
+              "data.models", "data.database",
+              "doc.markdown", "doc.canvas",
+              "workflow.user-journey", "workflow.data-pipeline", "workflow.build-process", "workflow.automation",
+              "library.js", "library.utils", "config.schema", "test.e2e"
+            ]
+          },
+          "source": { "type": "string" },
+          "location": { "type": "string" },
+          "metadata": { "type": "object" },
+          "analytics": { "type": "object" },
+          "status": {
+            "type": "object",
+            "properties": {
+              "state": { "type": "string", "enum": ["building", "backlogged", "blocked", "burned", "built", "broken"] },
+              "progress": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "quality": {
+                "type": "object",
+                "properties": {
+                  "qualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "notes": { "type": "string" }
+                }
+              },
+              "legacy": {
+                "type": "object",
+                "properties": {
+                  "phase": { "type": "string", "enum": ["green", "orange", "red", "gray"] },
+                  "completeness": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              },
+              "reliability": { "type": "number", "minimum": 0, "maximum": 1 },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string" },
+                    "ref": { "type": "string" },
+                    "score": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "note": { "type": "string" }
+                  },
+                  "required": ["type", "score"]
+                }
+              }
+            },
+            "required": ["state", "progress"]
+          }
+        },
+        "required": ["id", "type", "status"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dependsOn", "implements", "references", "relatedTo", "conflictsWith", "partOf", "uses", "queries", "generates", "processes"
+            ]
+          },
+          "strength": { "type": "number", "minimum": 0, "maximum": 1 },
+          "label": { "type": "string" }
+        },
+        "required": ["from", "to", "type"]
+      }
+    }
+  },
+  "required": ["graphId", "lastScan", "assets", "edges"]
+}

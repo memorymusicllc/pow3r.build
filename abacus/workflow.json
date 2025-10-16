@@ -1,0 +1,25 @@
+{
+  "name": "Pow3r V3 Status Diagram Workflow",
+  "description": "Fetch GitHub repos, build pow3r.v3.status.json, and generate Mermaid/Graphviz diagrams.",
+  "parameters": {
+    "GITHUB_TOKEN": { "type": "secret", "description": "GitHub token with repo read access" },
+    "ORG": { "type": "string", "description": "GitHub organization (or leave blank for single repo)" },
+    "REPO": { "type": "string", "description": "Optional: owner/repo or repo if ORG set" }
+  },
+  "steps": [
+    {
+      "id": "scan-and-convert",
+      "name": "Scan GitHub and convert to v3",
+      "type": "python",
+      "entrypoint": "github_scanner_v3.py",
+      "args": ["--org", "${ORG}", "--repo", "${REPO}", "--output", "github-repos"],
+      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" },
+      "outputs": ["github-repos/**/pow3r.v3.status.json", "github-repos/**/architecture.mmd", "github-repos/**/architecture.dot"]
+    }
+  ],
+  "artifacts": [
+    { "path": "github-repos/**/pow3r.v3.status.json", "type": "file" },
+    { "path": "github-repos/**/architecture.mmd", "type": "file" },
+    { "path": "github-repos/**/architecture.dot", "type": "file" }
+  ]
+}
