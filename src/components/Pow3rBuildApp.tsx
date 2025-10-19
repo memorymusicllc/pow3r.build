@@ -76,16 +76,16 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
 
           if (!rawData) {
             try {
-              const response = await fetch('/pow3r.status.config.json');
+              const response = await fetch('/pow3r.v3.status.json');
               if (response.ok) {
                 configData = await response.json();
-                console.log('Loaded pow3r.status.config.json:', configData);
+                console.log('Loaded pow3r.v3.status.json:', configData);
                 setData(configData);
                 setIsLoading(false);
                 return;
               }
             } catch (error) {
-              console.log('pow3r.status.config.json not available, trying data.json...');
+              console.log('pow3r.v3.status.json not available, trying data.json...');
             }
           }
 
@@ -151,7 +151,7 @@ export const Pow3rBuildApp: React.FC<Pow3rBuildAppProps> = ({
     loadData();
   }, [dataUrl, config]);
 
-  // Transform data.json to pow3r.status.config format
+  // Transform data.json to pow3r.v3.status format
   const transformDataToConfig = (rawData: any): Pow3rStatusConfig => {
     // If already in the right format, return as is
     if (rawData.nodes && rawData.edges && rawData.projectName) {

@@ -1,0 +1,135 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Pow3rSchemaParadigm v3 (X-FILES Edition)",
+    "description": "The universal schema, now with definitions for the In-Situ Triage & Action Console (X-FILES).",
+    "definitions": {
+      "Node": {
+        "type": "object",
+        "required": ["id", "type", "version", "io", "agentDirectives"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+          "io": {
+            "type": "object",
+            "properties": {
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "dtype": { "type": "string" },
+                    "validationRule": { "type": "string", "description": "A validation rule (e.g., 'isEmail', 'isGreaterThan:0') for the agent to enforce." }
+                  }
+                }
+              },
+              "outputs": {
+                "type": "array",
+                "items": { "type": "object" }
+              }
+            }
+          },
+          "observability": { "$ref": "#/definitions/ObservabilityConfig" },
+          "props": { "type": "object" },
+          "agentDirectives": {
+            "type": "object",
+            "description": "Instructions for AI agents on how to build, test, and maintain this component.",
+            "properties": {
+              "constitutionRef": { "type": "string", "format": "uri", "description": "A URI pointing to the specific constitutional article this component must adhere to." },
+              "requiredTests": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "description": { "type": "string", "description": "A natural language description of the test case. (e.g., 'Verify that the button enters a loading state when clicked')." },
+                    "testType": { "type": "string", "enum": ["unit", "integration", "e2e-playwright"], "default": "e2e-playwright" },
+                    "expectedOutcome": { "type": "string", "description": "The expected result of the test." }
+                  }
+                }
+              },
+              "selfHealing": {
+                "type": "object",
+                "description": "Defines how the component can self-diagnose and request repairs.",
+                "properties": {
+                  "enabled": { "type": "boolean", "default": true },
+                  "monitoredMetrics": { "type": "array", "items": { "type": "string" }, "description": "Metrics from observability to watch (e.g., 'errorRate', 'avgLatency')." },
+                  "failureCondition": { "type": "string", "description": "A logical condition for triggering a self-healing request (e.g., 'errorRate > 0.05 for 5m')." },
+                  "repairPrompt": { "type": "string", "description": "A pre-defined prompt to send to the 'Architect' agent upon failure, including context." }
+                }
+              }
+            },
+            "required": ["requiredTests", "selfHealing"]
+          }
+        }
+      },
+      "ObservabilityConfig": {
+        "type": "object",
+        "properties": {
+          "metrics": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "logging": {
+            "type": "object",
+            "properties": {
+              "level": { "type": "string", "enum": ["debug", "info", "warn", "error"] },
+              "enabled": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "XFilesUI": {
+        "type": "object",
+        "allOf": [{ "$ref": "#/definitions/Node" }],
+        "properties": {
+          "type": { "const": "ui.x-files-console" },
+          "props": {
+            "type": "object",
+            "properties": {
+              "position": { "type": "string", "enum": ["bottom-right", "top-left"], "default": "bottom-right" },
+              "triggerIcon": { "type": "string", "description": "Icon to display for the trigger button." }
+            }
+          },
+          "agentDirectives": {
+            "requiredTests": [
+              {
+                "description": "Verify that clicking the X-FILES icon opens the reporting modal.",
+                "testType": "e2e-playwright"
+              },
+              {
+                "description": "Verify that submitting the modal successfully sends a complete dossier payload to the /api/x-files/create endpoint.",
+                "testType": "e2e-playwright"
+              }
+            ]
+          }
+        }
+      },
+      "CaseFile": {
+        "type": "object",
+        "allOf": [{ "$ref": "#/definitions/Node" }],
+        "properties": {
+          "type": { "const": "system.case-file" },
+          "caseType": { "type": "string", "enum": ["BugReport", "FeatureRequest", "SystemAnomaly"] },
+          "status": { "type": "string", "enum": ["Open", "InProgress", "PendingValidation", "Closed"], "default": "Open" },
+          "dossier": {
+            "type": "object",
+            "properties": {
+              "userIntent": { "type": "string" },
+              "componentId": { "type": "string" },
+              "componentConfig": { "$ref": "#/definitions/Node" },
+              "applicationState": { "type": "object" },
+              "sessionRecordingRef": { "type": "string", "format": "uri" },
+              "logs": { "type": "array", "items": { "type": "string" } },
+              "environment": { "type": "object" }
+            }
+          },
+          "agentDirectives": {
+            "selfHealing": {
+              "repairPrompt": "A new CaseFile has been created with the attached dossier. Analyze the root cause, determine which constitutional article was violated, create a plan to resolve it, and dispatch the necessary agents. Update this CaseFile's status as you progress."
+            }
+          }
+        }
+      }
+    }
+  }  

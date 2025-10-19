@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Status Aggregator
-Collects all pow3r.status.json files and creates a unified config for 3D visualization
+Collects all pow3r.v3.status.json files and creates a unified config for 3D visualization
 """
 
 import json
@@ -12,9 +12,9 @@ from typing import List, Dict
 
 
 class StatusAggregator:
-    """Aggregate multiple pow3r.status.json files into one config"""
+    """Aggregate multiple pow3r.v3.status.json files into one config"""
     
-    def __init__(self, status_dirs: List[str], output_file: str = './public/pow3r.status.config.json'):
+    def __init__(self, status_dirs: List[str], output_file: str = './public/pow3r.v3.status.json'):
         self.status_dirs = [Path(d) for d in status_dirs]
         self.output_file = Path(output_file)
         self.all_configs = []
@@ -30,7 +30,7 @@ class StatusAggregator:
                 continue
             
             print(f"\n📂 Scanning: {status_dir}")
-            status_files = list(status_dir.glob('*.pow3r.status.json'))
+            status_files = list(status_dir.glob('*.pow3r.v3.status.json'))
             
             for status_file in status_files:
                 try:
@@ -261,7 +261,7 @@ def main():
         dirs = default_dirs
     
     # Output file
-    output = './public/pow3r.status.config.json'
+    output = './public/pow3r.v3.status.json'
     if '--output' in sys.argv:
         idx = sys.argv.index('--output')
         if idx + 1 < len(sys.argv):

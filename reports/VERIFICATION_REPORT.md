@@ -49,8 +49,8 @@
 
 ### Files Verified Locally
 
-#### 1. pow3r.status.config.json ✅
-**Location:** `/dist/pow3r.status.config.json`
+#### 1. pow3r.v3.status.json ✅
+**Location:** `/dist/pow3r.v3.status.json`
 
 **New Status Format Confirmed:**
 ```json
@@ -155,7 +155,7 @@ Production HTML includes:
 
 4. **Status Config Verification**
    ```bash
-   curl https://thewatchmen.pages.dev/pow3r.status.config.json | jq '.nodes[0].status'
+   curl https://thewatchmen.pages.dev/pow3r.v3.status.json | jq '.nodes[0].status'
    ```
 
 ### Post-Deployment (Within 24 Hours)

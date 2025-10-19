@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "error": {
+    "message": "Invalid Request",
+    "code": "VALIDATION_ERROR",
+    "details": "Type must be one of: config, law, status",
+    "timestamp": "2025-10-15T06:17:43.713Z"
+  }
+}

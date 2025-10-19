@@ -1,25 +1,29 @@
-# Repository to 3D Visualization Tool
+# Pow3r Ecosystem v3.0 - X-FILES Edition
 
 [![Deploy to Cloudflare Pages](https://github.com/memorymusicllc/pow3r.build/workflows/Deploy%20to%20Cloudflare%20Pages/badge.svg)](https://github.com/memorymusicllc/pow3r.build/actions)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/memorymusicllc/pow3r.build)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/memorymusicllc/pow3r.build)
+[![Constitution](https://img.shields.io/badge/constitution-v3.0--X--FILES-green.svg)](.cursor/rules/pow3r.v3.law.md)
 [![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![Three.js](https://img.shields.io/badge/three.js-0.160-orange.svg)](https://threejs.org/)
 
-A comprehensive system for discovering, analyzing, and visualizing local Git repositories in interactive 3D.
+A fully autonomous, schema-driven ecosystem for discovering, analyzing, and visualizing Git repositories with self-healing capabilities and real-time anomaly detection.
 
-**Status**: ✅ **ALL PHASES COMPLETE**  
+**Status**: ✅ **v3.0 X-FILES SYSTEM ACTIVE**  
 **Live Demo**: 🌐 [thewatchmen.pages.dev](https://thewatchmen.pages.dev)  
-**Latest**: 🎨 [Power.Components Theme Integration Complete](reports/20251011_REPORT_CLAUDE_SONNET_CURSOR_POWER_COMPONENTS_THEME_INTEGRATION.md)
+**Constitution**: 📜 [Project Phoenix Constitution v3.0](.cursor/rules/pow3r.v3.law.md)  
+**X-FILES**: 🔍 In-Situ Triage & Action Console for system anomaly detection
 
 ## Overview
 
-This tool provides a complete workflow to:
+The Pow3r Ecosystem v3.0 provides a fully autonomous, self-healing workflow:
 - 🔍 **Discover** - Scan directories for Git repositories
 - ✅ **Select** - Interactively choose repos to analyze
 - 📊 **Analyze** - Deep analysis of Git history and code structure
-- 🎨 **Visualize** - Interactive 3D network visualization
-- 📈 **Monitor** - Track development status and activity
+- 🎨 **Visualize** - Interactive 3D network visualization with "Data as Light" philosophy
+- 📈 **Monitor** - Real-time development status and activity tracking
+- 🔧 **Self-Heal** - Automatic anomaly detection and repair via X-FILES system
+- 📋 **Case Files** - Comprehensive bug reports, feature requests, and system anomaly tracking
 
 ## Quick Start
 
@@ -111,7 +115,14 @@ The CloudFlare workers automatically:
 
 ## Features
 
-### GitHub Integration & CloudFlare Workers (NEW!)
+### X-FILES System (NEW in v3.0!)
+- **In-Situ Triage & Action Console** - Real-time anomaly detection and self-healing
+- **Case File Management** - Comprehensive bug reports, feature requests, and system anomaly tracking
+- **Self-Healing Protocol** - Automatic root cause analysis and repair dispatch
+- **Constitutional Enforcement** - Guardian agent validation of all system operations
+- **Real-time Monitoring** - Continuous observability with session recording
+
+### GitHub Integration & CloudFlare Workers
 - **Automatic Repository Scanning** - Scan entire GitHub organizations
 - **Webhook Integration** - Auto-update on push, PR, issues
 - **CloudFlare Workers** - Serverless processing and API
@@ -220,6 +231,8 @@ Selection saved to: `.repo-analyzer/selected_repositories_[timestamp].json`
 
 ## Architecture
 
+The A-TEAM system operates as a fully autonomous multi-agent workflow with comprehensive v3 status schema mapping. See [V3 Architecture Mapping](docs/V3_ARCHITECTURE_MAPPING.md) for complete details.
+
 ### Core Components
 
 1. **RepositoryScanner**: Discovers and analyzes repositories
@@ -296,12 +309,38 @@ This tool is divided into distinct phases:
 
 **→ [See GitHub Integration Guide](README-github-integration.md)**
 
-### Phase 4: Advanced Features 📋 FUTURE
+## X-FILES System & Constitution
+
+### Project Phoenix Constitution v3.0
+The Pow3r Ecosystem operates under the [Project Phoenix Constitution v3.0](.cursor/rules/pow3r.v3.law.md), which establishes:
+
+- **Prime Directive**: Build and maintain a fully autonomous, schema-driven ecosystem
+- **Data as Light Philosophy**: UI as the living, luminous embodiment of underlying data
+- **Full-Auto Mandate**: Operate autonomously without human intervention
+- **Schema Supremacy**: pow3r.config.json as the single source of truth
+- **Constitutional Enforcement**: Guardian agent with veto authority
+
+### X-FILES In-Situ Triage & Action Console
+The X-FILES system provides:
+
+- **Real-time Anomaly Detection**: Continuous monitoring for system violations
+- **Case File Creation**: Automatic generation of comprehensive dossiers
+- **Self-Healing Protocol**: Root cause analysis and repair dispatch
+- **Constitutional Compliance**: Validation against constitutional articles
+- **Status Lifecycle**: Open → InProgress → PendingValidation → Closed
+
+### Phase 4: X-FILES System & Self-Healing ✅ COMPLETE
+- **In-Situ Triage & Action Console** - Real-time anomaly detection interface
+- **Case File Management** - Bug reports, feature requests, system anomalies
+- **Self-Healing Protocol** - Automatic root cause analysis and repair
+- **Constitutional Enforcement** - Guardian agent validation system
+- **Real-time Observability** - Continuous monitoring with session recording
+
+### Phase 5: Advanced Features 📋 FUTURE
 - Actual dependency graph parsing
 - Time-based commit animations
 - Multiple layout algorithms
 - Export to image/video formats
-- Real-time monitoring with WebSocket
 - Team collaboration features
 - AI-powered insights
 

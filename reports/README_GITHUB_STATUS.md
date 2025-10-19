@@ -147,7 +147,7 @@ python github_scanner.py
 ```bash
 python status_aggregator.py ./github-status
 
-# Outputs to: ./public/pow3r.status.config.json
+# Outputs to: ./public/pow3r.v3.status.json
 ```
 
 ### Step 5: View Visualization
@@ -293,7 +293,7 @@ cat github-status/[repo-name].pow3r.status.json | jq .
 
 # Test aggregator
 python status_aggregator.py ./github-status
-cat public/pow3r.status.config.json | jq .stats
+cat public/pow3r.v3.status.json | jq .stats
 
 # Test API (after deployment)
 curl https://your-domain.pages.dev/api/status | jq .
@@ -328,10 +328,10 @@ Tested with 25 repositories:
 ### No data in visualization
 ```bash
 # Check if status file exists
-ls -la public/pow3r.status.config.json
+ls -la public/pow3r.v3.status.json
 
 # Validate JSON
-cat public/pow3r.status.config.json | jq . > /dev/null
+cat public/pow3r.v3.status.json | jq . > /dev/null
 ```
 
 ### Webhook not firing

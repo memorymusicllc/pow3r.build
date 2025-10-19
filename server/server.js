@@ -58,7 +58,7 @@ async function findConfigFiles(dir, depth = 0) {
         // Recurse into subdirectories
         const subConfigs = await findConfigFiles(fullPath, depth + 1);
         configs.push(...subConfigs);
-      } else if (entry.name === 'pow3r.status.json' || entry.name === 'dev-status.config.json') {
+      } else if (entry.name === 'pow3r.v3.status.json' || entry.name === 'dev-status.config.json') {
         // Found a config file!
         try {
           const content = await fs.readFile(fullPath, 'utf8');
@@ -72,7 +72,7 @@ async function findConfigFiles(dir, depth = 0) {
           configs.push({
             path: fullPath,
             relativePath: path.relative(BASE_PATH, fullPath),
-            configType: entry.name === 'pow3r.status.json' ? 'v2' : 'v1',
+            configType: entry.name === 'pow3r.v3.status.json' ? 'v3' : 'v1',
             ...config
           });
           console.log(`✓ Loaded: ${projectName} (${entry.name})`);

@@ -1,0 +1,32 @@
+{
+  "version": "3.0",
+  "lastUpdate": "2025-10-15T06:04:00.728Z",
+  "managedBy": "Abi Director Agent",
+  "purpose": "Architectural Progress Diagram - World Model",
+  "nodes": [],
+  "edges": [],
+  "metadata": {
+    "constitution": {
+      "version": "3.0",
+      "edition": "X-FILES",
+      "reference": ".cursor/rules/pow3r.v3.law.md"
+    },
+    "xFilesSystem": {
+      "enabled": true,
+      "caseFileTypes": [
+        "BugReport",
+        "FeatureRequest",
+        "SystemAnomaly"
+      ],
+      "selfHealing": {
+        "enabled": true,
+        "monitoredMetrics": [
+          "errorRate",
+          "avgLatency",
+          "qualityScore"
+        ],
+        "failureCondition": "errorRate > 0.05 for 5m"
+      }
+    }
+  }
+}

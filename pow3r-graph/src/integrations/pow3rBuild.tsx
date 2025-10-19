@@ -194,7 +194,7 @@ export const Pow3rBuildIntegration: React.FC<Pow3rBuildIntegrationProps> = ({
             🌌 Pow3r Build
           </div>
           <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
-            No pow3r.status.json files found
+            No pow3r.v3.status.json files found
           </div>
         </div>
       </div>

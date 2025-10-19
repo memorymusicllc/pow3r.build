@@ -122,8 +122,8 @@ curl https://thewatchmen.pages.dev/api/status
 ### Modified Files
 - `docs/pow3r.status.json` - Updated schema
 - `pow3r-graph/src/schemas/pow3rStatusSchema.ts` - TypeScript schema
-- `pow3r.status.config.json` - Main config (converted)
-- `public/pow3r.status.config.json` - Public config (converted)
+- `config/pow3r.v3.status.json` - Main config (converted)
+- `public/pow3r.v3.status.json` - Public config (converted)
 - `config_manager.py` - Config management
 - `comprehensive_analyzer.py` - Analysis logic
 - `functions/api/data-aggregator.js` - API endpoint

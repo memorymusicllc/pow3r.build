@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * GitHub Org Scanner
- * Fetches pow3r.status.json from all repositories in an org/user
+ * Fetches pow3r.v3.status.json from all repositories in an org/user
  * and writes a consolidated public/data.json used by the 3D graph app.
  */
 
@@ -92,10 +92,10 @@ function sha16(input) {
 }
 
 async function getPow3rStatus(owner, repo, ref) {
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/pow3r.status.json?ref=${encodeURIComponent(ref)}`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/config/pow3r.v3.status.json?ref=${encodeURIComponent(ref)}`;
   const res = await safeFetch(url, { headers: ghHeaders() });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch pow3r.status.json from ${owner}/${repo}@${ref}`);
+  if (!res.ok) throw new Error(`Failed to fetch pow3r.v3.status.json from ${owner}/${repo}@${ref}`);
   const contentMeta = await res.json();
   if (contentMeta && contentMeta.content) {
     const decoded = Buffer.from(contentMeta.content, 'base64').toString('utf8');
@@ -104,8 +104,8 @@ async function getPow3rStatus(owner, repo, ref) {
       // Attach metadata for the frontend to use
       json.metadata = {
         ...(json.metadata || {}),
-        path: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/pow3r.status.json`,
-        relativePath: `${repo}/pow3r.status.json`,
+        path: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/config/pow3r.v3.status.json`,
+        relativePath: `${repo}/config/pow3r.v3.status.json`,
         configType: 'v2',
         owner,
         repo,
@@ -232,8 +232,8 @@ async function generateFallbackStatus(owner, repo, ref = 'main') {
       owner,
       repo,
       ref,
-      path: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/pow3r.status.json`,
-      relativePath: `${repo}/pow3r.status.json`,
+      path: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/config/pow3r.v3.status.json`,
+      relativePath: `${repo}/config/pow3r.v3.status.json`,
       configType: 'v2'
     }
   };
@@ -257,7 +257,7 @@ async function main() {
       const cfg = await getPow3rStatus(owner, name, ref);
       if (cfg) {
         projects.push(cfg);
-        console.log(`  ✓ ${owner}/${name} → pow3r.status.json`);
+        console.log(`  ✓ ${owner}/${name} → pow3r.v3.status.json`);
       } else {
         const fallback = await generateFallbackStatus(owner, name);
         projects.push(fallback);

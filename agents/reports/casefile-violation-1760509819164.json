@@ -1,0 +1,80 @@
+{
+  "id": "violation-1760509819164",
+  "type": "system.case-file",
+  "caseType": "SystemAnomaly",
+  "status": "Open",
+  "dossier": {
+    "userIntent": "Constitutional compliance enforcement",
+    "componentId": "guardian-agent",
+    "componentConfig": {
+      "constitutionRef": ".cursor/rules/pow3r.v3.law.md#article-ix",
+      "requiredTests": [
+        {
+          "description": "Verify that Guardian Agent can validate constitutional compliance",
+          "testType": "e2e-playwright",
+          "expectedOutcome": "Guardian Agent successfully validates actions against constitution"
+        },
+        {
+          "description": "Verify that Guardian Agent can create CaseFiles for violations",
+          "testType": "e2e-playwright",
+          "expectedOutcome": "CaseFiles are created with complete dossier for violations"
+        }
+      ],
+      "selfHealing": {
+        "enabled": true,
+        "monitoredMetrics": [
+          "violationRate",
+          "vetoCount",
+          "caseFileResolution"
+        ],
+        "failureCondition": "violationRate > 0.05 for 5m",
+        "repairPrompt": "Guardian Agent has failed to maintain constitutional compliance. Analyze violation patterns, check constitutional references, and repair enforcement mechanisms according to Article IX requirements."
+      }
+    },
+    "applicationState": {
+      "action": {
+        "type": "workflow_execution",
+        "payload": {
+          "schemaDriven": true,
+          "configFirst": true,
+          "e2eTests": true,
+          "liveVerification": true,
+          "mobileFirst": true,
+          "unboundDesign": true,
+          "xFilesIntegration": true,
+          "caseFileCreation": true,
+          "selfHealing": true,
+          "observability": true,
+          "constitutionalValidation": true,
+          "backwardCompatibility": true
+        }
+      },
+      "validation": {
+        "valid": false,
+        "violations": [
+          "Article II: Schema Supremacy violation"
+        ],
+        "article": "II",
+        "veto": true
+      },
+      "timestamp": "2025-10-15T06:30:19.164Z"
+    },
+    "sessionRecordingRef": null,
+    "logs": [
+      "Constitutional violation detected: Article II: Schema Supremacy violation",
+      "Violated Article: II",
+      "Action Type: workflow_execution",
+      "Timestamp: 2025-10-15T06:30:19.164Z"
+    ],
+    "environment": {
+      "nodeVersion": "v20.14.0",
+      "platform": "darwin",
+      "constitutionVersion": "3.0"
+    }
+  },
+  "agentDirectives": {
+    "selfHealing": {
+      "repairPrompt": "Constitutional violation detected in action: workflow_execution. Violated articles: Article II: Schema Supremacy violation. Analyze the root cause, determine corrective actions, and dispatch appropriate agents to resolve the violation according to constitutional requirements."
+    }
+  }
+}

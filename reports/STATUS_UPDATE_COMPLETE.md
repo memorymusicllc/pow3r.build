@@ -57,8 +57,8 @@ Successfully completed comprehensive update to the Pow3r.build status system and
   - Status colors updated
 
 - **Configuration Files** ✅
-  - `pow3r.status.config.json` - Converted to new format
-  - `public/pow3r.status.config.json` - Converted to new format
+  - `config/pow3r.v3.status.json` - Converted to new format
+  - `public/pow3r.v3.status.json` - Converted to new format
   - All 5 nodes updated with new status structure
 
 ### 2. Cursor Rules & Policy Enforcement ✅
@@ -161,8 +161,8 @@ Created `.cursor/rules/` directory structure per CURSOR_IDE_POLICY_ENFORCEMENT_B
 ### Schema & Config
 - `docs/pow3r.status.json`
 - `pow3r-graph/src/schemas/pow3rStatusSchema.ts`
-- `pow3r.status.config.json`
-- `public/pow3r.status.config.json`
+- `config/pow3r.v3.status.json`
+- `public/pow3r.v3.status.json`
 - `postcss.config.js`
 
 ### Python

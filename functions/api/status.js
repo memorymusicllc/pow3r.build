@@ -1,6 +1,6 @@
 /**
  * CloudFlare Worker - Status API
- * Serves aggregated pow3r.status.config.json from KV storage
+ * Serves aggregated pow3r.v3.status.json from KV storage
  */
 
 export async function onRequest(context) {

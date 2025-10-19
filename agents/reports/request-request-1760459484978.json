@@ -1,0 +1,40 @@
+{
+  "id": "request-1760459484978",
+  "timestamp": "2025-10-14T16:31:24.978Z",
+  "userRequest": {
+    "text": "Implement user authentication with mobile-first design",
+    "timestamp": "2025-10-14T16:31:24.963Z",
+    "source": "cli"
+  },
+  "status": "completed",
+  "workflowId": "workflow-1760459484978",
+  "result": {
+    "success": true,
+    "workflowId": "workflow-1760459484978",
+    "status": "completed",
+    "constitutionalCompliance": true,
+    "phases": [
+      "analysis",
+      "validation",
+      "planning"
+    ],
+    "results": {
+      "plan": {
+        "id": "plan-1760459484978",
+        "type": "test_implementation",
+        "priority": "medium",
+        "complexity": "low",
+        "estimatedTime": "1 hour",
+        "requirements": [
+          "System testing",
+          "Constitutional validation"
+        ],
+        "constitutionalRequirements": [
+          "Article I: Prime Directive compliance"
+        ]
+      }
+    }
+  },
+  "error": null,
+  "completedAt": "2025-10-14T16:31:24.978Z"
+}

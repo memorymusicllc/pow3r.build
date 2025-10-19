@@ -1,0 +1,114 @@
+{
+  "name": "pow3r-autonomous-agents",
+  "version": "3.0.0",
+  "description": "Autonomous Multi-Agent System for Pow3r Ecosystem - Project Phoenix Constitution v3.0 (X-FILES Edition)",
+  "type": "module",
+  "main": "ateam-system.js",
+  "scripts": {
+    "start": "node ateam-system.js",
+    "ateam": "node ateam-system.js",
+    "test": "node --test",
+    "dev": "node --watch ateam-system.js",
+    "guardian": "node guardian-agent.js",
+    "architect": "node architect-agent.js",
+    "orchestrator": "node agent-orchestrator.js",
+    "abi": "node abi-director-agent.js",
+    "chat-analyzer": "node chat-analyzer-agent.js",
+    "verification": "node verification-agent.js",
+    "apd": "node apd-manager.js"
+  },
+  "keywords": [
+    "autonomous",
+    "agents",
+    "ai",
+    "constitution",
+    "x-files",
+    "self-healing",
+    "pow3r",
+    "schema-driven"
+  ],
+  "author": "Pow3r Ecosystem",
+  "license": "MIT",
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:memorymusicllc/pow3r.build.git"
+  },
+  "constitution": {
+    "version": "3.0",
+    "edition": "X-FILES",
+    "reference": ".cursor/rules/pow3r.v3.law.md"
+  },
+  "schema": {
+    "config": "config/pow3r.v3.config.json",
+    "status": "config/pow3r.v3.status.json",
+    "data": "config/pow3r.v3.data.json"
+  },
+  "agents": {
+    "abi-director": {
+      "role": "Director - Context Log, Intent Tracker, Goal Scoring",
+      "authority": "Supreme",
+      "status": "active"
+    },
+    "chat-analyzer": {
+      "role": "Request Tracking & Analysis",
+      "authority": "Analysis",
+      "status": "active"
+    },
+    "verification": {
+      "role": "Code Quality & Deployment Verification",
+      "authority": "Verification",
+      "status": "active"
+    },
+    "apd-manager": {
+      "role": "Architectural Progress Diagram Management",
+      "authority": "Architecture",
+      "status": "active"
+    },
+    "guardian": {
+      "role": "Constitutional Enforcement",
+      "authority": "Supreme",
+      "status": "active"
+    },
+    "architect": {
+      "role": "System Design & Planning",
+      "authority": "Design",
+      "status": "active"
+    },
+    "developer": {
+      "role": "Code Generation & Implementation",
+      "authority": "Development",
+      "status": "pending"
+    },
+    "tester": {
+      "role": "E2E Testing & Validation",
+      "authority": "Quality",
+      "status": "pending"
+    },
+    "deployer": {
+      "role": "CloudFlare Deployment & Verification",
+      "authority": "Deployment",
+      "status": "pending"
+    },
+    "documentation": {
+      "role": "AI-Optimized Documentation",
+      "authority": "Documentation",
+      "status": "pending"
+    },
+    "repo-manager": {
+      "role": "Git Operations & Branch Management",
+      "authority": "Repository",
+      "status": "pending"
+    },
+    "x-files": {
+      "role": "Anomaly Detection & Self-Healing",
+      "authority": "Monitoring",
+      "status": "pending"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Config Manager - pow3r.status.json Lifecycle Management
+Config Manager - pow3r.v3.status.json Lifecycle Management
 Handles create, read, update, validate operations for config files
 """
 
@@ -19,9 +19,9 @@ from status_utils import (
 
 
 class ConfigManager:
-    """Manages pow3r.status.json lifecycle"""
+    """Manages pow3r.v3.status.json lifecycle"""
     
-    CONFIG_FILENAME = 'pow3r.status.json'
+    CONFIG_FILENAME = 'config/pow3r.v3.status.json'
     
     def __init__(self, repo_path: str):
         self.repo_path = Path(repo_path)
@@ -196,7 +196,7 @@ class ConfigManager:
         return counts
     
     def migrate_from_old(self, old_config_path: Path) -> bool:
-        """Migrate from dev-status.config.json to pow3r.status.json"""
+        """Migrate from dev-status.config.json to pow3r.v3.status.json"""
         try:
             with open(old_config_path, 'r') as f:
                 old = json.load(f)

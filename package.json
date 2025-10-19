@@ -1,6 +1,7 @@
 {
   "name": "repo-to-3d",
   "version": "1.0.0",
+  "type": "module",
   "description": "[![Deploy to Cloudflare Pages](https://github.com/memorymusicllc/pow3r.build/workflows/Deploy%20to%20Cloudflare%20Pages/badge.svg)](https://github.com/memorymusicllc/pow3r.build/actions) [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/memorymusicllc/pow3r.build) [![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/) [![Node](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/) [![Three.js](https://img.shields.io/badge/three.js-0.160-orange.svg)](https://threejs.org/)",
   "main": "index.js",
   "scripts": {
@@ -35,7 +36,9 @@
     "tailwindcss": "^3.3.6",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.160.0",
-    "zustand": "^4.4.7"
+    "zustand": "^4.4.7",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/jest-dom": "^5.16.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",

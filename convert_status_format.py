@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Convert Status Format Script
-Converts pow3r.status.config.json files from legacy to new status format
+Converts pow3r.v3.status.json files from legacy to new status format
 """
 
 import json
@@ -75,8 +75,8 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: python convert_status_format.py <config_file> [output_file]")
         print("\nExample:")
-        print("  python convert_status_format.py pow3r.status.config.json")
-        print("  python convert_status_format.py pow3r.status.config.json new-config.json")
+        print("  python convert_status_format.py pow3r.v3.status.json")
+        print("  python convert_status_format.py pow3r.v3.status.json new-config.json")
         sys.exit(1)
     
     input_file = sys.argv[1]

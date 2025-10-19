@@ -2,7 +2,7 @@
 /**
  * GitHub Scanner
  * - Scans an organization or a list of repositories
- * - Generates pow3r.status.json for each repository with architecture and dev status
+ * - Generates pow3r.v3.status.json for each repository with architecture and dev status
  * - Optionally aggregates and writes public/data.json
  *
  * Env vars:
@@ -10,7 +10,7 @@
  *   GITHUB_ORG        - Organization name to scan (optional if GITHUB_REPOS provided)
  *   GITHUB_REPOS      - Comma-separated list of full repo names (e.g., org/repo1,org/repo2)
  *   OUTPUT_DIR        - Directory to write outputs (default: ./output/github)
- *   AGGREGATE_OUTPUT  - If 'true', also write a combined config to public/pow3r.status.config.json
+ *   AGGREGATE_OUTPUT  - If 'true', also write a combined config to public/pow3r.v3.status.json
  */
 
 const fs = require('fs');
@@ -303,7 +303,7 @@ async function scan() {
       console.log(`➡️  ${owner}/${repo}`);
       const cfg = await generateRepoStatus(owner, repo);
       configs.push(cfg);
-      const outPath = path.join(OUTPUT_DIR, owner, repo, 'pow3r.status.json');
+      const outPath = path.join(OUTPUT_DIR, owner, repo, 'pow3r.v3.status.json');
       await writeJson(outPath, cfg);
       console.log(`   ✅ Wrote ${outPath}`);
     } catch (e) {
@@ -313,7 +313,7 @@ async function scan() {
 
   if (AGGREGATE_OUTPUT && configs.length > 0) {
     const aggregate = makeAggregateConfig(configs);
-    const aggregatePath = path.join(__dirname, '../public/pow3r.status.config.json');
+    const aggregatePath = path.join(__dirname, '../public/pow3r.v3.status.json');
     await writeJson(aggregatePath, aggregate);
     console.log(`🧩 Wrote aggregate ${aggregatePath}`);
   }

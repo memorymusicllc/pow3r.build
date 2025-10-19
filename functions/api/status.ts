@@ -17,7 +17,7 @@ export const onRequest = async (context: any) => {
 
   // Fallback: serve file from public
   try {
-    const res = await fetch(new URL('/pow3r.status.config.json', url.origin));
+    const res = await fetch(new URL('/pow3r.v3.status.json', url.origin));
     if (res.ok) {
       return new Response(res.body, { status: 200, headers: { 'content-type': 'application/json' } });
     }

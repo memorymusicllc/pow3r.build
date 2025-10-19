@@ -3,7 +3,7 @@ import { TronSearch } from '@pow3r/search-ui';
 import { SearchSuggestion, FilterChip } from '@pow3r/search-ui/types';
 
 interface Pow3rGraphProps {
-  data: any; // pow3r.status.json data
+  data: any; // pow3r.v3.status.json data
   onNodeSelect?: (node: any) => void;
   onEdgeSelect?: (edge: any) => void;
   onTransform?: (transform: GraphTransform) => void;
@@ -30,7 +30,7 @@ interface NodeDetails {
 
 /**
  * Pow3r Graph Component
- * Transforms between 2D/3D graph types from any node point using pow3r.status.json schema
+ * Transforms between 2D/3D graph types from any node point using pow3r.v3.status.json schema
  */
 export const Pow3rGraph: React.FC<Pow3rGraphProps> = ({
   data,

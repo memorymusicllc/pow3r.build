@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive Repository Analyzer
-Generates pow3r.config.json, pow3r.config.canvas, and pow3r.config.md
+Generates pow3r.v3.config.json, pow3r.config.canvas, and pow3r.config.md
 
 Integrates multiple data sources:
 - Local Git
@@ -34,7 +34,7 @@ class ComprehensiveAnalyzer:
         self.api_keys = api_keys
         
         # Output paths
-        self.output_json = self.repo_path / 'pow3r.status.json'
+        self.output_json = self.repo_path / 'config' / 'pow3r.v3.status.json'
         self.output_canvas = self.repo_path / 'pow3r.canvas.json'
         self.output_mermaid = self.repo_path / 'pow3r.config.md'
     
@@ -498,7 +498,7 @@ class ComprehensiveAnalyzer:
     # Output generators
     
     def generate_json(self, nodes: List[Dict], edges: List[Dict], raw_data: Dict) -> Dict:
-        """Generate pow3r.config.json"""
+        """Generate pow3r.v3.config.json"""
         return {
             "graphId": hashlib.sha256(f"{self.repo_name}-{datetime.now().isoformat()}".encode()).hexdigest()[:16],
             "projectName": self.repo_name,

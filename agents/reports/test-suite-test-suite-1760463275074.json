@@ -1,0 +1,82 @@
+{
+  "id": "test-suite-1760463275074",
+  "implementationId": "impl-1760463275049",
+  "timestamp": "2025-10-14T17:34:35.074Z",
+  "status": "completed",
+  "tests": [
+    {
+      "id": "test-comp-1760463275049-v0i5armmt-basic",
+      "name": "UserAuthentication.basic.spec.ts",
+      "type": "basic-functionality",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/UserAuthentication.basic.spec.ts",
+      "componentId": "comp-1760463275049-v0i5armmt",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275049-v0i5armmt-x-files",
+      "name": "UserAuthentication.x-files.spec.ts",
+      "type": "x-files-integration",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/UserAuthentication.x-files.spec.ts",
+      "componentId": "comp-1760463275049-v0i5armmt",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275049-v0i5armmt-mobile",
+      "name": "UserAuthentication.mobile.spec.ts",
+      "type": "mobile-responsiveness",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/UserAuthentication.mobile.spec.ts",
+      "componentId": "comp-1760463275049-v0i5armmt",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275049-v0i5armmt-compliance",
+      "name": "UserAuthentication.compliance.spec.ts",
+      "type": "constitutional-compliance",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/UserAuthentication.compliance.spec.ts",
+      "componentId": "comp-1760463275049-v0i5armmt",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275055-6qaeg7ns2-basic",
+      "name": "XFilesConsole.basic.spec.ts",
+      "type": "basic-functionality",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/XFilesConsole.basic.spec.ts",
+      "componentId": "comp-1760463275055-6qaeg7ns2",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275055-6qaeg7ns2-x-files",
+      "name": "XFilesConsole.x-files.spec.ts",
+      "type": "x-files-integration",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/XFilesConsole.x-files.spec.ts",
+      "componentId": "comp-1760463275055-6qaeg7ns2",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275055-6qaeg7ns2-mobile",
+      "name": "XFilesConsole.mobile.spec.ts",
+      "type": "mobile-responsiveness",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/XFilesConsole.mobile.spec.ts",
+      "componentId": "comp-1760463275055-6qaeg7ns2",
+      "constitutionalCompliance": true
+    },
+    {
+      "id": "test-comp-1760463275055-6qaeg7ns2-compliance",
+      "name": "XFilesConsole.compliance.spec.ts",
+      "type": "constitutional-compliance",
+      "file": "/Users/creator/Documents/DEV/Repo to 3D/e2e-tests/XFilesConsole.compliance.spec.ts",
+      "componentId": "comp-1760463275055-6qaeg7ns2",
+      "constitutionalCompliance": true
+    }
+  ],
+  "playwrightConfig": {
+    "id": "config-test-suite-1760463275074",
+    "name": "playwright.config.js",
+    "type": "playwright-config",
+    "file": "/Users/creator/Documents/DEV/Repo to 3D/playwright.config.js",
+    "constitutionalCompliance": true
+  },
+  "screenshots": [],
+  "constitutionalCompliance": true,
+  "completedAt": "2025-10-14T17:34:35.105Z"
+}

@@ -72,7 +72,7 @@ Combine all status files into the unified config:
 python status_aggregator.py ./github-status ./local-status
 
 # Or specify custom output location:
-python status_aggregator.py ./github-status --output ./public/pow3r.status.config.json
+python status_aggregator.py ./github-status --output ./public/pow3r.v3.status.json
 
 # This creates a unified config that the 3D visualization loads
 ```
@@ -158,7 +158,7 @@ To manually scan all repositories and update status:
 python github_scanner.py
 
 # Aggregate status files
-python status_aggregator.py ./github-status --output ./public/pow3r.status.config.json
+python status_aggregator.py ./github-status --output ./public/pow3r.v3.status.json
 
 # Deploy updated config
 wrangler pages deploy public
@@ -179,7 +179,7 @@ Once webhooks are set up, status updates happen automatically:
 
 1. Navigate to your deployment URL: `https://your-domain.pages.dev`
 2. The 3D visualization automatically loads from:
-   - `/pow3r.status.config.json` (static file)
+   - `/pow3r.v3.status.json` (static file)
    - `/api/status` (live from KV storage)
    - `/data.json` (fallback)
 
@@ -271,7 +271,7 @@ Each repository generates a `pow3r.status.json` file with:
 ### 3D Visualization Not Loading
 
 1. Check browser console for errors
-2. Verify `pow3r.status.config.json` exists and is valid JSON
+2. Verify `pow3r.v3.status.json` exists and is valid JSON
 3. Check `/api/status` endpoint returns data
 
 ## Scheduled Updates

@@ -27,7 +27,7 @@ wrangler kv:key put --binding=STATUS_KV "GITHUB_WEBHOOK_SECRET" "$WEBHOOK_SECRET
 python github_scanner.py
 
 # Aggregate status files
-python status_aggregator.py ./github-status --output ./public/pow3r.status.config.json
+python status_aggregator.py ./github-status --output ./public/pow3r.v3.status.json
 
 # Deploy to CloudFlare
 wrangler pages deploy public
@@ -57,7 +57,7 @@ wrangler dev
 
 # Validate JSON files
 cat github-status/*.json | jq empty
-cat public/pow3r.status.config.json | jq .stats
+cat public/pow3r.v3.status.json | jq .stats
 ```
 
 ## Development Commands
@@ -155,7 +155,7 @@ setup_github_webhooks.py       → Configures webhooks
 functions/api/github-webhook.js → Webhook handler
 functions/api/status.js        → Status API
 public/app.js                  → 3D visualization
-public/pow3r.status.config.json → Aggregated config (output)
+public/pow3r.v3.status.json → Aggregated config (output)
 github-status/                 → Scanner output directory
 wrangler.toml                  → CloudFlare configuration
 ```
@@ -166,7 +166,7 @@ wrangler.toml                  → CloudFlare configuration
 GET  /api/status              → Aggregated status for all repos
 GET  /api/status?repo=name    → Status for specific repo
 POST /api/github-webhook      → GitHub webhook handler (internal)
-GET  /pow3r.status.config.json → Static aggregated config
+GET  /pow3r.v3.status.json → Static aggregated config
 ```
 
 ## Status Format Quick Reference
@@ -226,13 +226,13 @@ test.e2e              → Tests (tests/)
 
 ```bash
 # Count total repos
-jq '.totalProjects' public/pow3r.status.config.json
+jq '.totalProjects' public/pow3r.v3.status.json
 
 # List green repos
-jq '.nodes[] | select(.status == "green") | .name' public/pow3r.status.config.json
+jq '.nodes[] | select(.status == "green") | .name' public/pow3r.v3.status.json
 
 # Count components by type
-jq '[.nodes[].type] | group_by(.) | map({type: .[0], count: length})' public/pow3r.status.config.json
+jq '[.nodes[].type] | group_by(.) | map({type: .[0], count: length})' public/pow3r.v3.status.json
 
 # Find most active repos
 jq '.nodes[] | select(.stats.totalCommitsLast30Days > 10) | {name, commits: .stats.totalCommitsLast30Days}' github-status/*.json

@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function - GitHub Webhook
- * Verifies signature, fetches/creates pow3r.status.json for the repo,
+ * Verifies signature, fetches/creates pow3r.v3.status.json for the repo,
  * and updates KV (projects:data) for the visualization.
  */
 

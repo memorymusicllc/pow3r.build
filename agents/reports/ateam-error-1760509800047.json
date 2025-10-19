@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-10-15T06:30:00.047Z",
+  "userRequest": {
+    "text": "Test A-TEAM system functionality",
+    "timestamp": "2025-10-15T06:30:00.041Z",
+    "source": "test"
+  },
+  "error": "Node not found: workflow-ateam-workflow-1760509800042",
+  "stack": "Error: Node not found: workflow-ateam-workflow-1760509800042\n    at APDManager.updateNodeStatus (file:///Users/creator/Documents/DEV/Repo%20to%203D/agents/apd-manager.js:322:15)\n    at ATEAMOrchestrator.executeFullAutoWorkflow (file:///Users/creator/Documents/DEV/Repo%20to%203D/agents/ateam-orchestrator.js:380:36)\n    at async ATEAMSystem.processUserRequest (file:///Users/creator/Documents/DEV/Repo%20to%203D/agents/ateam-system.js:76:22)\n    at async testATEAMSystem (file:///Users/creator/Documents/DEV/Repo%20to%203D/agents/test-ateam.js:38:22)",
+  "system": "A-TEAM",
+  "version": "3.0"
+}

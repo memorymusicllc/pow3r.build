@@ -83,7 +83,7 @@ This document describes the complete workflow for automatically tracking and vis
    python github_scanner.py
    
    # Aggregate status files
-   python status_aggregator.py ./github-status --output ./public/pow3r.status.config.json
+   python status_aggregator.py ./github-status --output ./public/pow3r.v3.status.json
    
    # Deploy
    wrangler pages deploy public
@@ -204,7 +204,7 @@ This document describes the complete workflow for automatically tracking and vis
 
 ```javascript
 // app.js loads in priority order:
-1. /pow3r.status.config.json  (static file)
+1. /pow3r.v3.status.json  (static file)
 2. /api/status                (live from KV)
 3. /data.json                 (fallback)
 

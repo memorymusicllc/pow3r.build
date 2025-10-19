@@ -1,6 +1,6 @@
 /**
  * Pow3r Status JSON Schema
- * Defines the structure for pow3r.status.json files
+ * Defines the structure for pow3r.v3.status.json files
  */
 
 // Status type definitions

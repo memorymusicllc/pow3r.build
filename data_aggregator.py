@@ -35,7 +35,7 @@ class DataAggregator:
             # Find all power.status.json files
             status_files = list(path.glob('**/power.status.json'))
             status_files.extend(list(path.glob('**/pow3r.status.json')))
-            status_files.extend(list(path.glob('**/pow3r.status.config.json')))
+            status_files.extend(list(path.glob('**/pow3r.v3.status.json')))
             
             for status_file in status_files:
                 try:

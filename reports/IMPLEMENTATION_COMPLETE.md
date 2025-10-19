@@ -31,11 +31,11 @@ A Python script that:
 - Combines them into a unified graph structure
 - Positions projects in a 3D grid
 - Creates inter-project relationships based on shared topics/languages
-- Outputs to `public/pow3r.status.config.json`
+- Outputs to `public/pow3r.v3.status.json`
 
 **Usage:**
 ```bash
-python status_aggregator.py ./github-status ./local-status --output ./public/pow3r.status.config.json
+python status_aggregator.py ./github-status ./local-status --output ./public/pow3r.v3.status.json
 ```
 
 ### 3. CloudFlare Workers ✅
@@ -81,7 +81,7 @@ python setup_github_webhooks.py
 ### 5. Updated 3D Visualization (`public/app.js`) ✅
 
 Enhanced to load status from multiple sources:
-1. `/pow3r.status.config.json` (aggregated, prioritized)
+1. `/pow3r.v3.status.json` (aggregated, prioritized)
 2. `/api/status` (live from KV)
 3. `/data.json` (legacy fallback)
 
@@ -123,7 +123,7 @@ Two comprehensive guides created:
 │       └── status.js              # Status API (NEW)
 ├── public/
 │   ├── app.js                     # Updated visualization
-│   └── pow3r.status.config.json   # Aggregated config
+│   └── pow3r.v3.status.json   # Aggregated config
 ├── github-status/                 # Scanner output (generated)
 │   ├── repo1.pow3r.status.json
 │   ├── repo2.pow3r.status.json
@@ -145,7 +145,7 @@ Two comprehensive guides created:
 
 2. Run status_aggregator.py
    └─> Combines all status files
-   └─> Outputs to public/pow3r.status.config.json
+   └─> Outputs to public/pow3r.v3.status.json
 
 3. Setup CloudFlare Workers
    └─> Create KV namespace
@@ -291,7 +291,7 @@ cat github-status/[repo-name].pow3r.status.json | jq .
 
 ```bash
 python status_aggregator.py ./github-status
-cat public/pow3r.status.config.json | jq .stats
+cat public/pow3r.v3.status.json | jq .stats
 ```
 
 ### Test CloudFlare Workers Locally
@@ -320,7 +320,7 @@ curl https://your-domain.pages.dev/api/status | jq .
 
 1. Open browser to `https://your-domain.pages.dev`
 2. Open Developer Console
-3. Check for log: `📂 Data source: pow3r.status.config.json (aggregated)`
+3. Check for log: `📂 Data source: pow3r.v3.status.json (aggregated)`
 4. Verify 3D graph renders with nodes and edges
 
 ## Performance Metrics
