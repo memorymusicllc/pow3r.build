@@ -1,25 +1,73 @@
 {
-  "$schema": "https://pow3r.link/schemas/xmap.v5.json",
-  "xmapId": "xmap-pow3r.build",
+  "$schema": "https://pow3r.link/schemas/pow3r.v5.config.schema.json",
+  "configId": "pow3r-v5-pow3r.build",
   "version": "1.0.0",
   "schemaVersion": {
     "current": "5.0.0",
     "minSupported": "5.0.0"
   },
   "metadata": {
-    "title": "pow3r.build XMAP",
+    "title": "pow3r.build Config",
     "description": "[![Deploy to Cloudflare Pages](https://github.com/memorymusicllc/pow3r.build/workflows/Deploy%20to%20Cloudflare%20Pages/badge.svg)](https://github.com/memorymusicllc/pow3r.build/actions) [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/memorymusicllc/pow3r.build) [![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/) [![Node](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/) [![Three.js](https://img.shields.io/badge/three.js-0.160-orange.svg)](https://threejs.org/)",
     "ecosystem": "pow3r",
     "maintainers": [
       "Power Flow"
     ],
-    "createdAt": "2025-12-13T06:29:17.227Z",
-    "lastUpdate": "2025-12-13T06:29:17.227Z"
+    "createdAt": "2025-12-15T01:20:50.316Z",
+    "lastUpdate": "2025-12-15T01:20:50.316Z"
   },
   "constitution": {
     "version": "5.0.0",
     "enforcement": "strict",
-    "techStackCompliant": false
+    "techStackCompliant": false,
+    "issues": [
+      {
+        "type": "constitutional-violation",
+        "severity": "critical",
+        "message": "Prohibited dependency: @radix-ui/react-slot",
+        "fix": "Remove @radix-ui/react-slot and use approved alternatives"
+      },
+      {
+        "type": "constitutional-violation",
+        "severity": "critical",
+        "message": "Prohibited dependency: @radix-ui/react-slot",
+        "fix": "Remove @radix-ui/react-slot and use approved alternatives"
+      }
+    ]
+  },
+  "techStack": {
+    "hasReact": true,
+    "hasVite": true,
+    "hasTailwind": true,
+    "hasTypeScript": true,
+    "hasZustand": true,
+    "framework": "react",
+    "dependencies": [
+      "@radix-ui/react-slot",
+      "class-variance-authority",
+      "clsx",
+      "framer-motion",
+      "lucide-react",
+      "playwright",
+      "react",
+      "react-dom",
+      "tailwind-merge",
+      "tailwindcss",
+      "tailwindcss-animate",
+      "three",
+      "zustand",
+      "@testing-library/react",
+      "@testing-library/jest-dom",
+      "@playwright/test",
+      "@types/react",
+      "@types/react-dom",
+      "@types/three",
+      "@vitejs/plugin-react",
+      "autoprefixer",
+      "postcss",
+      "typescript",
+      "vite"
+    ]
   },
   "nodes": [
     {
@@ -46,8 +94,8 @@
       "developmentStatus": {
         "phase": "in-progress",
         "completion": 0.8999999999999999,
-        "healthScore": 0.9,
-        "lastUpdate": "2025-12-13T06:29:17.227Z"
+        "healthScore": 0.39999999999999997,
+        "lastUpdate": "2025-12-13T06:29:49.000Z"
       }
     },
     {
@@ -56,7 +104,7 @@
       "version": "1.0.0",
       "metadata": {
         "title": "Ui",
-        "description": "6 ui components",
+        "description": "14 ui components",
         "tags": [
           "ui"
         ]
@@ -77,7 +125,41 @@
         "ThemeSwitcher",
         "UserAuthentication",
         "XFilesConsole",
-        "theme-provider"
+        "UserAuthentication.test",
+        "XFilesConsole.test",
+        "theme-provider",
+        "badge",
+        "button",
+        "card",
+        "dialog",
+        "tabs",
+        "tooltip"
+      ]
+    },
+    {
+      "id": "pow3r.build.services",
+      "type": "component.services",
+      "version": "1.0.0",
+      "metadata": {
+        "title": "Services",
+        "description": "2 services components",
+        "tags": [
+          "services"
+        ]
+      },
+      "spatialPosition": {
+        "x": -50,
+        "y": 90,
+        "z": 10
+      },
+      "developmentStatus": {
+        "phase": "complete",
+        "completion": 1,
+        "healthScore": 0.95
+      },
+      "children": [
+        "index",
+        "types"
       ]
     },
     {
@@ -93,7 +175,7 @@
       },
       "spatialPosition": {
         "x": 100,
-        "y": 90,
+        "y": 130,
         "z": 10
       },
       "developmentStatus": {
@@ -125,14 +207,14 @@
       "version": "1.0.0",
       "metadata": {
         "title": "Functions",
-        "description": "1 functions components",
+        "description": "13 functions components",
         "tags": [
           "functions"
         ]
       },
       "spatialPosition": {
         "x": -75,
-        "y": 130,
+        "y": 170,
         "z": 10
       },
       "developmentStatus": {
@@ -141,7 +223,19 @@
         "healthScore": 0.95
       },
       "children": [
-        "_middleware"
+        "_middleware",
+        "data-aggregator",
+        "data",
+        "deployment",
+        "github-webhook",
+        "projects",
+        "scan-processor",
+        "stats",
+        "status-utils",
+        "status",
+        "status",
+        "webhook",
+        "webhook"
       ]
     }
   ],
@@ -153,6 +247,20 @@
       },
       "to": {
         "nodeId": "pow3r.build.ui"
+      },
+      "edgeType": "contains",
+      "metadata": {
+        "label": "Contains",
+        "strength": 1
+      }
+    },
+    {
+      "id": "edge-pow3r.build-pow3r.build.services",
+      "from": {
+        "nodeId": "pow3r.build"
+      },
+      "to": {
+        "nodeId": "pow3r.build.services"
       },
       "edgeType": "contains",
       "metadata": {
@@ -190,7 +298,9 @@
     }
   ],
   "statusSummary": {
-    "totalNodes": 4,
-    "overallCompletion": 0.975
+    "totalNodes": 5,
+    "totalComponents": 44,
+    "overallCompletion": 0.9800000000000001,
+    "issueCount": 2
   }
 }
