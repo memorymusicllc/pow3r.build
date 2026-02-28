@@ -1,0 +1,538 @@
+{
+  "metadata": {
+    "id": "urn:uuid:config-mm6q8uv1-ts2d4kx",
+    "version": "1.0.0",
+    "created_at": "2026-02-28T19:41:41.820Z",
+    "created_by": "migrate-config-v5-to-v7",
+    "last_modified_at": "2026-02-28T19:41:41.820Z",
+    "last_modified_by": "migrate-config-v5-to-v7",
+    "canonical_hash": "sha256:migrated-1772307701821"
+  },
+  "manifest": {
+    "manifest_id": "pow3r-v5-pow3r.build",
+    "manifest_version": "1.0.0",
+    "manifest_status": "draft",
+    "change_proposals": [],
+    "required_gates": [
+      "contextLoadedGate",
+      "verifiableEvidenceGate",
+      "workflowTestsGate"
+    ]
+  },
+  "directorAgent": "maxi",
+  "nodes": [
+    {
+      "node_id": "pow3r.build",
+      "node_type": "service",
+      "name": "pow3r.build",
+      "description": "CI/CD Pipeline System with Guardian gates integration",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.feature.deployment-pipeline",
+      "node_type": "service",
+      "name": "Deployment Pipeline",
+      "description": "11-step automated deployment workflow with validation",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.feature.guardian-gates",
+      "node_type": "service",
+      "name": "Guardian Gates",
+      "description": "19 validation gates that must pass before deployment",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.feature.orchestrator-cloudflare",
+      "node_type": "service",
+      "name": "Pow3r Orchestrator + Cloudflare Deployment",
+      "description": "Deployments via Pow3r Orchestrator and Cloudflare (Guardian note). Cloudflare monitors GitHub or Orchestrator builds and pushes.",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.feature.multi-repo",
+      "node_type": "service",
+      "name": "Multi-repo Deployment",
+      "description": "Deploy across multiple Pow3r repositories simultaneously",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.service.build-validator",
+      "node_type": "service",
+      "name": "Build Validator",
+      "description": "Validates builds before deployment (tech stack, dependencies, etc.)",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.service.test-executor",
+      "node_type": "service",
+      "name": "Test Executor",
+      "description": "Executes tests before deployment with retry logic",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.integration.guardian",
+      "node_type": "service",
+      "name": "Guardian Integration",
+      "description": "Integration with pow3r.config Guardian system for gate validation",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.integration.github",
+      "node_type": "service",
+      "name": "GitHub Integration",
+      "description": "GitHub API integration for deployments and status",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    },
+    {
+      "node_id": "pow3r.build.integration.cloudflare",
+      "node_type": "service",
+      "name": "Cloudflare Integration",
+      "description": "Cloudflare Workers/Pages deployment via Wrangler",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "deployment_targets": [
+        "cloudflare-pages"
+      ],
+      "status": "unknown",
+      "owner": "Power Flow",
+      "required_tests": [],
+      "telemetry_endpoints": [
+        "/mcp/xmap/xlog"
+      ],
+      "privileges": {
+        "read": "public",
+        "propose": "platform-team"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "edge-0-pow3r-build-to-pow3r-build-feature-deployment-pipeline",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.feature.deployment-pipeline",
+      "edge_type": "contains",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-1-pow3r-build-to-pow3r-build-feature-guardian-gates",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.feature.guardian-gates",
+      "edge_type": "contains",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-2-pow3r-build-to-pow3r-build-feature-orchestrator-cloudflare",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.feature.orchestrator-cloudflare",
+      "edge_type": "contains",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-3-pow3r-build-to-pow3r-build-feature-multi-repo",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.feature.multi-repo",
+      "edge_type": "contains",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-4-pow3r-build-feature-deployment-pipeline-to-pow3r-build-service-build-validator",
+      "from_node": "pow3r.build.feature.deployment-pipeline",
+      "to_node": "pow3r.build.service.build-validator",
+      "edge_type": "control",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-5-pow3r-build-feature-deployment-pipeline-to-pow3r-build-service-test-executor",
+      "from_node": "pow3r.build.feature.deployment-pipeline",
+      "to_node": "pow3r.build.service.test-executor",
+      "edge_type": "control",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-6-pow3r-build-to-pow3r-build-integration-guardian",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.integration.guardian",
+      "edge_type": "control",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-7-pow3r-build-to-pow3r-build-integration-github",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.integration.github",
+      "edge_type": "control",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    },
+    {
+      "edge_id": "edge-8-pow3r-build-to-pow3r-build-integration-cloudflare",
+      "from_node": "pow3r.build",
+      "to_node": "pow3r.build.integration.cloudflare",
+      "edge_type": "control",
+      "permission_schema": {},
+      "allowed_agents_roles": [
+        "director",
+        "architect-role"
+      ],
+      "encryption_policy": "tls-required"
+    }
+  ],
+  "workflows": [
+    {
+      "workflow_id": "wf-config-validation",
+      "workflow_type": "validation",
+      "steps": [
+        {
+          "step_id": "validate-schema",
+          "node": "xmap-mcp-server",
+          "action": "validate"
+        },
+        {
+          "step_id": "resolve-director",
+          "node": "maxi",
+          "action": "resolve"
+        }
+      ],
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff": "exponential"
+      },
+      "evidence_policy": {
+        "required_artifacts": [
+          "screenshot",
+          "trace"
+        ]
+      },
+      "guardian_gates": [
+        "contextLoadedGate",
+        "verifiableEvidenceGate"
+      ],
+      "telemetry_requirements": [
+        "/mcp/xmap/xlog"
+      ]
+    }
+  ],
+  "guardian": [
+    {
+      "gate_id": "contextLoadedGate",
+      "type": "pre-commit",
+      "evaluation_policy": "automated",
+      "required_evidence": [],
+      "action_on_fail": "block"
+    },
+    {
+      "gate_id": "verifiableEvidenceGate",
+      "type": "pre-commit",
+      "evaluation_policy": "automated",
+      "required_evidence": [
+        "screenshot",
+        "trace"
+      ],
+      "action_on_fail": "block"
+    }
+  ],
+  "validator": [
+    {
+      "validator_id": "director-agent-validator",
+      "rules": [
+        {
+          "rule_id": "director-from-config",
+          "description": "Director node must resolve from config.directorAgent"
+        }
+      ],
+      "enforcement_mode": "hard-block"
+    }
+  ],
+  "tests": [
+    {
+      "test_id": "wf-config-validation",
+      "type": "contract",
+      "test_runner": "jest",
+      "required_result": {
+        "pass_threshold": 1
+      },
+      "evidence_artifacts": [
+        "screenshot",
+        "trace"
+      ],
+      "auto_fix_capabilities": false
+    }
+  ],
+  "telemetry": [
+    {
+      "metrics": [
+        "/mcp/xmap/metrics"
+      ],
+      "logs": [
+        "/mcp/xmap/logs"
+      ],
+      "traces": [
+        "/mcp/xmap/traces"
+      ],
+      "retention_policy": {
+        "days": 90
+      },
+      "alerting_rules": []
+    }
+  ],
+  "config_controls": {
+    "patch_policy": "delta",
+    "allowed_patch_ops": [
+      "add",
+      "replace"
+    ],
+    "contract_tests_required": [
+      "wf-config-validation"
+    ],
+    "manifest_lock": false
+  },
+  "provenance": [],
+  "agent_views": [],
+  "ui_contracts": [],
+  "compliance": {
+    "compliance_score": 0.85,
+    "evidence_refs": [],
+    "compliance_status": "compliant",
+    "remediation_plan_ref": ""
+  },
+  "_observability": {
+    "otlpExporter": {
+      "endpoint": "https://config.superbots.link/otlp",
+      "protocol": "http/protobuf"
+    },
+    "metrics": {
+      "deploymentsSucceeded": {
+        "type": "counter",
+        "unit": "count"
+      },
+      "deploymentsFailed": {
+        "type": "counter",
+        "unit": "count"
+      },
+      "gatesPassed": {
+        "type": "counter",
+        "unit": "count"
+      },
+      "gatesFailed": {
+        "type": "counter",
+        "unit": "count"
+      },
+      "buildDuration": {
+        "type": "histogram",
+        "unit": "ms"
+      },
+      "testDuration": {
+        "type": "histogram",
+        "unit": "ms"
+      }
+    },
+    "tracing": {
+      "enabled": true,
+      "samplingRate": 0.2
+    }
+  },
+  "_techStack": {
+    "hasReact": false,
+    "hasVite": false,
+    "hasTailwind": false,
+    "hasTypeScript": false,
+    "hasZustand": false,
+    "framework": "cloudflare-workers",
+    "runtime": "v8-isolates",
+    "dependencies": [
+      "wrangler",
+      "@cloudflare/workers-types"
+    ],
+    "bindings": {
+      "kv": [
+        "BUILD_LOGS"
+      ],
+      "d1": false
+    }
+  }
+}
